@@ -1,12 +1,13 @@
-export const Navbar = () => {
+import { Link } from 'react-router-dom';
+
+const Navbar = () => {
   return (
-    <nav style={{ padding: '20px', borderBottom: '1px solid #ddd', display: 'flex', justifyContent: 'space-between' }}>
-      <h1 style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>결혼·출산 건강 점수</h1>
-      <div style={{ display: 'flex', gap: '15px' }}>
-        <span>홈</span>
-        <span>점수 확인</span>
-        <span>커뮤니티</span>
-      </div>
+    <nav style={{ display: 'flex', gap: '20px', padding: '15px', background: '#333', color: '#fff' }}>
+      <Link to="/" style={{ color: 'white', textDecoration: 'none' }}>홈</Link>
+      <Link to="/login" style={{ color: 'white', textDecoration: 'none' }}>로그인</Link>
+      <Link to="/settings" style={{ color: 'white', textDecoration: 'none' }}>설정</Link>
     </nav>
   );
 };
+
+export default Navbar;
