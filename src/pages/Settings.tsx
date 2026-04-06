@@ -14,6 +14,7 @@ import {
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import { useAuthStore } from '../store/useAuthStore';
 
+
 const Settings = () => {
   const navigate = useNavigate();
   const [termsModalOpen, setTermsModalOpen] = useState(false);
@@ -33,6 +34,7 @@ const Settings = () => {
   const setProfileGender = useUserProfileStore((s) => s.setGender);
   const loginMethod = useAuthStore((s) => s.loginMethod);
   const loginEmail = useAuthStore((s) => s.email);
+  const logout = useAuthStore((s) => s.logout);
 
   useEffect(() => {
     if (
@@ -556,7 +558,8 @@ const Settings = () => {
                   type="button"
                   onClick={() => {
                     setLogoutModalOpen(false);
-                    navigate('/');
+                    logout();
+                    navigate('/login', { replace: true });
                   }}
                   className="flex-1 rounded-[14px] bg-[#9388FA] py-3.5 text-[15px] font-semibold text-white shadow-[0px_8px_20px_rgba(147,136,250,0.45)] transition active:scale-[0.98]"
                 >

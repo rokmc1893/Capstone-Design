@@ -4,11 +4,16 @@ import { X } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
 import { KakaoLoginButton } from '../components/KakaoLoginButton';
 import { useAuthStore } from '../store/useAuthStore';
+import { redirectToKakaoLogin } from '../lib/auth';
 
 const Login = () => {
   const navigate = useNavigate();
   const [termsModalOpen, setTermsModalOpen] = useState(false);
-  const setLoginMethod = useAuthStore((s) => s.setLoginMethod);
+  // 이미 로그인된 경우 홈으로 이동
+  const accessToken = useAuthStore((s) => s.accessToken);
+  useEffect(() => {
+    if (accessToken) navigate('/home', { replace: true });
+  }, [accessToken, navigate]);
 
   useEffect(() => {
     if (!termsModalOpen) return;
@@ -61,18 +66,14 @@ const Login = () => {
           <div className="mt-14 flex w-full max-w-[320px] flex-col items-center gap-3">
             <KakaoLoginButton
               onClick={() => {
-                setLoginMethod('kakao', null);
-                navigate('/home');
+                // 백엔드 카카오 OAuth 엔드포인트로 전체 리다이렉트
+                redirectToKakaoLogin();
               }}
             />
 
             <button
               type="button"
-              onClick={() => {
-                // TODO: 실제 이메일 로그인 완료 시, 해당 이메일 주소를 전달
-                setLoginMethod('email', 'example@email.com');
-                navigate('/home');
-              }}
+              onClick={() => navigate('/email-auth')}
               className="flex h-[48px] w-full max-w-[320px] items-center justify-center rounded-[20px] bg-[#F2F2F2] text-[14px] font-medium tracking-[-0.12px] text-[#444] shadow-[0_3px_10px_rgba(0,0,0,0.06)] ring-1 ring-white/50 backdrop-blur-sm transition hover:bg-white/90 active:scale-[0.99] active:shadow-[0_2px_6px_rgba(0,0,0,0.05)]"
             >
               이메일로 시작하기

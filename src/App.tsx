@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import EmailAuth from './pages/EmailAuth';
+import KakaoCallback from './pages/KakaoCallback';
 import Splash from './pages/Splash';
 import Onboarding2 from './pages/Onboarding2';
 import Settings from './pages/Settings';
@@ -29,6 +31,8 @@ function App() {
         <Route path="/" element={<Splash />} />
         <Route path="/onboarding/2" element={<Onboarding2 />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/email-auth" element={<EmailAuth />} />
+        <Route path="/oauth/kakao/callback" element={<KakaoCallback />} />
         <Route path="/community" element={<Community />} />
         <Route path="/home" element={<Home />} />
         <Route path="/inspection" element={<InspectionGender />} />

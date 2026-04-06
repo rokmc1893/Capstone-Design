@@ -29,9 +29,10 @@ export function BsBullseye(props: SVGProps<SVGSVGElement>) {
 }
 
 export function BsPeople(props: SVGProps<SVGSVGElement>) {
+  // 단일 사람 아이콘 (Bootstrap person-outline 느낌)
   return (
     <svg {...iconProps} {...props}>
-      <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1h8zm-7.978-1A7.974 7.974 0 0 1 7 14H0s1-3 5-3 5 3 5 3zm7.014-1.014A7.974 7.974 0 0 1 16 14h-7s1-3 5-3 5 3 5 3zM5.5 6a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zm0 1a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z" />
+      <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm0 1C5.33 9 2 10.34 2 12.5V14a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-1.5C14 10.34 10.67 9 8 9z" />
     </svg>
   );
 }
