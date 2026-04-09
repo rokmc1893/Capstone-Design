@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Pie, PieChart, Cell, ResponsiveContainer } from 'recharts';
 import { useSearchParams } from 'react-router-dom';
 import { useSimulatorStore } from '../store/useSimulatorStore';
@@ -58,6 +58,29 @@ const Simulator = () => {
     setAlcohol,
     setStressLevel,
   } = useSimulatorStore();
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState({
+    gender,
+    age,
+    bmi,
+    sleepHours,
+    smoking,
+    alcohol,
+    stressLevel,
+  });
+
+  useEffect(() => {
+    if (isEditing) return;
+    setDraft({
+      gender,
+      age,
+      bmi,
+      sleepHours,
+      smoking,
+      alcohol,
+      stressLevel,
+    });
+  }, [isEditing, gender, age, bmi, sleepHours, smoking, alcohol, stressLevel]);
 
   const riskLevel = getRiskLevel(risk);
 
@@ -192,12 +215,64 @@ const Simulator = () => {
 
               {isInspection && (
                 <GlassCard>
-                  <p className="text-[11px] font-semibold text-gray400 sm:text-xs">
-                    What-if 시뮬레이터
-                  </p>
-                  <p className="mt-1 break-keep text-[10px] leading-snug text-gray400 sm:text-[11px]">
-                    BMI·수면·흡연·음주를 바꿔 보며 위험도 변화를 확인합니다.
-                  </p>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-[11px] font-semibold text-gray400 sm:text-xs">
+                        What-if 시뮬레이터
+                      </p>
+                      <p className="mt-1 break-keep text-[10px] leading-snug text-gray400 sm:text-[11px]">
+                        {isEditing
+                          ? '값을 수정한 뒤 저장하면 위험도가 다시 계산됩니다.'
+                          : '검사 완료 값입니다. 수정하기를 눌러 변경할 수 있어요.'}
+                      </p>
+                    </div>
+                    {!isEditing ? (
+                      <button
+                        type="button"
+                        onClick={() => setIsEditing(true)}
+                        className="shrink-0 rounded-full bg-blackBg px-3 py-1.5 text-[10px] font-medium text-white sm:text-[11px]"
+                      >
+                        수정하기
+                      </button>
+                    ) : (
+                      <div className="flex shrink-0 gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDraft({
+                              gender,
+                              age,
+                              bmi,
+                              sleepHours,
+                              smoking,
+                              alcohol,
+                              stressLevel,
+                            });
+                            setIsEditing(false);
+                          }}
+                          className="rounded-full bg-white px-3 py-1.5 text-[10px] font-medium text-blackBg ring-1 ring-gray100 sm:text-[11px]"
+                        >
+                          취소
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setGender(draft.gender);
+                            setAge(draft.age);
+                            setBmi(draft.bmi);
+                            setSleepHours(draft.sleepHours);
+                            setSmoking(draft.smoking);
+                            setAlcohol(draft.alcohol);
+                            setStressLevel(draft.stressLevel);
+                            setIsEditing(false);
+                          }}
+                          className="rounded-full bg-blackBg px-3 py-1.5 text-[10px] font-medium text-white sm:text-[11px]"
+                        >
+                          저장
+                        </button>
+                      </div>
+                    )}
+                  </div>
 
                   <div className="mt-2.5 space-y-2 sm:mt-3 sm:space-y-3">
                     <div className="rounded-xl bg-gray100/70 p-2 sm:rounded-2xl sm:p-2.5">
@@ -207,23 +282,31 @@ const Simulator = () => {
                       <div className="inline-flex w-full rounded-full bg-gray100 p-0.5">
                         <button
                           type="button"
-                          onClick={() => setGender('female')}
+                          onClick={() =>
+                            isEditing &&
+                            setDraft((prev) => ({ ...prev, gender: 'female' }))
+                          }
+                          disabled={!isEditing}
                           className={`flex-1 rounded-full px-2 py-1.5 text-[11px] font-medium transition sm:px-3 sm:py-2 sm:text-xs ${
-                            gender === 'female'
+                            draft.gender === 'female'
                               ? 'bg-white text-blackBg shadow-sm'
                               : 'text-gray400'
-                          }`}
+                          } ${!isEditing ? 'cursor-not-allowed opacity-60' : ''}`}
                         >
                           여성
                         </button>
                         <button
                           type="button"
-                          onClick={() => setGender('male')}
+                          onClick={() =>
+                            isEditing &&
+                            setDraft((prev) => ({ ...prev, gender: 'male' }))
+                          }
+                          disabled={!isEditing}
                           className={`flex-1 rounded-full px-2 py-1.5 text-[11px] font-medium transition sm:px-3 sm:py-2 sm:text-xs ${
-                            gender === 'male'
+                            draft.gender === 'male'
                               ? 'bg-white text-blackBg shadow-sm'
                               : 'text-gray400'
-                          }`}
+                          } ${!isEditing ? 'cursor-not-allowed opacity-60' : ''}`}
                         >
                           남성
                         </button>
@@ -236,7 +319,7 @@ const Simulator = () => {
                           나이
                         </p>
                         <p className="text-xs font-semibold tabular-nums text-blackBg sm:text-sm">
-                          {age}
+                          {draft.age}
                           <span className="ml-0.5 text-[9px] font-normal text-gray200">
                             세
                           </span>
@@ -246,9 +329,16 @@ const Simulator = () => {
                           min={20}
                           max={45}
                           step={1}
-                          value={age}
-                          onChange={(e) => setAge(Number(e.target.value))}
-                          className={`mt-1 ${rangeAccent}`}
+                          value={draft.age}
+                          onChange={(e) =>
+                            isEditing &&
+                            setDraft((prev) => ({
+                              ...prev,
+                              age: Number(e.target.value),
+                            }))
+                          }
+                          disabled={!isEditing}
+                          className={`mt-1 ${rangeAccent} ${!isEditing ? 'cursor-not-allowed opacity-55' : ''}`}
                         />
                       </div>
                       <div className="rounded-xl bg-gray100/70 p-2 sm:rounded-2xl sm:p-2.5">
@@ -256,16 +346,23 @@ const Simulator = () => {
                           BMI
                         </p>
                         <p className="text-xs font-semibold tabular-nums text-blackBg sm:text-sm">
-                          {bmi.toFixed(1)}
+                          {draft.bmi.toFixed(1)}
                         </p>
                         <input
                           type="range"
                           min={18}
                           max={30}
                           step={0.1}
-                          value={bmi}
-                          onChange={(e) => setBmi(Number(e.target.value))}
-                          className={`mt-1 ${rangeAccent}`}
+                          value={draft.bmi}
+                          onChange={(e) =>
+                            isEditing &&
+                            setDraft((prev) => ({
+                              ...prev,
+                              bmi: Number(e.target.value),
+                            }))
+                          }
+                          disabled={!isEditing}
+                          className={`mt-1 ${rangeAccent} ${!isEditing ? 'cursor-not-allowed opacity-55' : ''}`}
                         />
                       </div>
                     </div>
@@ -276,7 +373,7 @@ const Simulator = () => {
                           수면 시간
                         </p>
                         <p className="text-xs font-semibold tabular-nums text-blackBg sm:text-sm">
-                          {sleepHours.toFixed(1)}
+                          {draft.sleepHours.toFixed(1)}
                           <span className="ml-0.5 text-[9px] font-normal text-gray200">
                             시간
                           </span>
@@ -286,11 +383,16 @@ const Simulator = () => {
                           min={4}
                           max={9}
                           step={0.5}
-                          value={sleepHours}
+                          value={draft.sleepHours}
                           onChange={(e) =>
-                            setSleepHours(Number(e.target.value))
+                            isEditing &&
+                            setDraft((prev) => ({
+                              ...prev,
+                              sleepHours: Number(e.target.value),
+                            }))
                           }
-                          className={`mt-1 ${rangeAccent}`}
+                          disabled={!isEditing}
+                          className={`mt-1 ${rangeAccent} ${!isEditing ? 'cursor-not-allowed opacity-55' : ''}`}
                         />
                       </div>
                       <div className="rounded-xl bg-gray100/70 p-2 sm:rounded-2xl sm:p-2.5">
@@ -298,7 +400,7 @@ const Simulator = () => {
                           스트레스
                         </p>
                         <p className="text-xs font-semibold tabular-nums text-blackBg sm:text-sm">
-                          {stressLevel}
+                          {draft.stressLevel}
                           <span className="ml-0.5 text-[9px] font-normal text-gray200">
                             /10
                           </span>
@@ -308,11 +410,16 @@ const Simulator = () => {
                           min={0}
                           max={10}
                           step={1}
-                          value={stressLevel}
+                          value={draft.stressLevel}
                           onChange={(e) =>
-                            setStressLevel(Number(e.target.value))
+                            isEditing &&
+                            setDraft((prev) => ({
+                              ...prev,
+                              stressLevel: Number(e.target.value),
+                            }))
                           }
-                          className={`mt-1 ${rangeAccent}`}
+                          disabled={!isEditing}
+                          className={`mt-1 ${rangeAccent} ${!isEditing ? 'cursor-not-allowed opacity-55' : ''}`}
                         />
                       </div>
                     </div>
@@ -333,12 +440,19 @@ const Simulator = () => {
                             <button
                               key={opt.key}
                               type="button"
-                              onClick={() => setSmoking(opt.key)}
+                              onClick={() =>
+                                isEditing &&
+                                setDraft((prev) => ({
+                                  ...prev,
+                                  smoking: opt.key,
+                                }))
+                              }
+                              disabled={!isEditing}
                               className={`min-w-0 flex-1 rounded-md px-1 py-1 text-[9px] font-medium transition sm:text-[10px] ${
-                                smoking === opt.key
+                                draft.smoking === opt.key
                                   ? 'bg-blackBg text-white shadow-sm'
                                   : 'text-gray400'
-                              }`}
+                              } ${!isEditing ? 'cursor-not-allowed opacity-60' : ''}`}
                             >
                               {opt.label}
                             </button>
@@ -360,12 +474,19 @@ const Simulator = () => {
                             <button
                               key={opt.key}
                               type="button"
-                              onClick={() => setAlcohol(opt.key)}
+                              onClick={() =>
+                                isEditing &&
+                                setDraft((prev) => ({
+                                  ...prev,
+                                  alcohol: opt.key,
+                                }))
+                              }
+                              disabled={!isEditing}
                               className={`min-w-0 flex-1 rounded-md px-1 py-1 text-[9px] font-medium transition sm:text-[10px] ${
-                                alcohol === opt.key
+                                draft.alcohol === opt.key
                                   ? 'bg-blackBg text-white shadow-sm'
                                   : 'text-gray400'
-                              }`}
+                              } ${!isEditing ? 'cursor-not-allowed opacity-60' : ''}`}
                             >
                               {opt.label}
                             </button>

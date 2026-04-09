@@ -11,14 +11,14 @@ const MissionsArchive = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-white p-4">
       <div
-        className="relative h-[844px] w-[390px] overflow-hidden rounded-[28px] shadow-xl"
+        className="relative h-[min(844px,100dvh)] w-full max-w-[390px] overflow-hidden rounded-[28px] shadow-xl"
         style={{
-          background: 'linear-gradient(to bottom, #9388FA 0%, #E0A1CD 100%)',
+          background: 'linear-gradient(to bottom, #A78BFA 0%, #F472B6 100%)',
         }}
       >
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -top-24 left-[-40px] h-[240px] w-[240px] rounded-full bg-white/20 blur-[30px]" />
-          <div className="absolute top-[220px] right-[-70px] h-[260px] w-[260px] rounded-full bg-[#E0A1CD]/30 blur-[40px]" />
+          <div className="absolute top-[220px] right-[-70px] h-[260px] w-[260px] rounded-full bg-[#F472B6]/30 blur-[40px]" />
           <div className="absolute inset-0 bg-white/10 backdrop-blur-[2px]" />
         </div>
 
@@ -31,20 +31,12 @@ const MissionsArchive = () => {
             <button
               type="button"
               onClick={() => navigate('/missions')}
-              className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-1 text-white/90 backdrop-blur-sm"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm active:scale-[0.97]"
+              aria-label="미션 화면으로 이동"
             >
               <ChevronLeft className="h-5 w-5" />
-              <span className="text-[13px] font-medium">Mission</span>
             </button>
-          </div>
-
-          <div className="mt-4">
-            <h1 className="text-[22px] font-bold leading-tight tracking-[-0.3px] text-white">
-              보관함
-            </h1>
-            <p className="mt-1 text-[13px] leading-relaxed text-white/85">
-              레벨 5에 도달해 만개한 꽃들이 여기에 쌓여요.
-            </p>
+            <h1 className="text-[22px] font-bold leading-tight tracking-[-0.3px] text-white">보관함</h1>
           </div>
 
           <section className="mt-8 flex-1">
@@ -54,10 +46,7 @@ const MissionsArchive = () => {
                   <div className="h-9 w-9 rounded-full bg-pink-200/60" />
                 </div>
                 <p className="text-[14px] font-medium">
-                  아직 꽃이 자라나지 않았어요.
-                </p>
-                <p className="mt-1 text-[12px] text-white/75">
-                  미션을 완료해서 꽃을 키워 주세요!
+                  아직 꽃이 자라나지 않았어요. 미션을 완료해서 꽃을 키워 주세요!
                 </p>
               </div>
             ) : (

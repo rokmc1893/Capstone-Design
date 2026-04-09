@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { StatusBar } from '../components/StatusBar';
 
-const Onboarding2 = () => {
+const Onboarding3 = () => {
   const navigate = useNavigate();
 
   return (
@@ -37,32 +37,32 @@ const Onboarding2 = () => {
           <div className="flex flex-1 flex-col items-center">
             <div className="mt-4 w-full max-w-[278px]">
               <img
-                src="/Onboarding2.png"
-                alt="온보딩 검사 안내 일러스트"
+                src="/Onboarding3.png"
+                alt="온보딩 성장 일러스트"
                 className="h-auto w-full object-contain"
                 loading="eager"
               />
             </div>
 
             <h1 className="mt-8 whitespace-pre-line text-[34px] font-bold leading-[1.24] tracking-[-0.02em] text-[#1f1f1f]">
-              {'간단한 검사 한번으로\n현재 상태를 체크하세요'}
+              {'변화를 눈으로\n확인해보세요'}
             </h1>
 
             <p className="mt-4 whitespace-pre-line text-[16px] leading-[1.6] tracking-[-0.01em] text-[#2a2a2a]/78">
-              {'간단한 검사로\n현재 내 몸 상태를\n확인할 수 있어요'}
+              {'미션을 완료할 수록 꽃이 자라나요\n당신의 노력이 성장으로 이어집니다'}
             </p>
           </div>
 
           <div className="mb-5 flex items-center justify-center gap-2.5">
             <span className="h-2.5 w-2.5 rounded-full bg-white/60" />
-            <span className="h-2.5 w-6 rounded-full bg-[#2A2A2A]" />
             <span className="h-2.5 w-2.5 rounded-full bg-white/60" />
+            <span className="h-2.5 w-6 rounded-full bg-[#2A2A2A]" />
             <span className="h-2.5 w-2.5 rounded-full bg-white/60" />
           </div>
 
           <button
             type="button"
-            onClick={() => navigate('/onboarding/3')}
+            onClick={() => navigate('/onboarding/4')}
             className="h-[56px] w-full rounded-[28px] bg-[#EAEAEA] text-[16px] font-semibold tracking-[-0.01em] text-[#4A4A4A] shadow-[0_8px_20px_rgba(0,0,0,0.10)] transition active:scale-[0.99]"
           >
             다음으로
@@ -73,4 +73,4 @@ const Onboarding2 = () => {
   );
 };
 
-export default Onboarding2;
+export default Onboarding3;

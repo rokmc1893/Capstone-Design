@@ -37,11 +37,13 @@ export const useBloomMissionsStore = create<BloomMissionsState>()(
         let level = prev.level;
         let blooms = prev.blooms;
 
-        while (xp >= XP_PER_LEVEL && level < MAX_LEVEL) {
+        while (xp >= XP_PER_LEVEL) {
           xp -= XP_PER_LEVEL;
-          level = (level + 1) as BloomStage;
-          if (level === MAX_LEVEL) {
+          if (level < MAX_LEVEL) {
+            level = (level + 1) as BloomStage;
+          } else {
             blooms += 1;
+            level = 1;
           }
         }
 

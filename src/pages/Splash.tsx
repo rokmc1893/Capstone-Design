@@ -10,7 +10,7 @@ const Splash = () => {
 
   useEffect(() => {
     const id = window.setTimeout(() => {
-      navigate('/login', { replace: true });
+      navigate('/onboarding/1', { replace: true });
     }, SPLASH_DURATION_MS);
     return () => clearTimeout(id);
   }, [navigate]);

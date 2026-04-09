@@ -36,19 +36,19 @@ const Missions = () => {
           ? 'Stage: Small Plant'
           : level === 4
             ? 'Stage: Budding Flower'
-            : 'Stage: Bloom';
+            : 'Stage: Fully Bloomed Flower';
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-white p-4">
       <div
-        className="relative h-[844px] w-[390px] overflow-hidden rounded-[28px] shadow-xl"
+        className="relative h-[min(844px,100dvh)] w-full max-w-[390px] overflow-hidden rounded-[28px] shadow-xl"
         style={{
-          background: 'linear-gradient(to bottom, #9388FA 0%, #E0A1CD 100%)',
+          background: 'linear-gradient(to bottom, #A78BFA 0%, #F472B6 100%)',
         }}
       >
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -top-24 left-[-40px] h-[240px] w-[240px] rounded-full bg-white/20 blur-[30px]" />
-          <div className="absolute top-[220px] right-[-70px] h-[260px] w-[260px] rounded-full bg-[#E0A1CD]/30 blur-[40px]" />
+          <div className="absolute top-[220px] right-[-70px] h-[260px] w-[260px] rounded-full bg-[#F472B6]/30 blur-[40px]" />
           <div className="absolute inset-0 bg-white/10 backdrop-blur-[2px]" />
         </div>
 
@@ -57,17 +57,20 @@ const Missions = () => {
         </header>
 
         <main className="relative z-10 flex flex-1 flex-col px-5 pb-28 pt-3">
-          {/* Header row */}
           <div className="flex items-center justify-between">
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-1 text-white/90 backdrop-blur-sm"
-            >
-              <ChevronLeft className="h-5 w-5" />
-              <span className="text-[13px] font-medium">뒤로</span>
-            </button>
-
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm active:scale-[0.97]"
+                aria-label="뒤로 이동"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <h1 className="text-[24px] font-bold leading-tight tracking-[-0.3px] text-white">
+                Mission
+              </h1>
+            </div>
             <button
               type="button"
               onClick={() => navigate('/missions/archive')}
@@ -78,23 +81,13 @@ const Missions = () => {
             </button>
           </div>
 
-          <div className="mt-4">
-            <h1 className="text-[24px] font-bold leading-tight tracking-[-0.3px] text-white">
-              Mission
-            </h1>
-            <p className="mt-1 text-[13px] leading-relaxed text-white/85">
-              오늘의 작은 실천으로 씨앗을 피워 보세요.
-            </p>
-          </div>
-
-          {/* Mission cards */}
           <section className="mt-6 space-y-3">
             {missions.map((m) => {
               const done = completed[m.id];
               return (
                 <div
                   key={m.id}
-                  className="flex items-center gap-3 rounded-[22px] bg-white/20 px-4 py-3.5 text-left shadow-[0_16px_40px_rgba(15,23,42,0.25)] ring-1 ring-white/35 backdrop-blur-md"
+                  className="flex items-center gap-3 rounded-[24px] bg-white/20 px-4 py-3.5 text-left shadow-[0_16px_40px_rgba(15,23,42,0.25)] ring-1 ring-white/35 backdrop-blur-md"
                 >
                   <div className="min-w-0 flex-1">
                     <p
@@ -118,7 +111,7 @@ const Missions = () => {
                     className={`flex h-9 w-9 items-center justify-center rounded-full text-[11px] font-semibold shadow-[0_8px_20px_rgba(0,0,0,0.2)] transition-transform active:scale-95 ${
                       done
                         ? 'bg-emerald-400 text-white'
-                        : 'bg-white/85 text-[#FF3AA7]'
+                        : 'bg-white/90 text-[#FF3AA7]'
                     }`}
                     aria-label={done ? '완료 취소' : '미션 완료 +5 XP'}
                   >
@@ -129,7 +122,6 @@ const Missions = () => {
             })}
           </section>
 
-          {/* XP bar */}
           <section className="mt-6">
             <div className="flex items-center justify-between text-[11px] font-semibold uppercase text-white/85">
               <span>Level {level}</span>
@@ -137,17 +129,16 @@ const Missions = () => {
             </div>
             <div className="mt-2 h-[10px] w-full overflow-hidden rounded-full bg-white/20 ring-1 ring-white/40">
               <div
-                className="h-full rounded-full bg-white/90 transition-[width] duration-500 ease-out"
+                className="h-full rounded-full bg-white/90 transition-[width] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
                 style={{ width: `${progress}%` }}
               />
             </div>
           </section>
 
-          {/* Plant area */}
           <section className="mt-7 flex-1">
             <div className="flex h-full items-center justify-center">
-              <div className="flex h-[220px] w-full max-w-[320px] flex-col items-center justify-center rounded-[40px] bg-white/10 shadow-[0_18px_50px_rgba(15,23,42,0.45)] ring-1 ring-white/35 backdrop-blur-xl">
-                <div className="relative mb-5 flex h-[120px] w-[120px] items-center justify-center">
+              <div className="flex h-[220px] w-full max-w-[320px] flex-col items-center justify-center rounded-[40px] bg-white/10 shadow-[inset_0_1px_18px_rgba(255,255,255,0.22),0_18px_50px_rgba(15,23,42,0.45)] ring-1 ring-white/35 backdrop-blur-xl">
+                <div className="relative mb-5 flex h-[120px] w-[120px] items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]">
                   {level === 1 && (
                     <div className="h-8 w-8 rounded-full bg-amber-700 shadow-[0_0_0_6px_rgba(245,158,11,0.35)]" />
                   )}
@@ -183,7 +174,7 @@ const Missions = () => {
                   )}
                   {level === 5 && (
                     <div className="relative flex flex-col items-center">
-                      <div className="absolute h-24 w-24 rounded-full bg-amber-200/20 blur-xl animate-spin-slow" />
+                      <div className="absolute h-24 w-24 rounded-full bg-amber-200/25 blur-xl animate-spin-slow" />
                       <div className="h-16 w-1 rounded-full bg-emerald-700" />
                       <div className="mt-[-34px] flex gap-2">
                         <div className="h-6 w-6 rounded-full bg-emerald-400/90" />

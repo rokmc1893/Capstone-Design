@@ -15,7 +15,7 @@ const tabs: Array<{ key: TabKey; label: string; Icon: TabIconComponent }> = [
 function getSelectedTab(pathname: string): TabKey {
   /** 검사하기·시뮬레이터는 홈 흐름 → '홈' 활성 */
   if (pathname === '/simulator' || pathname === '/inspection') return 'home';
-  if (pathname === '/missions') return 'missions';
+  if (pathname === '/missions' || pathname.startsWith('/missions/')) return 'missions';
   if (pathname === '/community') return 'community';
   return 'home';
 }
@@ -28,7 +28,7 @@ export function BottomTabNav() {
 
   return (
     <div className="absolute bottom-8 left-1/2 z-20 w-[360px] -translate-x-1/2">
-      <TapCounsel className="w-full h-[64px]">
+      <TapCounsel className="h-[64px] w-full rounded-[32px] bg-white/90">
         <div className="grid grid-cols-3 h-full items-center">
           {tabs.map((t) => {
             const active = t.key === selectedTab;
@@ -38,7 +38,7 @@ export function BottomTabNav() {
                 key={t.key}
                 type="button"
                 className={`flex h-full flex-col items-center justify-center gap-1 transition-colors ${
-                  active ? 'text-[#9388FA]' : 'text-[#9A9A98]'
+                  active ? 'text-[#FF3AA7]' : 'text-[#9A9A98]'
                 }`}
                 aria-current={active ? 'page' : undefined}
                 onClick={() => {
@@ -59,6 +59,11 @@ export function BottomTabNav() {
                 >
                   {t.label}
                 </span>
+                <span
+                  className={`h-1 w-1 rounded-full transition-opacity ${
+                    active ? 'bg-[#FF3AA7] opacity-100' : 'opacity-0'
+                  }`}
+                />
               </button>
             );
           })}
