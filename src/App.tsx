@@ -26,6 +26,8 @@ import InspectionMaleStep4 from './pages/InspectionMaleStep4';
 import InspectionMaleStep5 from './pages/InspectionMaleStep5';
 import InspectionMaleStep6 from './pages/InspectionMaleStep6';
 import InspectionMaleStep7 from './pages/InspectionMaleStep7';
+import InspectionReportArchive from './pages/InspectionReportArchive';
+import InspectionReportDetail from './pages/InspectionReportDetail';
 
 function App() {
   return (
@@ -41,6 +43,8 @@ function App() {
         <Route path="/oauth/kakao/callback" element={<KakaoCallback />} />
         <Route path="/community" element={<Community />} />
         <Route path="/home" element={<Home />} />
+        <Route path="/inspection-reports/archive" element={<InspectionReportArchive />} />
+        <Route path="/inspection-reports/detail" element={<InspectionReportDetail />} />
         <Route path="/inspection" element={<InspectionGender />} />
         <Route path="/inspection/female/1" element={<InspectionFemaleStep1 />} />
         <Route path="/inspection/female/2" element={<InspectionFemaleStep2 />} />

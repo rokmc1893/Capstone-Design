@@ -46,10 +46,10 @@ const InspectionFemaleStep4 = () => {
           <p className="mt-3 text-[16px] leading-relaxed text-white/90">이후 단계 UI는 준비 중이에요.</p>
           <button
             type="button"
-            onClick={() => navigate('/simulator?tab=inspection')}
+            onClick={() => navigate('/inspection-reports/detail?source=latest')}
             className="mt-8 w-full max-w-[280px] rounded-[16px] bg-[#9388FA] py-4 text-[17px] font-bold text-white shadow-[0_10px_28px_rgba(32,24,64,0.2)] active:scale-[0.99]"
           >
-            시뮬레이터로 이동
+            상세 리포트 보기
           </button>
         </main>
       </div>

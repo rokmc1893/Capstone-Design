@@ -37,7 +37,7 @@ function computeBmiFromHeightWeight(heightCm: number, weightKg: number): number 
   return Math.round((weightKg / (h * h)) * 100) / 100;
 }
 
-interface SimulatorState {
+export interface SimulatorState {
   gender: Gender;
   age: number;
   /** 신체 입력 (검사 설문 Step 1 등), BMI는 키·몸무게로 산출 */

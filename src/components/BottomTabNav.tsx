@@ -14,7 +14,13 @@ const tabs: Array<{ key: TabKey; label: string; Icon: TabIconComponent }> = [
 
 function getSelectedTab(pathname: string): TabKey {
   /** 검사하기·시뮬레이터는 홈 흐름 → '홈' 활성 */
-  if (pathname === '/simulator' || pathname === '/inspection') return 'home';
+  if (
+    pathname === '/simulator' ||
+    pathname === '/inspection' ||
+    pathname.startsWith('/inspection-reports')
+  ) {
+    return 'home';
+  }
   if (pathname === '/missions' || pathname.startsWith('/missions/')) return 'missions';
   if (pathname === '/community') return 'community';
   return 'home';
