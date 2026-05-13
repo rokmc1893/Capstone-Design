@@ -1,23 +1,28 @@
 import { api } from './api';
+import { enrichReportFromSimulator, wellnessScoreFromRisk } from './inspectionReportDerived';
 import { useSimulatorStore } from '../store/useSimulatorStore';
 import type { SimulatorState } from '../store/useSimulatorStore';
 import type { ResultReport, ResultRiskLevel } from '../types/resultReport';
 
-type SimulatorSnapshot = Pick<
-  SimulatorState,
-  | 'gender'
-  | 'age'
-  | 'sleepHours'
-  | 'smoking'
-  | 'alcohol'
-  | 'stressLevel'
-  | 'pssSum'
-  | 'risk'
->;
-
 const RESULT_PATH = '/api/results';
 
-function formatGender(gender: SimulatorSnapshot['gender']): '남성' | '여성' {
+/** OpenAI 등 LLM 분석·행동 가이드 확장 (엔드포인트가 없으면 null) */
+export type ResultReportLlmInsights = {
+  personalizedAnalysis?: string;
+  actionGuideBullets?: string[];
+};
+
+export async function fetchReportLlmInsights(resultId: number): Promise<ResultReportLlmInsights | null> {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL as string | undefined;
+  if (!baseUrl) return null;
+  try {
+    return await api.get<ResultReportLlmInsights>(`${RESULT_PATH}/${resultId}/llm-insights`);
+  } catch {
+    return null;
+  }
+}
+
+function formatGender(gender: SimulatorState['gender']): '남성' | '여성' {
   return gender === 'male' ? '남성' : '여성';
 }
 
@@ -27,13 +32,13 @@ function toRiskLevel(risk: number): ResultRiskLevel {
   return 'DANGER';
 }
 
-function smokingFactorLabel(smoking: SimulatorSnapshot['smoking']): string | null {
+function smokingFactorLabel(smoking: SimulatorState['smoking']): string | null {
   if (smoking === 'often') return '심한 흡연';
   if (smoking === 'sometimes') return '가끔 흡연';
   return null;
 }
 
-function drinkingFactorLabel(alcohol: SimulatorSnapshot['alcohol']): string | null {
+function drinkingFactorLabel(alcohol: SimulatorState['alcohol']): string | null {
   if (alcohol === 'often') return '잦은 음주';
   if (alcohol === 'sometimes') return '가끔 음주';
   return null;
@@ -42,10 +47,12 @@ function drinkingFactorLabel(alcohol: SimulatorSnapshot['alcohol']): string | nu
 function buildMockReport(
   resultId: number,
   nickname: string,
-  snapshot: SimulatorSnapshot,
+  snapshot: SimulatorState,
 ): ResultReport {
   const gender = formatGender(snapshot.gender);
-  const score = Math.round(snapshot.risk);
+  const riskRounded = Math.round(snapshot.risk);
+  /** 백엔드 명세: `score`는 건강 점수(0~100). 로컬 목은 위험도로부터 환산 */
+  const score = wellnessScoreFromRisk(riskRounded);
   const riskLevel = toRiskLevel(snapshot.risk);
   const factorAnalyses: ResultReport['factorAnalyses'] = [];
 
@@ -135,7 +142,7 @@ function buildMockReport(
       ? `PSS ${snapshot.pssSum}점/40점`
       : `보통 (${snapshot.stressLevel}/10)`;
 
-  return {
+  const base: ResultReport = {
     resultId,
     nickname,
     age: snapshot.age,
@@ -162,10 +169,11 @@ function buildMockReport(
     missions,
     closing: '오늘 하루도 다정하게 응원할게요.',
   };
+  return enrichReportFromSimulator(base, snapshot);
 }
 
 function buildSampleReport(): ResultReport {
-  return {
+  const base: ResultReport = {
     resultId: 123,
     nickname: '김철수',
     age: 32,
@@ -213,6 +221,25 @@ function buildSampleReport(): ResultReport {
     ],
     closing: '오늘 하루도 다정하게 응원할게요.',
   };
+  const demo: SimulatorState = {
+    ...useSimulatorStore.getState(),
+    gender: 'male',
+    age: 32,
+    heightCm: 175,
+    weightKg: 80,
+    bmi: Math.round((80 / (1.75 * 1.75)) * 100) / 100,
+    sleepHours: 6,
+    smoking: 'often',
+    alcohol: 'often',
+    stressLevel: 6,
+    pssSum: 22,
+    smokeStatus: 'daily',
+    drinkStatus: 'weeklyOrMore',
+    bingeStatus: 'weeklyOrMore',
+    hasSex12Mo: true,
+    risk: 65,
+  };
+  return enrichReportFromSimulator(base, demo);
 }
 
 export function parseResultId(value: string | null): number | null {
@@ -221,24 +248,52 @@ export function parseResultId(value: string | null): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function mergeWithLlmInsights(data: ResultReport, insights: ResultReportLlmInsights | null): ResultReport {
+  return {
+    ...data,
+    personalizedAnalysis: insights?.personalizedAnalysis ?? data.personalizedAnalysis,
+    actionGuideBullets: insights?.actionGuideBullets ?? data.actionGuideBullets,
+  };
+}
+
+/**
+ * 홈 카드용 최신 결과 1건. `GET /api/results/latest` (백엔드 제공 시).
+ * 없거나 실패 시 `null` → 홈은 로컬 목에서만 스토어 폴백.
+ */
+export async function fetchLatestResultReportForHome(): Promise<ResultReport | null> {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL as string | undefined;
+  if (!baseUrl) return null;
+
+  try {
+    const data = await api.get<ResultReport>(`${RESULT_PATH}/latest`);
+    const insights = await fetchReportLlmInsights(data.resultId).catch(() => null);
+    return mergeWithLlmInsights(data, insights);
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchResultReport(resultId: number): Promise<ResultReport> {
   const baseUrl = import.meta.env.VITE_API_BASE_URL as string | undefined;
+  const snapshot = useSimulatorStore.getState();
 
   if (!baseUrl) {
     if (resultId === 123) return buildSampleReport();
-    return buildMockReport(resultId, '담나', useSimulatorStore.getState());
+    return buildMockReport(resultId, '담나', snapshot);
   }
 
   try {
-    return await api.get<ResultReport>(`${RESULT_PATH}/${resultId}`);
+    const data = await api.get<ResultReport>(`${RESULT_PATH}/${resultId}`);
+    const insights = await fetchReportLlmInsights(resultId).catch(() => null);
+    return mergeWithLlmInsights(data, insights);
   } catch {
     if (resultId === 123) return buildSampleReport();
-    return buildMockReport(resultId, '담나', useSimulatorStore.getState());
+    return buildMockReport(resultId, '담나', snapshot);
   }
 }
 
 export async function fetchLatestResultReport(
-  snapshot: SimulatorSnapshot,
+  snapshot: SimulatorState,
   nickname: string,
 ): Promise<ResultReport> {
   const baseUrl = import.meta.env.VITE_API_BASE_URL as string | undefined;

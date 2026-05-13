@@ -55,11 +55,30 @@ export type ResultMission = {
   userAdjustable: boolean;
 };
 
+/** 설문 요약 — 카테고리별 라벨/값 리스트 */
+export type ResultQuestionnaireGroup = {
+  title: string;
+  rows: { label: string; value: string }[];
+};
+
+/** 지표 비교 표 한 행 */
+export type ResultComparisonTrend = 'higher' | 'lower' | 'neutral';
+
+export type ResultComparisonRow = {
+  item: string;
+  myValue: string;
+  averageValue: string;
+  /** 예: "12% 더 높습니다", "약 14% 더 낮습니다" */
+  comparisonResult: string;
+  trend: ResultComparisonTrend;
+};
+
 export type ResultReport = {
   resultId: number;
   nickname: string;
   age: number;
   gender: '남성' | '여성';
+  /** 건강 점수 0~100 (백엔드 `GET /api/results/{resultId}` 명세) */
   score: number;
   riskLevel: ResultRiskLevel;
   intro: ResultReportIntro;
@@ -67,4 +86,14 @@ export type ResultReport = {
   factorAnalyses: ResultFactorAnalysis[];
   missions: ResultMission[];
   closing: string;
+  /** 서버가 내려주면 우선 사용. 없으면 클라이언트에서 설문 스냅샷으로 생성 */
+  questionnaireGroups?: ResultQuestionnaireGroup[];
+  comparisonTable?: ResultComparisonRow[];
+  coreRiskBullets?: string[];
+  /** LLM 분석 API 등 */
+  personalizedAnalysis?: string;
+  /** 행동 가이드 API / 미션 기반 */
+  actionGuideBullets?: string[];
+  /** 홈·요약용 주요 요인 (서버가 내려주면 우선) */
+  topFactors?: { label: string; value: number }[];
 };

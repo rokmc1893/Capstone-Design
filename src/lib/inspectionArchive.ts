@@ -120,7 +120,7 @@ export async function fetchInspectionArchive(): Promise<InspectionArchiveRespons
   try {
     return await api.get<InspectionArchiveResponse>(ARCHIVE_PATH);
   } catch {
-    return buildMockArchive(new Date());
+    return { years: [] };
   }
 }
 
@@ -161,12 +161,81 @@ export function getDefaultSelection(
   const yearEntry =
     sortedYears.find((entry) => entry.year === currentYear) ?? sortedYears[0];
   const year = yearEntry?.year ?? currentYear;
-  const activeMonths = getActiveMonths(yearEntry);
-
+  const active = getActiveMonths(yearEntry);
   const month =
-    activeMonths.includes(currentMonth) ? currentMonth : (activeMonths[0] ?? currentMonth);
+    active.includes(currentMonth) ? currentMonth : active.length > 0 ? active[active.length - 1] : currentMonth;
   const monthEntry = getMonthEntry(yearEntry, month);
   const roundId = monthEntry?.rounds[0]?.id ?? null;
 
   return { year, month, roundId };
+}
+
+/** 연도를 바꿀 때: 직전 월에 그 해 데이터가 있으면 유지, 없으면 이번 달(달력) 또는 그 해 첫 기록 월 */
+export function pickMonthWhenYearChanges(
+  yearEntry: InspectionYear | undefined,
+  previousMonth: number,
+  calendarMonth: number,
+): number {
+  const active = getActiveMonths(yearEntry);
+  if (active.length === 0) return Math.min(12, Math.max(1, previousMonth));
+  if (active.includes(previousMonth)) return previousMonth;
+  if (active.includes(calendarMonth)) return calendarMonth;
+  return active[0];
+}
+
+/** 해당 월 검사일(로컬 YYYY-MM-DD) 목록 — 중복 제거·정렬 */
+export function distinctInspectionDatesInMonth(rounds: InspectionRound[]): string[] {
+  const set = new Set<string>();
+  for (const r of rounds) {
+    const d = r.inspectedAt.slice(0, 10);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(d)) set.add(d);
+  }
+  return [...set].sort();
+}
+
+export type MonthCalendarCell = {
+  key: string;
+  day: number | null;
+  iso: string | null;
+  hasInspection: boolean;
+  isToday: boolean;
+};
+
+/** 선택한 연·월에 대한 달력 그리드(앞쪽 빈 칸 패딩 포함). `inspectionDateSet`에 있는 날은 검사 있음 */
+export function buildMonthCalendarGrid(
+  year: number,
+  month: number,
+  inspectionDateSet: Set<string>,
+  today: Date = new Date(),
+): MonthCalendarCell[] {
+  const cells: MonthCalendarCell[] = [];
+  const lastDay = new Date(year, month, 0).getDate();
+  const firstWeekday = new Date(year, month - 1, 1).getDay();
+
+  for (let i = 0; i < firstWeekday; i++) {
+    cells.push({
+      key: `pad-${year}-${month}-${i}`,
+      day: null,
+      iso: null,
+      hasInspection: false,
+      isToday: false,
+    });
+  }
+
+  const ty = today.getFullYear();
+  const tm = today.getMonth() + 1;
+  const td = today.getDate();
+
+  for (let d = 1; d <= lastDay; d++) {
+    const iso = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    cells.push({
+      key: iso,
+      day: d,
+      iso,
+      hasInspection: inspectionDateSet.has(iso),
+      isToday: year === ty && month === tm && d === td,
+    });
+  }
+
+  return cells;
 }

@@ -85,7 +85,7 @@ const InspectionMaleStep7 = () => {
     setTouched(true);
     if (q7 === null || q8 === null || q9 === null || q10 === null) return;
     applyInspectionMaleStep7({ q7, q8, q9, q10 });
-    navigate('/inspection-reports/detail?source=latest');
+    navigate('/inspection-reports/archive');
   }, [applyInspectionMaleStep7, navigate, q7, q8, q9, q10]);
 
   return (

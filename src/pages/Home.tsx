@@ -1,9 +1,11 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Settings as SettingsIcon, ClipboardList, Heart } from 'lucide-react';
 import { BottomTabNav } from '../components/BottomTabNav';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import { useSimulatorStore } from '../store/useSimulatorStore';
+import { fetchLatestResultReportForHome, getRiskLevelLabel } from '../lib/resultReport';
+import type { ResultReport } from '../types/resultReport';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -18,11 +20,24 @@ const Home = () => {
   const alcohol = useSimulatorStore((s) => s.alcohol);
   const stressLevel = useSimulatorStore((s) => s.stressLevel);
 
-  const hasInspectionResult = heightCm > 0 && weightKg > 0;
+  const hasApiBase = Boolean(import.meta.env.VITE_API_BASE_URL);
+  const [latestReport, setLatestReport] = useState<ResultReport | null | undefined>(undefined);
 
-  const riskLevel = risk < 30 ? 'low' : risk < 60 ? 'medium' : 'high';
-  const riskStatusLabel =
-    riskLevel === 'low' ? '양호' : riskLevel === 'medium' ? '주의' : '고위험';
+  useEffect(() => {
+    if (!hasApiBase) {
+      setLatestReport(null);
+      return;
+    }
+    let mounted = true;
+    void fetchLatestResultReportForHome().then((r) => {
+      if (mounted) setLatestReport(r ?? null);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [hasApiBase]);
+
+  const hasInspectionResult = heightCm > 0 && weightKg > 0;
 
   const riskFactors = useMemo(() => {
     const factors: { label: string; value: number }[] = [];
@@ -49,8 +64,27 @@ const Home = () => {
     return factors.sort((a, b) => b.value - a.value);
   }, [age, alcohol, bmi, sleepHours, smoking, stressLevel]);
 
+  const serverFactors = useMemo(() => {
+    if (!latestReport) return null;
+    if (latestReport.topFactors?.length) return latestReport.topFactors;
+    if (latestReport.factorAnalyses?.length) {
+      return latestReport.factorAnalyses.map((f) => ({ label: f.factor, value: 0 }));
+    }
+    if (latestReport.coreRiskBullets?.length) {
+      return latestReport.coreRiskBullets.slice(0, 6).map((t) => ({
+        label: t.length > 28 ? `${t.slice(0, 28)}…` : t,
+        value: 0,
+      }));
+    }
+    return null;
+  }, [latestReport]);
+
   const cardClassName =
     'flex min-h-[132px] min-w-0 flex-col rounded-[20px] bg-white/12 px-3.5 py-3.5 shadow-[0px_18px_40px_rgba(16,24,40,0.18)] ring-1 ring-white/25 backdrop-blur-xl';
+
+  const showServerCards = hasApiBase && latestReport !== undefined && latestReport !== null;
+  const showServerEmpty = hasApiBase && latestReport === null;
+  const serverLoading = hasApiBase && latestReport === undefined;
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
@@ -128,16 +162,27 @@ const Home = () => {
 
           <div className="mt-auto grid grid-cols-2 gap-3 pb-[104px] pt-6">
             <div className={cardClassName}>
-              <p className="text-[12px] font-semibold leading-[18px] text-white/90">
-                최근 검사 결과
-              </p>
-              {hasInspectionResult ? (
+              <p className="text-[12px] font-semibold leading-[18px] text-white/90">최근 검사 결과</p>
+              {serverLoading ? (
+                <p className="mt-auto text-[13px] text-white/70">불러오는 중…</p>
+              ) : showServerCards ? (
+                <div className="mt-3 flex flex-1 flex-col justify-end">
+                  <p className="break-keep text-[24px] font-bold leading-[30px] tabular-nums tracking-[-0.3px] text-white">
+                    {latestReport.score}점
+                  </p>
+                  <p className="mt-2 inline-flex w-fit rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-medium leading-[16px] text-white/90">
+                    {getRiskLevelLabel(latestReport.riskLevel)}
+                  </p>
+                </div>
+              ) : showServerEmpty ? (
+                <p className="mt-auto text-[22px] font-semibold leading-[28px] text-white/75">---</p>
+              ) : hasInspectionResult ? (
                 <div className="mt-3 flex flex-1 flex-col justify-end">
                   <p className="break-keep text-[24px] font-bold leading-[30px] tabular-nums tracking-[-0.3px] text-white">
                     {risk.toFixed(0)}점
                   </p>
                   <p className="mt-2 inline-flex w-fit rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-medium leading-[16px] text-white/90">
-                    {riskStatusLabel}
+                    {risk < 30 ? '양호' : risk < 60 ? '주의' : '고위험'}
                   </p>
                 </div>
               ) : (
@@ -147,7 +192,26 @@ const Home = () => {
 
             <div className={cardClassName}>
               <p className="text-[12px] font-semibold leading-[18px] text-white/90">주요 요인</p>
-              {hasInspectionResult && riskFactors.length > 0 ? (
+              {serverLoading ? (
+                <p className="mt-auto text-[13px] text-white/70">불러오는 중…</p>
+              ) : showServerCards ? (
+                <div className="mt-3 flex flex-1 flex-wrap content-start gap-1.5">
+                  {serverFactors && serverFactors.length > 0 ? (
+                    serverFactors.map((factor) => (
+                      <span
+                        key={`${factor.label}-${factor.value}`}
+                        className="inline-flex max-w-full items-center rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-medium leading-[14px] text-white/90 ring-1 ring-white/25"
+                      >
+                        <span className="break-keep">{factor.label}</span>
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-[11px] leading-relaxed text-white/70">표시할 주요 요인이 없습니다.</p>
+                  )}
+                </div>
+              ) : showServerEmpty ? (
+                <p className="mt-auto text-[22px] font-semibold leading-[28px] text-white/75">---</p>
+              ) : hasInspectionResult && riskFactors.length > 0 ? (
                 <div className="mt-3 flex flex-1 flex-wrap content-start gap-1.5">
                   {riskFactors.map((factor) => (
                     <span
