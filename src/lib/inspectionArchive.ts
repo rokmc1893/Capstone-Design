@@ -1,4 +1,3 @@
-import { api } from './api';
 import { fetchResultsHistoryRaw } from './homeMissionsApi';
 import { mapResultsHistoryToInspectionArchive } from './resultsHistoryMapper';
 
@@ -119,22 +118,10 @@ export async function fetchInspectionArchive(): Promise<InspectionArchiveRespons
 
   try {
     const raw = await fetchResultsHistoryRaw();
-    const mapped = mapResultsHistoryToInspectionArchive(raw);
-    if (mapped.years.length > 0) return mapped;
+    return mapResultsHistoryToInspectionArchive(raw);
   } catch {
-    /* fallthrough */
+    return { years: [] };
   }
-
-  try {
-    const raw = await api.get<unknown>('/inspection-reports/archive');
-    if (raw && typeof raw === 'object' && 'years' in (raw as object)) {
-      return raw as InspectionArchiveResponse;
-    }
-  } catch {
-    /* ignore */
-  }
-
-  return { years: [] };
 }
 
 export function sortArchiveYears(years: InspectionYear[]): InspectionYear[] {
