@@ -186,6 +186,12 @@ const EmailAuth = () => {
               </p>
             )}
 
+            {mode === 'signup' && (
+              <p className="text-center text-[11px] leading-relaxed text-white/70">
+                회원가입 시 서비스 이용약관에 동의하는 것으로 간주됩니다.
+              </p>
+            )}
+
             {/* 제출 버튼 */}
             <button
               type="submit"

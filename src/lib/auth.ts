@@ -11,8 +11,12 @@ export async function signUp(payload: {
   email: string;
   password: string;
   nickname: string;
+  isTermsAgreed?: boolean;
 }): Promise<AuthResult> {
-  return api.post<AuthResult>('/auth/signup', payload);
+  return api.post<AuthResult>('/auth/signup', {
+    ...payload,
+    isTermsAgreed: payload.isTermsAgreed ?? true,
+  });
 }
 
 /** 일반 로그인 */
