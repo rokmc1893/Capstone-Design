@@ -4,8 +4,7 @@
  */
 
 import { api, type AuthResult } from './api';
-
-const BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+import { getKakaoOAuthLoginUrl } from './backendUrl';
 
 /** 일반 회원가입 */
 export async function signUp(payload: {
@@ -24,9 +23,9 @@ export async function emailLogin(payload: {
   return api.post<AuthResult>('/auth/login', payload);
 }
 
-/** 카카오 로그인 — 브라우저 전체 리다이렉트 */
+/** 카카오 로그인 — 백엔드 OAuth 엔드포인트로 전체 리다이렉트 */
 export function redirectToKakaoLogin() {
-  window.location.href = `${BASE_URL}/oauth/kakao/login`;
+  window.location.href = getKakaoOAuthLoginUrl();
 }
 
 /** 토큰 재발급 */
