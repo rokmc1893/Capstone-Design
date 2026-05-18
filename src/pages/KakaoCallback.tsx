@@ -32,13 +32,13 @@ const KakaoCallback = () => {
   const setAuth = useAuthStore((s) => s.setAuth);
 
   useEffect(() => {
-    const accessToken = searchParams.get('accessToken');
-    const refreshToken = searchParams.get('refreshToken');
-    const userId = searchParams.get('userId');
-    const nickname = searchParams.get('nickname');
+    const accessToken = searchParams.get('accessToken')?.trim();
+    const refreshToken = searchParams.get('refreshToken')?.trim();
+    const userId = searchParams.get('userId')?.trim();
+    const nickname = searchParams.get('nickname')?.trim();
 
     if (accessToken && refreshToken) {
-      const resolvedNickname = nickname?.trim() || '사용자';
+      const resolvedNickname = nickname || '사용자';
       setAuth({
         method: 'kakao',
         email: null,

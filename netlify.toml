@@ -60,6 +60,12 @@
   force = true
   conditions = {Accept = ["application/json"]}
 
+# 카카오 OAuth 프론트 콜백 (쿼리스트링 유지)
+[[redirects]]
+  from = "/oauth/kakao/callback"
+  to = "/index.html"
+  status = 200
+
 # React Router SPA (직접 URL·새로고침·공유 링크)
 [[redirects]]
   from = "/*"
