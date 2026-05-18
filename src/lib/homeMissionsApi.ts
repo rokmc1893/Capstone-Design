@@ -5,6 +5,7 @@ import type {
   HomeUserDto,
   MissionCompleteResponseDto,
   MissionHistoryPageDto,
+  MissionsTodayPayload,
   MissionsTodayResultDto,
   TodayMissionDto,
   UserMeDto,
@@ -39,9 +40,24 @@ export async function fetchMissionsMe(): Promise<TodayMissionDto[]> {
   return normalizeMissionList(raw);
 }
 
-export async function fetchMissionsToday(): Promise<TodayMissionDto[]> {
+export async function fetchMissionsToday(): Promise<MissionsTodayPayload> {
   const raw = await api.get<unknown>('/api/missions/today');
-  return normalizeMissionList(raw);
+  return {
+    missions: normalizeMissionList(raw),
+    dailyRewardCapReached: pickDailyRewardCapReached(raw),
+  };
+}
+
+function pickDailyRewardCapReached(raw: unknown): boolean | undefined {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+  const o = raw as MissionsTodayResultDto & Record<string, unknown>;
+  if (typeof o.dailyRewardCapReached === 'boolean') return o.dailyRewardCapReached;
+  const user = o.user;
+  if (user && typeof user === 'object') {
+    const cap = (user as Record<string, unknown>).dailyRewardCapReached;
+    if (typeof cap === 'boolean') return cap;
+  }
+  return undefined;
 }
 
 function normalizeMissionList(raw: unknown): TodayMissionDto[] {
@@ -59,6 +75,13 @@ function normalizeMissionList(raw: unknown): TodayMissionDto[] {
 /** 홈 `user` 또는 미션 완료 응답으로 새싹 레벨·EXP 동기화용 */
 export function pickSproutFromHome(home: HomeDashboardDto | null): HomeUserDto | null {
   return home?.user ?? null;
+}
+
+export function pickDailyRewardCapFromHome(home: HomeDashboardDto | null): boolean | undefined {
+  if (!home) return undefined;
+  if (typeof home.dailyRewardCapReached === 'boolean') return home.dailyRewardCapReached;
+  if (typeof home.user?.dailyRewardCapReached === 'boolean') return home.user.dailyRewardCapReached;
+  return undefined;
 }
 
 export function todayMissionNumericId(m: TodayMissionDto): number | null {

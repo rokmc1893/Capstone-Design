@@ -3,6 +3,7 @@ export type HomeUserDto = {
   nickname?: string;
   level?: number;
   exp?: number;
+  dailyRewardCapReached?: boolean;
 };
 
 export type HomeRecentTestDto = {
@@ -24,6 +25,7 @@ export type HomeDashboardDto = {
   todayMissions?: TodayMissionDto[];
   unreadNotiCount?: number;
   actions?: HomeActionDto[];
+  dailyRewardCapReached?: boolean;
 };
 
 export type TestSessionStartResult = {
@@ -51,6 +53,12 @@ export type TodayMissionDto = {
 export type MissionsTodayResultDto = {
   total?: number;
   missions?: TodayMissionDto[];
+  dailyRewardCapReached?: boolean;
+};
+
+export type MissionsTodayPayload = {
+  missions: TodayMissionDto[];
+  dailyRewardCapReached?: boolean;
 };
 
 export type MissionCompleteResponseDto = {

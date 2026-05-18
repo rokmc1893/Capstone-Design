@@ -30,11 +30,28 @@ interface BloomMissionsState {
   markMissionCompleted: (id: string) => void;
   /** `GET /home`의 `user.level` / `user.exp` 반영 */
   applyHomeSprout: (payload: { level?: number; exp?: number }) => void;
+  /** 로컬 날짜(YYYY-MM-DD) 기준 오늘 일일 경험치 상한 도달일 (자정 이후 무효) */
+  dailyRewardCapDate: string | null;
+  /** API·미션 완료 응답으로 일일 경험치 상한 상태 동기화 */
+  syncDailyRewardCapReached: (reached?: boolean) => void;
 }
 
 const XP_PER_MISSION = 5;
 const XP_PER_LEVEL = 100;
 const MAX_LEVEL: BloomStage = 5;
+
+export const DAILY_REWARD_CAP_MESSAGE = '오늘 받을 수 있는 경험치 상한에 도달했어요.';
+
+function localDateKey(d = new Date()): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+export function isDailyRewardCapActive(capDate: string | null): boolean {
+  return capDate === localDateKey();
+}
 
 function clampSproutLevel(n: number): BloomStage {
   if (!Number.isFinite(n)) return 1;
@@ -74,10 +91,16 @@ export const useBloomMissionsStore = create<BloomMissionsState>()(
       blooms: 0,
       bloomRecords: [],
       selectedFlowerId: 'lily',
+      dailyRewardCapDate: null,
       setSelectedFlower: (id) => set({ selectedFlowerId: id }),
+      syncDailyRewardCapReached: (reached) => {
+        if (reached === true) set({ dailyRewardCapDate: localDateKey() });
+        else if (reached === false) set({ dailyRewardCapDate: null });
+      },
       applyMissionCompleteDto: (dto) => {
         set((prev) => {
           const next: Partial<BloomMissionsState> = {};
+          if (dto.dailyRewardCapReached) next.dailyRewardCapDate = localDateKey();
           if (dto.currentLevel != null) next.level = clampSproutLevel(dto.currentLevel);
           if (dto.currentExp != null) next.xp = Math.max(0, Math.round(dto.currentExp));
           if (dto.requiredExpForCurrentLevel != null) {
@@ -172,10 +195,13 @@ export const useBloomMissionsStore = create<BloomMissionsState>()(
         const mergedCompleted = { ...currentState.completed, ...(p.completed ?? {}) };
         const requiredExpForNext =
           typeof p.requiredExpForNext === 'number' ? p.requiredExpForNext : currentState.requiredExpForNext;
+        const capDate = typeof p.dailyRewardCapDate === 'string' ? p.dailyRewardCapDate : null;
+        const dailyRewardCapDate = isDailyRewardCapActive(capDate) ? capDate : null;
         return {
           ...currentState,
           ...p,
           requiredExpForNext,
+          dailyRewardCapDate,
           completed: mergedCompleted,
           bloomRecords: records,
           selectedFlowerId: fid,

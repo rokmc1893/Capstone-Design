@@ -15,6 +15,7 @@ import { missionsFromResultReport, type BloomMissionRow } from '../lib/bloomMiss
 import {
   fetchHomeDashboard,
   fetchMissionsToday,
+  pickDailyRewardCapFromHome,
   pickSproutFromHome,
   postMissionComplete,
   todayMissionNumericId,
@@ -22,7 +23,11 @@ import {
 import { missionErrorMessage } from '../lib/missionApiMessages';
 import { fetchLatestResultReport, fetchLatestResultReportForHome } from '../lib/resultReport';
 import { useAuthStore } from '../store/useAuthStore';
-import { useBloomMissionsStore } from '../store/useBloomMissionsStore';
+import {
+  DAILY_REWARD_CAP_MESSAGE,
+  isDailyRewardCapActive,
+  useBloomMissionsStore,
+} from '../store/useBloomMissionsStore';
 import { useSimulatorStore } from '../store/useSimulatorStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 
@@ -41,6 +46,7 @@ const Missions = () => {
 
   const markMissionCompleted = useBloomMissionsStore((s) => s.markMissionCompleted);
   const applyHomeSprout = useBloomMissionsStore((s) => s.applyHomeSprout);
+  const syncDailyRewardCapReached = useBloomMissionsStore((s) => s.syncDailyRewardCapReached);
 
   useEffect(() => {
     let mounted = true;
@@ -48,13 +54,16 @@ const Missions = () => {
       const snapshot = useSimulatorStore.getState();
       try {
         if (hasApiBase && accessToken) {
-          const [today, home] = await Promise.all([fetchMissionsToday(), fetchHomeDashboard()]);
+          const [todayPayload, home] = await Promise.all([fetchMissionsToday(), fetchHomeDashboard()]);
           if (!mounted) return;
           const sprout = pickSproutFromHome(home);
           if (sprout) applyHomeSprout({ level: sprout.level, exp: sprout.exp });
+          const capFromHome = pickDailyRewardCapFromHome(home);
+          if (capFromHome) syncDailyRewardCapReached(true);
+          if (todayPayload.dailyRewardCapReached) syncDailyRewardCapReached(true);
 
           const rows: BloomMissionRow[] = [];
-          for (const t of today) {
+          for (const t of todayPayload.missions) {
             const mid = todayMissionNumericId(t);
             if (mid == null) continue;
             const rowId = `api:${mid}`;
@@ -97,7 +106,14 @@ const Missions = () => {
     return () => {
       mounted = false;
     };
-  }, [hasApiBase, nickname, accessToken, applyHomeSprout, markMissionCompleted]);
+  }, [
+    hasApiBase,
+    nickname,
+    accessToken,
+    applyHomeSprout,
+    markMissionCompleted,
+    syncDailyRewardCapReached,
+  ]);
   const level = useBloomMissionsStore((s) => s.level);
   const xp = useBloomMissionsStore((s) => s.xp);
   const completed = useBloomMissionsStore((s) => s.completed);
@@ -105,6 +121,8 @@ const Missions = () => {
   const bloomRecords = useBloomMissionsStore((s) => s.bloomRecords);
   const selectedFlowerId = useBloomMissionsStore((s) => s.selectedFlowerId);
   const requiredExpForNext = useBloomMissionsStore((s) => s.requiredExpForNext);
+  const dailyRewardCapDate = useBloomMissionsStore((s) => s.dailyRewardCapDate);
+  const dailyRewardCapActive = isDailyRewardCapActive(dailyRewardCapDate);
   const toggleMission = useBloomMissionsStore((s) => s.toggleMission);
   const applyMissionCompleteDto = useBloomMissionsStore((s) => s.applyMissionCompleteDto);
 
@@ -135,9 +153,6 @@ const Missions = () => {
           markMissionCompleted(m.id);
           setMissionBanner('이미 완료된 미션이에요.');
           return;
-        }
-        if (dto.dailyRewardCapReached) {
-          setMissionBanner('오늘 받을 수 있는 경험치 상한에 도달했어요.');
         }
         applyMissionCompleteDto(dto);
         markMissionCompleted(m.id);
@@ -219,6 +234,14 @@ const Missions = () => {
             최신 검사 결과를 바탕으로 미션이 구성됩니다. 완료할 때마다 경험치가 쌓이고, 단계가 올라가면 무작위로 정해진
             꽃이 자라요. 한 번 피우고 나면 다음에는 다른 꽃이 나올 수 있어요.
           </p>
+          {dailyRewardCapActive ? (
+            <p
+              className="mt-2 shrink-0 rounded-[12px] bg-black/20 px-3 py-2 text-[11px] leading-snug text-white"
+              role="status"
+            >
+              {DAILY_REWARD_CAP_MESSAGE}
+            </p>
+          ) : null}
           {missionBanner ? (
             <p className="mt-2 shrink-0 rounded-[12px] bg-black/20 px-3 py-2 text-[11px] leading-snug text-white">
               {missionBanner}
