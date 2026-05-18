@@ -1,19 +1,26 @@
 import { useLocation, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Home, Target, Users } from 'lucide-react';
 import { TapCounsel } from './TapCounsel';
-import { BsBullseye, BsHouse, BsPeople } from './BootstrapTabIcons';
+import { glassNavPill } from './ui/glassStyles';
+import { springPremium } from '../lib/motionPresets';
+import { typeNavLabel } from '../lib/typography';
 
 export type TabKey = 'home' | 'missions' | 'community';
 
-type TabIconComponent = typeof BsHouse;
+type TabDef = {
+  key: TabKey;
+  label: string;
+  Icon: typeof Home;
+};
 
-const tabs: Array<{ key: TabKey; label: string; Icon: TabIconComponent }> = [
-  { key: 'home', label: '홈', Icon: BsHouse },
-  { key: 'missions', label: '미션', Icon: BsBullseye },
-  { key: 'community', label: '커뮤니티', Icon: BsPeople },
+const tabs: TabDef[] = [
+  { key: 'home', label: '홈', Icon: Home },
+  { key: 'missions', label: '미션', Icon: Target },
+  { key: 'community', label: '커뮤니티', Icon: Users },
 ];
 
 function getSelectedTab(pathname: string): TabKey {
-  /** 검사하기·시뮬레이터는 홈 흐름 → '홈' 활성 */
   if (
     pathname === '/simulator' ||
     pathname === '/inspection' ||
@@ -26,16 +33,21 @@ function getSelectedTab(pathname: string): TabKey {
   return 'home';
 }
 
-/** 홈 / 미션(시뮬레이터) / 커뮤니티 — 현재 경로에 맞춰 활성 탭만 강조 */
 export function BottomTabNav() {
   const navigate = useNavigate();
   const location = useLocation();
   const selectedTab = getSelectedTab(location.pathname);
 
   return (
-    <div className="absolute bottom-8 left-1/2 z-20 w-[360px] -translate-x-1/2">
-      <TapCounsel className="h-[64px] w-full rounded-[32px] bg-white/90">
-        <div className="grid grid-cols-3 h-full items-center">
+    <motion.nav
+      className="absolute inset-x-6 bottom-8 z-20"
+      aria-label="하단 메뉴"
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ ...springPremium, delay: 0.35 }}
+    >
+      <TapCounsel className={glassNavPill}>
+        <div className="relative grid h-full grid-cols-3 items-center">
           {tabs.map((t) => {
             const active = t.key === selectedTab;
             const Icon = t.Icon;
@@ -43,8 +55,8 @@ export function BottomTabNav() {
               <button
                 key={t.key}
                 type="button"
-                className={`flex h-full flex-col items-center justify-center gap-1 transition-colors ${
-                  active ? 'text-[#FF3AA7]' : 'text-[#9A9A98]'
+                className={`relative flex h-full flex-col items-center justify-center gap-0.5 ${
+                  active ? 'text-[#FF3AA7]' : 'text-[#8E8E93]'
                 }`}
                 aria-current={active ? 'page' : undefined}
                 onClick={() => {
@@ -53,28 +65,50 @@ export function BottomTabNav() {
                   if (t.key === 'community') navigate('/community');
                 }}
               >
-                <Icon
-                  className={`h-5 w-5 shrink-0 ${
-                    active ? 'opacity-100' : 'opacity-60'
-                  }`}
-                />
-                <span
-                  className={`text-[8px] leading-[22px] tracking-[-0.08px] ${
-                    active ? 'font-semibold' : 'font-medium'
-                  }`}
+                {active ? (
+                  <motion.span
+                    layoutId="bottom-tab-pill"
+                    className="pointer-events-none absolute inset-x-2.5 top-1.5 bottom-1.5 rounded-[20px] bg-[#FF3AA7]/12 shadow-[0_0_28px_rgba(255,58,167,0.4)]"
+                    transition={springPremium}
+                    aria-hidden
+                  />
+                ) : null}
+                <motion.span
+                  className="relative z-[1] flex flex-col items-center gap-0.5"
+                  animate={{
+                    scale: active ? 1.05 : 1,
+                    opacity: active ? 1 : 0.65,
+                  }}
+                  transition={springPremium}
                 >
-                  {t.label}
-                </span>
-                <span
-                  className={`h-1 w-1 rounded-full transition-opacity ${
-                    active ? 'bg-[#FF3AA7] opacity-100' : 'opacity-0'
-                  }`}
-                />
+                  <Icon
+                    className={`h-5 w-5 shrink-0 ${
+                      active ? 'drop-shadow-[0_0_10px_rgba(255,58,167,0.7)]' : ''
+                    }`}
+                    strokeWidth={active ? 2.25 : 1.85}
+                  />
+                  <span
+                    className={`${typeNavLabel} ${
+                      active ? 'font-semibold text-[#FF3AA7]' : 'font-medium text-[#8E8E93]'
+                    }`}
+                  >
+                    {t.label}
+                  </span>
+                  <motion.span
+                    className="h-1 w-1 rounded-full bg-[#FF3AA7]"
+                    animate={{
+                      scale: active ? 1 : 0,
+                      opacity: active ? 1 : 0,
+                    }}
+                    transition={springPremium}
+                    style={{ boxShadow: active ? '0 0 8px #FF3AA7' : 'none' }}
+                  />
+                </motion.span>
               </button>
             );
           })}
         </div>
       </TapCounsel>
-    </div>
+    </motion.nav>
   );
 }

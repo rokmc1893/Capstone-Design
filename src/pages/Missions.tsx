@@ -30,6 +30,17 @@ import {
 } from '../store/useBloomMissionsStore';
 import { useSimulatorStore } from '../store/useSimulatorStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
+import {
+  typeCaption,
+  typeCaptionXs,
+  typeCardDesc,
+  typeCardTitle,
+  typeOverline,
+  typeScreenTitle,
+} from '../lib/typography';
+
+const MISSION_SURFACE =
+  'rounded-[24px] bg-white/20 shadow-[0_16px_40px_rgba(15,23,42,0.25)] ring-1 ring-white/35 backdrop-blur-md';
 
 const Missions = () => {
   const navigate = useNavigate();
@@ -192,7 +203,7 @@ const Missions = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-white p-4">
       <div
-        className="relative flex h-[min(844px,100dvh)] w-full max-w-[390px] flex-col min-h-0 overflow-hidden rounded-[28px] shadow-xl"
+        className="relative flex h-[844px] w-[390px] flex-col min-h-0 overflow-hidden rounded-[28px] shadow-xl"
         style={{
           background: 'linear-gradient(to bottom, #A78BFA 0%, #F472B6 100%)',
         }}
@@ -207,7 +218,7 @@ const Missions = () => {
           <StatusBar />
         </header>
 
-        <main className="relative z-10 flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain px-5 pb-28 pt-3">
+        <main className="relative z-10 flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain px-6 pb-[104px] pt-3">
           <div className="flex shrink-0 items-center justify-between">
             <div className="flex items-center gap-1">
               <button
@@ -218,7 +229,7 @@ const Missions = () => {
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
-              <h1 className="text-[24px] font-bold leading-tight tracking-[-0.3px] text-white">미션</h1>
+              <h1 className={typeScreenTitle}>미션</h1>
             </div>
             <button
               type="button"
@@ -230,29 +241,27 @@ const Missions = () => {
             </button>
           </div>
 
-          <p className="mt-3 shrink-0 text-[12px] leading-snug text-white/85">
+          <p className={`mt-3.5 shrink-0 ${typeCaption}`}>
             최신 검사 결과를 바탕으로 미션이 구성됩니다. 완료할 때마다 경험치가 쌓이고, 단계가 올라가면 무작위로 정해진
             꽃이 자라요. 한 번 피우고 나면 다음에는 다른 꽃이 나올 수 있어요.
           </p>
           {dailyRewardCapActive ? (
             <p
-              className="mt-2 shrink-0 rounded-[12px] bg-black/20 px-3 py-2 text-[11px] leading-snug text-white"
+              className={`mt-2.5 shrink-0 rounded-[12px] bg-black/20 px-3.5 py-2.5 ${typeCaptionXs} text-white/82`}
               role="status"
             >
               {DAILY_REWARD_CAP_MESSAGE}
             </p>
           ) : null}
           {missionBanner ? (
-            <p className="mt-2 shrink-0 rounded-[12px] bg-black/20 px-3 py-2 text-[11px] leading-snug text-white">
+            <p className={`mt-2.5 shrink-0 rounded-[12px] bg-black/20 px-3.5 py-2.5 ${typeCaptionXs} text-white/82`}>
               {missionBanner}
             </p>
           ) : null}
 
-          <section className="mt-5 shrink-0">
-            <p className="mb-2 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-white/90">
-              성장 단계
-            </p>
-            <div className="flex items-start justify-between gap-0.5">
+          <section className={`mt-5 shrink-0 px-3 py-4 ${MISSION_SURFACE}`}>
+            <p className={`mb-3 text-center ${typeOverline}`}>성장 단계</p>
+            <div className="flex items-start justify-between gap-0.5 px-0.5">
               {stages.map((st, i) => {
                 const done = level >= st;
                 return (
@@ -266,13 +275,13 @@ const Missions = () => {
                       />
                     )}
                     <div
-                      className={`relative z-[1] flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
-                        done ? 'bg-white text-pink-600 shadow-md' : 'bg-white/25 text-white/75'
+                      className={`relative z-[1] flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold ${
+                        done ? 'bg-white/95 text-pink-600 shadow-md' : 'bg-white/25 text-white/72'
                       }`}
                     >
                       {st}
                     </div>
-                    <span className="mt-1.5 text-center text-[9px] font-semibold leading-[1.15] text-white/90">
+                    <span className="mt-1.5 text-center text-[9px] font-medium leading-[1.35] tracking-[-0.01em] text-white/78">
                       {GROWTH_STAGE_LABELS[st]}
                     </span>
                   </div>
@@ -281,12 +290,12 @@ const Missions = () => {
             </div>
           </section>
 
-          <section className="mt-5 shrink-0">
-            <div className="flex items-center justify-between text-[11px] font-semibold uppercase text-white/85">
+          <section className={`mt-5 shrink-0 px-4 py-3.5 ${MISSION_SURFACE}`}>
+            <div className={`flex items-center justify-between ${typeCaptionXs} font-semibold uppercase text-white/78`}>
               <span>
                 단계 {level} · {selectedFlower.emoji} {selectedFlower.nameKo}
               </span>
-              <span>
+              <span className="tabular-nums">
                 {Math.round(xp)} / {xpCap} XP
               </span>
             </div>
@@ -304,19 +313,19 @@ const Missions = () => {
               return (
                 <div
                   key={m.id}
-                  className="flex items-center gap-3 rounded-[24px] bg-white/20 px-4 py-3.5 text-left shadow-[0_16px_40px_rgba(15,23,42,0.25)] ring-1 ring-white/35 backdrop-blur-md"
+                  className={`flex items-center gap-3.5 px-5 py-4 text-left ${MISSION_SURFACE}`}
                 >
                   <div className="min-w-0 flex-1">
                     <p
-                      className={`text-[15px] font-semibold tracking-[-0.2px] ${
-                        done ? 'text-white/60 line-through' : 'text-white'
+                      className={`${typeCardTitle} ${
+                        done ? 'text-white/55 line-through' : ''
                       }`}
                     >
                       {m.title}
                     </p>
                     <p
-                      className={`mt-1 text-[12px] leading-snug ${
-                        done ? 'text-white/45 line-through' : 'text-white/80'
+                      className={`mt-1.5 ${typeCardDesc} ${
+                        done ? 'text-white/40 line-through' : ''
                       }`}
                     >
                       {m.description}
@@ -346,9 +355,11 @@ const Missions = () => {
             })}
           </section>
 
-          <section className="mt-6 flex shrink-0 flex-col pb-2">
-            <div className="flex w-full flex-col items-center justify-center rounded-[40px] bg-white/10 px-3 py-5 shadow-[inset_0_1px_18px_rgba(255,255,255,0.22),0_18px_50px_rgba(15,23,42,0.45)] ring-1 ring-white/35 backdrop-blur-xl">
-              <p className="mb-3 text-[11px] font-semibold text-white/90">
+          <section className="mt-6 flex shrink-0 flex-col">
+            <div
+              className={`flex w-full flex-col items-center justify-center px-4 py-5 ${MISSION_SURFACE}`}
+            >
+              <p className={`mb-3 ${typeCaption} text-white/82`}>
                 {selectedFlower.nameKo} · {GROWTH_STAGE_LABELS[level]}
               </p>
               <div className="relative flex min-h-[140px] w-full max-w-[240px] items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]">

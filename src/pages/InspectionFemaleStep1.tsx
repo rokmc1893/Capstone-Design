@@ -3,12 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Settings } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
 import { syncFemaleInspectionStep } from '../lib/testsSessionSync';
+import { inspectionInputClassName as inputClassName } from '../lib/inspectionFormStyles';
 import { useSimulatorStore } from '../store/useSimulatorStore';
-
-const inputClassName =
-  'w-full rounded-[14px] border border-black/10 bg-[#F4F4F6] px-4 py-3.5 text-[16px] leading-[1.35] text-[#1a1a1f] shadow-inner shadow-black/[0.03] outline-none transition ' +
-  'placeholder:text-[#A8A8AE] ' +
-  'focus:border-[#9388FA] focus:bg-white focus:ring-2 focus:ring-[#9388FA]/35';
 
 function digitsOnly(s: string): string {
   return s.replace(/\D/g, '');
@@ -108,7 +104,7 @@ const InspectionFemaleStep1 = () => {
           <button
             type="button"
             onClick={() => navigate('/home')}
-            className="flex min-w-0 items-center gap-0.5 text-[16px] font-bold leading-6 tracking-[-0.2px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)] active:opacity-80"
+            className="flex min-w-0 items-center gap-0.5 type-inspect-back active:opacity-80"
           >
             <ChevronLeft className="h-6 w-6 shrink-0" strokeWidth={2.25} aria-hidden />
             <span className="truncate">검사하기</span>
@@ -124,7 +120,7 @@ const InspectionFemaleStep1 = () => {
         </div>
 
         <main className="relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto px-5 pb-6 pt-2 sm:px-6">
-          <h1 className="text-center text-[20px] font-bold leading-[1.45] tracking-[-0.35px] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.14)] sm:text-[22px]">
+          <h1 className="type-inspect-title">
             간단한 질문 몇 가지로
             <br />
             현재 몸 상태를 진단해볼게요!
@@ -133,7 +129,7 @@ const InspectionFemaleStep1 = () => {
           <div className="mx-auto mt-6 w-full max-w-[350px] flex-1 rounded-[22px] bg-white/95 p-5 shadow-[0_16px_48px_rgba(24,24,48,0.12)] ring-1 ring-white/70 backdrop-blur-sm sm:mt-7 sm:rounded-[24px] sm:p-6">
             <div className="space-y-6">
               <div>
-                <label htmlFor="inspection-age" className="mb-2 block text-[15px] font-semibold leading-snug text-[#2a2a32]">
+                <label htmlFor="inspection-age" className="type-form-label mb-2 block">
                   1. 현재 만 나이가 어떻게 되시나요?
                 </label>
                 <input
@@ -148,12 +144,12 @@ const InspectionFemaleStep1 = () => {
                   aria-invalid={showAgeError}
                 />
                 {showAgeError && (
-                  <p className="mt-1.5 text-[12px] text-red-600">15~44 사이의 숫자만 입력할 수 있어요.</p>
+                  <p className="type-form-error mt-1.5">15~44 사이의 숫자만 입력할 수 있어요.</p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="inspection-height" className="mb-2 block text-[15px] font-semibold leading-snug text-[#2a2a32]">
+                <label htmlFor="inspection-height" className="type-form-label mb-2 block">
                   2. 키를 알려주세요 (cm)
                 </label>
                 <input
@@ -168,12 +164,12 @@ const InspectionFemaleStep1 = () => {
                   aria-invalid={showHeightError}
                 />
                 {showHeightError && (
-                  <p className="mt-1.5 text-[12px] text-red-600">120~220cm 사이로 입력해 주세요.</p>
+                  <p className="type-form-error mt-1.5">120~220cm 사이로 입력해 주세요.</p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="inspection-weight" className="mb-2 block text-[15px] font-semibold leading-snug text-[#2a2a32]">
+                <label htmlFor="inspection-weight" className="type-form-label mb-2 block">
                   3. 몸무게를 알려 주세요 (kg)
                 </label>
                 <input
@@ -188,19 +184,19 @@ const InspectionFemaleStep1 = () => {
                   aria-invalid={showWeightError}
                 />
                 {showWeightError && (
-                  <p className="mt-1.5 text-[12px] text-red-600">25~250kg 사이로 입력해 주세요.</p>
+                  <p className="type-form-error mt-1.5">25~250kg 사이로 입력해 주세요.</p>
                 )}
               </div>
             </div>
           </div>
 
           <div className="mx-auto mt-6 w-full max-w-[350px] shrink-0 sm:mt-7">
-            <p className="mb-3 text-center text-[14px] font-medium text-white/95">1 / 6</p>
+            <p className="type-inspect-progress mb-3 text-center">1 / 6</p>
             <button
               type="button"
               disabled={!validation.isValid}
               onClick={onNext}
-              className="w-full rounded-[16px] py-4 text-[17px] font-bold tracking-[-0.2px] text-white shadow-[0_10px_28px_rgba(32,24,64,0.2)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-white/35 disabled:text-white/70 disabled:shadow-none enabled:bg-[#9388FA] enabled:active:opacity-95"
+              className="w-full rounded-[16px] py-4 type-inspect-cta text-white/95 shadow-[0_10px_28px_rgba(32,24,64,0.2)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-white/35 disabled:text-white/70 disabled:shadow-none enabled:bg-[#9388FA] enabled:active:opacity-95"
             >
               다음으로
             </button>

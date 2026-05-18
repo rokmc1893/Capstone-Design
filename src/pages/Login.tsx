@@ -53,10 +53,8 @@ const Login = () => {
         {/* 메인 콘텐츠: Figma 로그인 온보딩 구조 */}
         <main className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 pb-14 text-center">
           <div className="flex max-w-[320px] flex-col items-center">
-            <h1 className="font-nanum-pen text-[62px] leading-[1.02] tracking-[-0.02em] text-[#1a1a1a] drop-shadow-[0_2px_12px_rgba(255,255,255,0.45)] sm:text-[66px]">
-              Fertility Helper
-            </h1>
-            <p className="mt-5 max-w-[280px] text-[14px] font-normal leading-[1.65] tracking-[-0.02em] text-[#2d2d2d]/78">
+            <h1 className="type-brand-display">Fertility Helper</h1>
+            <p className="type-ink-body-sm mt-5 max-w-[280px] text-[#2d2d2d]/78">
               간편하게 로그인하고
               <br />
               다양한 서비스를 이용해보세요.
@@ -74,7 +72,7 @@ const Login = () => {
             <button
               type="button"
               onClick={() => navigate('/email-auth')}
-              className="flex h-[48px] w-full max-w-[320px] items-center justify-center rounded-[20px] bg-[#F2F2F2] text-[14px] font-medium tracking-[-0.12px] text-[#444] shadow-[0_3px_10px_rgba(0,0,0,0.06)] ring-1 ring-white/50 backdrop-blur-sm transition hover:bg-white/90 active:scale-[0.99] active:shadow-[0_2px_6px_rgba(0,0,0,0.05)]"
+              className="type-ink-body-sm flex h-[48px] w-full max-w-[320px] items-center justify-center rounded-[20px] bg-[#F2F2F2] text-[#444] shadow-[0_3px_10px_rgba(0,0,0,0.06)] ring-1 ring-white/50 backdrop-blur-sm transition hover:bg-white/90 active:scale-[0.99] active:shadow-[0_2px_6px_rgba(0,0,0,0.05)]"
             >
               이메일로 시작하기
             </button>

@@ -104,7 +104,7 @@ const InspectionMaleStep3 = () => {
           <button
             type="button"
             onClick={() => navigate('/inspection/male/2')}
-            className="flex min-w-0 items-center gap-0.5 text-[16px] font-bold leading-6 tracking-[-0.2px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)] active:opacity-80"
+            className="flex min-w-0 items-center gap-0.5 type-inspect-back active:opacity-80"
           >
             <ChevronLeft className="h-6 w-6 shrink-0" strokeWidth={2.25} aria-hidden />
             <span className="truncate">검사하기</span>
@@ -120,7 +120,7 @@ const InspectionMaleStep3 = () => {
         </div>
 
         <div className="relative z-10 shrink-0 px-5 pb-3 pt-1 sm:px-6">
-          <h1 className="text-center text-[20px] font-bold leading-[1.45] tracking-[-0.35px] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.14)] sm:text-[22px]">
+          <h1 className="type-inspect-title">
             간단한 질문 몇 가지로
             <br />
             현재 몸 상태를 진단해볼게요!
@@ -132,7 +132,7 @@ const InspectionMaleStep3 = () => {
             <div className="mx-auto w-full max-w-[350px] rounded-[22px] bg-white/95 p-5 shadow-[0_16px_48px_rgba(24,24,48,0.12)] ring-1 ring-white/70 backdrop-blur-sm sm:rounded-[24px] sm:p-6">
               <div className="space-y-6">
                 <div>
-                  <p className="mb-3 text-[15px] font-semibold leading-snug text-[#2a2a32]">
+                  <p className="type-form-label mb-3">
                     7. 진단받은 적이 있는 질환을 모두 선택해 주세요
                   </p>
                   <div className="space-y-2.5">
@@ -172,7 +172,7 @@ const InspectionMaleStep3 = () => {
                 </div>
 
                 <div>
-                  <p className="mb-3 text-[15px] font-semibold leading-snug text-[#2a2a32]">
+                  <p className="type-form-label mb-3">
                     8. 최근 한 달간 흡연을 얼마나 하셨나요?
                   </p>
                   <div className="space-y-2.5">
@@ -201,7 +201,7 @@ const InspectionMaleStep3 = () => {
                 </div>
 
                 <div>
-                  <p className="mb-3 text-[15px] font-semibold leading-snug text-[#2a2a32]">
+                  <p className="type-form-label mb-3">
                     9. 최근 1년간 음주 빈도는 어떻게 되시나요?
                   </p>
                   <div className="space-y-2.5">
@@ -233,12 +233,12 @@ const InspectionMaleStep3 = () => {
           </div>
 
           <div className="mx-auto mt-4 w-full max-w-[350px] shrink-0 pt-1 sm:mt-5">
-            <p className="mb-3 text-center text-[14px] font-medium text-white/95">3 / 7</p>
+            <p className="type-inspect-progress mb-3 text-center">3 / 7</p>
             <button
               type="button"
               disabled={!validation.isValid}
               onClick={onNext}
-              className="w-full rounded-[16px] py-4 text-[17px] font-bold tracking-[-0.2px] text-white shadow-[0_10px_28px_rgba(32,24,64,0.2)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-white/35 disabled:text-white/70 disabled:shadow-none enabled:bg-[#9388FA] enabled:active:opacity-95"
+              className="w-full rounded-[16px] py-4 type-inspect-cta text-white/95 shadow-[0_10px_28px_rgba(32,24,64,0.2)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-white/35 disabled:text-white/70 disabled:shadow-none enabled:bg-[#9388FA] enabled:active:opacity-95"
             >
               다음으로
             </button>

@@ -196,7 +196,7 @@ const EmailAuth = () => {
             <button
               type="submit"
               disabled={loading}
-              className="mt-2 flex h-[52px] items-center justify-center rounded-[20px] bg-white text-[16px] font-semibold text-[#9388FA] shadow-[0_12px_32px_rgba(147,136,250,0.35)] transition active:scale-[0.98] disabled:opacity-70"
+              className="mt-2 flex h-[52px] items-center justify-center rounded-[20px] bg-white type-ink-button-lg text-[#9388FA] shadow-[0_12px_32px_rgba(147,136,250,0.35)] transition active:scale-[0.98] disabled:opacity-70"
             >
               {loading ? (
                 <Loader2 className="h-5 w-5 animate-spin" />

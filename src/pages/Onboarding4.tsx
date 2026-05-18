@@ -48,7 +48,7 @@ const Onboarding4 = () => {
             <button
               type="button"
               onClick={goLogin}
-              className="h-[56px] w-full rounded-[28px] bg-black text-[17px] font-bold tracking-[-0.02em] text-white shadow-[0_12px_32px_rgba(0,0,0,0.35),0_4px_12px_rgba(0,0,0,0.2)] transition active:scale-[0.99] active:shadow-[0_8px_24px_rgba(0,0,0,0.3)]"
+              className="h-[56px] w-full rounded-[28px] bg-black type-inspect-cta tracking-[-0.02em] text-white shadow-[0_12px_32px_rgba(0,0,0,0.35),0_4px_12px_rgba(0,0,0,0.2)] transition active:scale-[0.99] active:shadow-[0_8px_24px_rgba(0,0,0,0.3)]"
             >
               시작하기
             </button>

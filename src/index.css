@@ -1,3 +1,4 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
 @import url('https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Nanum+Pen+Script&display=swap');
 
 @tailwind base;
@@ -10,11 +11,33 @@ body,
   height: 100%;
 }
 
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text',
-    'Noto Sans KR', sans-serif;
-  background-color: #ffffff;
+@layer base {
+  html {
+    font-family:
+      'Pretendard Variable',
+      Pretendard,
+      -apple-system,
+      BlinkMacSystemFont,
+      'Apple SD Gothic Neo',
+      'Noto Sans KR',
+      system-ui,
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings:
+      'kern' 1,
+      'liga' 1;
+  }
+
+  body {
+    margin: 0;
+    font-family: inherit;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    background-color: #ffffff;
+    color: #202020;
+  }
 }
 
 .font-nanum-pen {
@@ -38,4 +61,359 @@ body {
 
 .animate-spin-slow {
   animation: spin-slow 14s linear infinite;
+}
+
+/* ── Toss / iOS 타이포그래피 (Pretendard) ── */
+@layer components {
+  .type-greeting {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.55;
+    letter-spacing: -0.02em;
+    color: rgba(255, 255, 255, 0.78);
+  }
+  .type-hero-title {
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.22;
+    letter-spacing: -0.035em;
+    color: rgba(255, 255, 255, 0.94);
+  }
+  .type-screen-title {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.035em;
+    color: rgba(255, 255, 255, 0.94);
+  }
+  .type-screen-title-lg {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.28;
+    letter-spacing: -0.04em;
+    color: rgba(255, 255, 255, 0.94);
+  }
+  .type-body {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.6;
+    letter-spacing: -0.015em;
+    color: rgba(255, 255, 255, 0.75);
+  }
+  .type-body-sm {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.55;
+    letter-spacing: -0.01em;
+    color: rgba(255, 255, 255, 0.72);
+  }
+  .type-caption {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.55;
+    letter-spacing: -0.01em;
+    color: rgba(255, 255, 255, 0.65);
+  }
+  .type-caption-xs {
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+    color: rgba(255, 255, 255, 0.62);
+  }
+  .type-card-title {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: -0.02em;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  .type-card-desc {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.55;
+    letter-spacing: -0.01em;
+    color: rgba(255, 255, 255, 0.65);
+  }
+  .type-stat-label {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.45;
+    letter-spacing: -0.015em;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  .type-stat-value {
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.03em;
+    color: rgba(255, 255, 255, 0.9);
+    font-variant-numeric: tabular-nums;
+  }
+  .type-stat-placeholder {
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: rgba(255, 255, 255, 0.5);
+  }
+  .type-badge {
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .type-nav-label {
+    font-size: 9px;
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: -0.02em;
+  }
+  .type-overline {
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .type-ink-title-xl {
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    color: rgba(31, 31, 31, 0.92);
+  }
+  .type-ink-title {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.03em;
+    color: rgba(32, 32, 32, 0.92);
+  }
+  .type-ink-title-sm {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: -0.025em;
+    color: rgba(32, 32, 32, 0.9);
+  }
+  .type-ink-title-sheet {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.03em;
+    color: rgba(32, 32, 32, 0.92);
+  }
+  .type-ink-body-lg {
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.6;
+    letter-spacing: -0.015em;
+    color: rgba(42, 42, 42, 0.82);
+  }
+  .type-ink-body {
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.55;
+    letter-spacing: -0.015em;
+    color: rgba(32, 32, 32, 0.72);
+  }
+  .type-ink-body-sm {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.55;
+    letter-spacing: -0.015em;
+    color: rgba(32, 32, 32, 0.72);
+  }
+  .type-ink-caption {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+    color: #72726f;
+  }
+  .type-ink-caption-sm {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+    color: #72726f;
+  }
+  .type-ink-list-row {
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.45;
+    letter-spacing: -0.015em;
+    color: rgba(32, 32, 32, 0.88);
+  }
+  .type-ink-list-row-sm {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.45;
+    letter-spacing: -0.015em;
+    color: rgba(32, 32, 32, 0.8);
+  }
+  .type-ink-button {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .type-ink-button-lg {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .type-brand-display {
+    font-family: 'Nanum Pen Script', cursive, sans-serif;
+    font-size: 62px;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    color: rgba(26, 26, 26, 0.9);
+    filter: drop-shadow(0 2px 12px rgba(255, 255, 255, 0.45));
+  }
+  @media (min-width: 640px) {
+    .type-brand-display {
+      font-size: 66px;
+    }
+  }
+
+  .type-inspect-back {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: -0.02em;
+    color: rgba(255, 255, 255, 0.92);
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.12));
+  }
+  .type-inspect-progress {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.45;
+    letter-spacing: -0.015em;
+    color: rgba(255, 255, 255, 0.88);
+  }
+  .type-inspect-title {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.28;
+    letter-spacing: -0.035em;
+    color: rgba(255, 255, 255, 0.94);
+    filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.12));
+  }
+  @media (min-width: 640px) {
+    .type-inspect-title {
+      font-size: 22px;
+    }
+  }
+  .type-inspect-cta {
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: -0.02em;
+  }
+  .type-inspect-cta-final {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: -0.02em;
+  }
+  .type-form-label {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.45;
+    letter-spacing: -0.015em;
+    color: rgba(42, 42, 50, 0.92);
+  }
+  .type-form-hint {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+    color: #585863;
+  }
+  .type-form-error {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.45;
+    color: rgba(220, 38, 38, 0.9);
+  }
+  .type-form-input {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    color: rgba(26, 26, 31, 0.92);
+  }
+  .type-form-option {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+    color: rgba(58, 58, 66, 0.88);
+  }
+
+  .type-report-section {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.45;
+    letter-spacing: -0.01em;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  .type-report-heading {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: -0.02em;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  .type-report-body {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.55;
+    letter-spacing: -0.01em;
+    color: rgba(255, 255, 255, 0.75);
+  }
+  .type-report-score {
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    color: rgba(255, 255, 255, 0.92);
+    font-variant-numeric: tabular-nums;
+  }
+  .type-report-score-sm {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.035em;
+    color: rgba(255, 255, 255, 0.9);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .type-status-bar {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: rgba(32, 32, 32, 0.9);
+  }
+  .type-sim-title {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: -0.02em;
+    color: rgba(32, 32, 32, 0.9);
+  }
+  .type-sim-caption {
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.45;
+    letter-spacing: -0.01em;
+    color: #72726f;
+  }
 }

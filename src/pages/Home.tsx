@@ -1,7 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Settings as SettingsIcon } from 'lucide-react';
 import { BottomTabNav } from '../components/BottomTabNav';
+import { MobileGlassBackdrop } from '../components/ui/MobileGlassBackdrop';
+import {
+  GRADIENT_BG_STYLE,
+  MOBILE_FRAME,
+  glassCard,
+  glassIconWell,
+  glassSettingsButton,
+  glassStatCard,
+} from '../components/ui/glassStyles';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import { useSimulatorStore } from '../store/useSimulatorStore';
 import { fetchHomeDashboard } from '../lib/homeMissionsApi';
@@ -12,6 +22,19 @@ import {
   resolveHomeActions,
 } from '../lib/homeActions';
 import { getDisplayName } from '../lib/displayName';
+import { usePremiumMotion } from '../lib/motionPresets';
+import {
+  typeBadge,
+  typeCaption,
+  typeCardDesc,
+  typeCardTitle,
+  typeGreeting,
+  typeHeroTitle,
+  typeStatLabel,
+  typeCaptionXs,
+  typeStatPlaceholder,
+  typeStatValue,
+} from '../lib/typography';
 import { fetchLatestResultReportForHome, getRiskLevelLabel } from '../lib/resultReport';
 import { useAuthStore } from '../store/useAuthStore';
 import type { HomeActionDto } from '../types/backendApi';
@@ -19,6 +42,7 @@ import type { ResultReport } from '../types/resultReport';
 
 const Home = () => {
   const navigate = useNavigate();
+  const { variants, stagger, spring, cardHover, cardTap } = usePremiumMotion();
   const authNickname = useAuthStore((s) => s.user?.nickname);
   const profileName = useUserProfileStore((s) => s.name);
   const profileNickname = useUserProfileStore((s) => s.nickname);
@@ -71,31 +95,21 @@ const Home = () => {
   );
 
   const latestResultId = latestReport?.resultId ?? null;
-
   const hasInspectionResult = heightCm > 0 && weightKg > 0;
 
   const riskFactors = useMemo(() => {
     const factors: { label: string; value: number }[] = [];
-
     if (age >= 40) factors.push({ label: '나이', value: 25 });
     else if (age >= 35) factors.push({ label: '나이', value: 15 });
-
     if (bmi >= 25) factors.push({ label: 'BMI', value: 15 });
     else if (bmi >= 23) factors.push({ label: 'BMI', value: 10 });
-
     if (sleepHours < 6) factors.push({ label: '수면', value: 15 });
     else if (sleepHours < 7) factors.push({ label: '수면', value: 8 });
-
     if (smoking === 'often') factors.push({ label: '흡연', value: 18 });
     else if (smoking === 'sometimes') factors.push({ label: '흡연', value: 10 });
-
     if (alcohol === 'often') factors.push({ label: '음주', value: 12 });
     else if (alcohol === 'sometimes') factors.push({ label: '음주', value: 6 });
-
-    if (stressLevel > 0) {
-      factors.push({ label: '스트레스', value: stressLevel * 2 });
-    }
-
+    if (stressLevel > 0) factors.push({ label: '스트레스', value: stressLevel * 2 });
     return factors.sort((a, b) => b.value - a.value);
   }, [age, alcohol, bmi, sleepHours, smoking, stressLevel]);
 
@@ -114,151 +128,186 @@ const Home = () => {
     return null;
   }, [latestReport]);
 
-  const cardClassName =
-    'flex min-h-[132px] min-w-0 flex-col rounded-[20px] bg-white/12 px-3.5 py-3.5 shadow-[0px_18px_40px_rgba(16,24,40,0.18)] ring-1 ring-white/25 backdrop-blur-xl';
-
   const showServerCards = hasApiBase && latestReport !== undefined && latestReport !== null;
   const showServerEmpty = hasApiBase && latestReport === null;
   const serverLoading = hasApiBase && latestReport === undefined;
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <div
-        className="relative flex h-[844px] w-[390px] flex-col overflow-hidden rounded-[28px] shadow-xl"
-        style={{ background: 'linear-gradient(to bottom, #9388FA 0%, #E0A1CD 100%)' }}
+    <motion.div className="flex min-h-screen items-center justify-center bg-[#f4f2fa] p-4">
+      <motion.div
+        className={MOBILE_FRAME}
+        style={GRADIENT_BG_STYLE}
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={spring}
       >
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-24 left-[-40px] h-[240px] w-[240px] rounded-full bg-white/20 blur-[30px]" />
-          <div className="absolute top-[220px] right-[-70px] h-[260px] w-[260px] rounded-full bg-[#E0A1CD]/30 blur-[40px]" />
-          <div className="absolute inset-0 bg-white/10 backdrop-blur-[2px]" />
-        </div>
+        <MobileGlassBackdrop />
 
-        <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain px-6 pt-12">
-          <div className="flex items-start justify-between">
+        <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain px-6 pt-12 pb-[104px]">
+          <motion.header
+            className="flex items-start justify-between gap-4"
+            initial="hidden"
+            animate="visible"
+            variants={variants}
+          >
             <div className="min-w-0">
-              <p className="text-[16px] leading-[22px] font-bold tracking-[-0.2px] text-white">
-                반가워요, {userName} 님!
-              </p>
-              <p className="mt-2 text-[24px] font-bold leading-[30px] tracking-[-0.4px] text-white">
+              <p className={typeGreeting}>반가워요, {userName} 님!</p>
+              <h1 className={`mt-2.5 ${typeHeroTitle} drop-shadow-[0_2px_16px_rgba(0,0,0,0.1)]`}>
                 오늘 하루도
                 <br />
                 좋은 결과가 있길
-              </p>
+              </h1>
             </div>
-            <button
+            <motion.button
               type="button"
               aria-label="설정"
               onClick={() => navigate('/settings')}
-              className="relative ml-4 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/85 shadow-[0px_10px_24px_rgba(16,24,40,0.14)] ring-1 ring-white/50 backdrop-blur-md active:scale-[0.98]"
+              className={glassSettingsButton}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.94 }}
+              transition={spring}
             >
-              <SettingsIcon className="h-5 w-5 text-blackBg" />
-            </button>
-          </div>
+              <SettingsIcon className="h-5 w-5" strokeWidth={2} />
+            </motion.button>
+          </motion.header>
 
-          <div className="mt-8 grid grid-cols-2 gap-3">
+          <motion.section
+            className="mt-9 grid grid-cols-2 gap-3.5"
+            aria-label="메인 메뉴"
+            initial="hidden"
+            animate="visible"
+            variants={stagger}
+          >
             {actionCards.map((action) => {
               const path = getHomeActionPath(action.type, { latestResultId });
               const Icon = homeActionIcon(action.type);
               const subtitle = homeActionSubtitle(action.type);
               return (
-                <button
+                <motion.button
                   key={action.type}
                   type="button"
+                  variants={variants}
                   disabled={!path}
                   onClick={() => {
                     if (path) navigate(path);
                   }}
-                  className="group relative flex min-h-[108px] w-full flex-col justify-between rounded-[20px] bg-white/12 p-4 text-left shadow-[0px_18px_40px_rgba(16,24,40,0.18)] ring-1 ring-white/25 backdrop-blur-xl active:scale-[0.99] disabled:opacity-50"
+                  whileHover={cardHover}
+                  whileTap={cardTap}
+                  transition={spring}
+                  className={`group relative flex min-h-[122px] w-full flex-col justify-between p-5 text-left disabled:opacity-45 ${glassCard}`}
                 >
-                  <div className="min-w-0">
-                    <p className="text-[15px] font-semibold leading-[20px] tracking-[-0.2px] text-white">
-                      {action.title}
-                    </p>
-                    {subtitle ? (
-                      <p className="mt-1 text-[11px] leading-[16px] text-white/75">{subtitle}</p>
-                    ) : null}
+                  <div className="min-w-0 pr-1">
+                    <p className={typeCardTitle}>{action.title}</p>
+                    {subtitle ? <p className={`mt-2 ${typeCardDesc}`}>{subtitle}</p> : null}
                   </div>
-                  <div className="mt-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white/30 shadow-[inset_0px_1px_0px_rgba(255,255,255,0.8)] ring-1 ring-white/40">
-                    <Icon className="h-5 w-5 text-white/85" aria-hidden />
+                  <div className={`mt-5 ${glassIconWell}`}>
+                    <Icon className="h-5 w-5 text-white/90" aria-hidden />
                   </div>
-                  <span className="pointer-events-none absolute inset-0 rounded-[20px] opacity-0 transition-opacity group-hover:opacity-100 bg-gradient-to-br from-white/20 via-transparent to-white/10" />
-                </button>
+                  <span className="pointer-events-none absolute inset-0 rounded-[24px] bg-gradient-to-br from-white/[0.14] via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                </motion.button>
               );
             })}
-          </div>
+          </motion.section>
 
-          <div className="mt-auto grid grid-cols-2 gap-3 pb-[104px] pt-6">
-            <div className={cardClassName}>
-              <p className="text-[12px] font-semibold leading-[18px] text-white/90">최근 검사 결과</p>
-              {serverLoading ? (
-                <p className="mt-auto text-[13px] text-white/70">불러오는 중…</p>
-              ) : showServerCards ? (
-                <div className="mt-3 flex flex-1 flex-col justify-end">
-                  <p className="break-keep text-[24px] font-bold leading-[30px] tabular-nums tracking-[-0.3px] text-white">
-                    {latestReport.score}점
-                  </p>
-                  <p className="mt-2 inline-flex w-fit rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-medium leading-[16px] text-white/90">
-                    {getRiskLevelLabel(latestReport.riskLevel)}
-                  </p>
-                </div>
-              ) : showServerEmpty ? (
-                <p className="mt-auto text-[22px] font-semibold leading-[28px] text-white/75">---</p>
-              ) : hasInspectionResult ? (
-                <div className="mt-3 flex flex-1 flex-col justify-end">
-                  <p className="break-keep text-[24px] font-bold leading-[30px] tabular-nums tracking-[-0.3px] text-white">
-                    {risk.toFixed(0)}점
-                  </p>
-                  <p className="mt-2 inline-flex w-fit rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-medium leading-[16px] text-white/90">
-                    {risk < 30 ? '양호' : risk < 60 ? '주의' : '고위험'}
-                  </p>
-                </div>
-              ) : (
-                <p className="mt-auto text-[22px] font-semibold leading-[28px] text-white/75">---</p>
-              )}
-            </div>
-
-            <div className={cardClassName}>
-              <p className="text-[12px] font-semibold leading-[18px] text-white/90">주요 요인</p>
-              {serverLoading ? (
-                <p className="mt-auto text-[13px] text-white/70">불러오는 중…</p>
-              ) : showServerCards ? (
-                <div className="mt-3 flex flex-1 flex-wrap content-start gap-1.5">
-                  {serverFactors && serverFactors.length > 0 ? (
-                    serverFactors.map((factor) => (
-                      <span
-                        key={`${factor.label}-${factor.value}`}
-                        className="inline-flex max-w-full items-center rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-medium leading-[14px] text-white/90 ring-1 ring-white/25"
-                      >
-                        <span className="break-keep">{factor.label}</span>
-                      </span>
-                    ))
-                  ) : (
-                    <p className="text-[11px] leading-relaxed text-white/70">표시할 주요 요인이 없습니다.</p>
-                  )}
-                </div>
-              ) : showServerEmpty ? (
-                <p className="mt-auto text-[22px] font-semibold leading-[28px] text-white/75">---</p>
-              ) : hasInspectionResult && riskFactors.length > 0 ? (
-                <div className="mt-3 flex flex-1 flex-wrap content-start gap-1.5">
-                  {riskFactors.map((factor) => (
-                    <span
-                      key={factor.label}
-                      className="inline-flex max-w-full items-center rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-medium leading-[14px] text-white/90 ring-1 ring-white/25"
+          <motion.section
+            className="mt-7 grid grid-cols-2 gap-3.5"
+            aria-label="검사 요약"
+            initial="hidden"
+            animate="visible"
+            variants={stagger}
+          >
+            <motion.div
+              variants={variants}
+              className={`${glassStatCard} flex min-h-[124px] flex-col px-5 py-5`}
+            >
+              <p className={typeStatLabel}>최근 검사 결과</p>
+              <div className="relative mt-auto flex flex-1 flex-col justify-end pt-3">
+                <motion.div className="pointer-events-none absolute -right-2 bottom-2 h-16 w-16 rounded-full bg-white/10 blur-2xl" aria-hidden />
+                {serverLoading ? (
+                  <p className={typeCaption}>불러오는 중…</p>
+                ) : showServerCards ? (
+                  <>
+                    <motion.p
+                      key={`score-${latestReport.score}`}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={typeStatValue}
                     >
-                      <span className="break-keep">{factor.label}</span>
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <p className="mt-auto text-[22px] font-semibold leading-[28px] text-white/75">---</p>
-              )}
-            </div>
-          </div>
+                      {latestReport.score}점
+                    </motion.p>
+                    <p className={`mt-2.5 inline-flex w-fit rounded-full border border-white/20 bg-white/12 px-2.5 py-1 ${typeBadge}`}>
+                      {getRiskLevelLabel(latestReport.riskLevel)}
+                    </p>
+                  </>
+                ) : showServerEmpty || !hasInspectionResult ? (
+                  <p className={typeStatPlaceholder}>---</p>
+                ) : (
+                  <>
+                    <motion.p
+                      key={`risk-${risk}`}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={typeStatValue}
+                    >
+                      {risk.toFixed(0)}점
+                    </motion.p>
+                    <p className={`mt-2.5 inline-flex w-fit rounded-full border border-white/20 bg-white/12 px-2.5 py-1 ${typeBadge}`}>
+                      {risk < 30 ? '양호' : risk < 60 ? '주의' : '고위험'}
+                    </p>
+                  </>
+                )}
+              </div>
+            </motion.div>
+
+            <motion.div
+              variants={variants}
+              className={`${glassStatCard} flex min-h-[124px] flex-col px-5 py-5`}
+            >
+              <p className={typeStatLabel}>주요 요인</p>
+              <div className="relative mt-auto flex flex-1 flex-col justify-end pt-3">
+                <div
+                  className="pointer-events-none absolute -left-1 bottom-0 h-14 w-14 rounded-full bg-[#F9A8D4]/20 blur-2xl"
+                  aria-hidden
+                />
+                {serverLoading ? (
+                  <p className={typeCaption}>불러오는 중…</p>
+                ) : showServerCards ? (
+                  <motion.div className="flex flex-wrap gap-1.5">
+                    {serverFactors && serverFactors.length > 0 ? (
+                      serverFactors.map((factor) => (
+                        <span
+                          key={`${factor.label}-${factor.value}`}
+                          className={`inline-flex max-w-full rounded-full border border-white/20 bg-white/12 px-2.5 py-1 ${typeBadge}`}
+                        >
+                          {factor.label}
+                        </span>
+                      ))
+                    ) : (
+                      <p className={typeCaptionXs}>표시할 주요 요인이 없습니다.</p>
+                    )}
+                  </motion.div>
+                ) : showServerEmpty || (!hasInspectionResult && !showServerCards) ? (
+                  <p className={typeStatPlaceholder}>---</p>
+                ) : (
+                  <div className="flex flex-wrap gap-1.5">
+                    {riskFactors.map((factor) => (
+                      <span
+                        key={factor.label}
+                        className={`inline-flex max-w-full rounded-full border border-white/20 bg-white/12 px-2.5 py-1 ${typeBadge}`}
+                      >
+                        {factor.label}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.section>
         </div>
 
         <BottomTabNav />
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

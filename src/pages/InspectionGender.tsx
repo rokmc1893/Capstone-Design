@@ -1,18 +1,24 @@
 import { useCallback, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Settings } from 'lucide-react';
+import { GenderCharacterArt } from '../components/illustrations/GenderCharacterArt';
 import { StatusBar } from '../components/StatusBar';
+import { MobileGlassBackdrop } from '../components/ui/MobileGlassBackdrop';
+import {
+  GRADIENT_BG_STYLE,
+  MOBILE_FRAME,
+  glassCard,
+  glassSettingsButton,
+} from '../components/ui/glassStyles';
 import { postSproutResetAfterRetest } from '../lib/homeMissionsApi';
+import { fadeUp, springPremium, staggerSection } from '../lib/motionPresets';
+import { typeBodySm, typeScreenTitleLg } from '../lib/typography';
 import { postTestsStartFromUiGender } from '../lib/testsSessionApi';
 import { useBloomMissionsStore } from '../store/useBloomMissionsStore';
 import { useTestSessionStore } from '../store/useTestSessionStore';
 import { useSimulatorStore } from '../store/useSimulatorStore';
-import imgMan from '../assets/inspection/man.png';
-import imgWoman from '../assets/inspection/woman.png';
 
-/**
- * 검사하기 — 성별 선택 (홈 → 검사하기 → 시뮬레이터 inspection)
- */
 const InspectionGender = () => {
   const navigate = useNavigate();
   const setGender = useSimulatorStore((s) => s.setGender);
@@ -52,106 +58,98 @@ const InspectionGender = () => {
       if (g === 'female') navigate('/inspection/female/1');
       else navigate('/inspection/male/1');
       navigateLock.current = false;
-    }, 240);
+    }, 320);
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white p-3 sm:p-4">
-      <div
-        className="relative flex h-[100dvh] max-h-[852px] w-full max-w-[393px] flex-col overflow-hidden rounded-[28px] shadow-xl"
-        style={{ background: 'linear-gradient(to bottom, #9388FA 0%, #E0A1CD 100%)' }}
+    <div className="flex min-h-screen items-center justify-center bg-[#f4f2fa] p-4">
+      <motion.div
+        className={`${MOBILE_FRAME} h-[min(844px,100dvh)] max-h-[852px]`}
+        style={GRADIENT_BG_STYLE}
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={springPremium}
       >
-        {/* 홈과 동일한 소프트 글로우 + 블렌드 */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-24 left-[-40px] h-[240px] w-[240px] rounded-full bg-white/20 blur-[30px]" />
-          <div className="absolute top-[220px] right-[-70px] h-[260px] w-[260px] rounded-full bg-[#E0A1CD]/30 blur-[40px]" />
-          <div className="absolute bottom-[-60px] left-1/2 h-[180px] w-[180px] -translate-x-1/2 rounded-full bg-[#9388FA]/20 blur-[32px]" />
-          <div className="absolute inset-0 bg-white/10 backdrop-blur-[2px]" />
-        </div>
+        <MobileGlassBackdrop />
 
-        <header className="relative z-10 shrink-0 pt-1.5">
+        <header className="relative z-10 shrink-0 pt-2">
           <StatusBar />
         </header>
 
-        <div className="relative z-10 flex shrink-0 items-center justify-between px-5 pb-2 pt-1 sm:px-6">
+        <div className="relative z-10 flex shrink-0 items-center justify-between px-6 pb-2 pt-1">
           <button
             type="button"
             onClick={goBack}
-            className="flex min-w-0 items-center gap-0.5 text-[16px] font-bold leading-6 tracking-[-0.2px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)] active:opacity-80"
+            className="type-inspect-back flex min-w-0 items-center gap-0.5 active:opacity-80"
           >
             <ChevronLeft className="h-6 w-6 shrink-0" strokeWidth={2.25} aria-hidden />
             <span className="truncate">검사하기</span>
           </button>
-          <button
+          <motion.button
             type="button"
             aria-label="설정"
             onClick={() => navigate('/settings')}
-            className="relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/90 shadow-[0px_10px_24px_rgba(16,24,40,0.14)] ring-1 ring-white/50 backdrop-blur-md active:scale-[0.98]"
+            className={glassSettingsButton}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.94 }}
+            transition={springPremium}
           >
-            <Settings className="h-5 w-5 text-[#1a1a1f]" strokeWidth={1.85} />
-          </button>
+            <Settings className="h-5 w-5" strokeWidth={2} />
+          </motion.button>
         </div>
 
-        <main className="relative z-10 flex min-h-0 flex-1 flex-col justify-center px-5 pb-8 pt-2 sm:px-6 sm:pb-10">
-          <h1 className="text-center text-[30px] font-bold leading-[1.25] tracking-[-0.45px] text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.18)] sm:text-[34px]">
-            당신의 성별은?
-          </h1>
+        <main className="relative z-10 flex min-h-0 flex-1 flex-col justify-center px-6 pb-10 pt-2">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            className="text-center"
+          >
+            <h1 className={`${typeScreenTitleLg} drop-shadow-[0_2px_16px_rgba(0,0,0,0.12)]`}>
+              성별을 선택해주세요
+            </h1>
+            <p className={`mt-2.5 ${typeBodySm}`}>
+              성별에 맞는 간단한 설문 후 진단을 이어가요.
+            </p>
+          </motion.div>
 
-          <div className="mx-auto mt-9 grid w-full max-w-[340px] grid-cols-2 gap-4 sm:mt-11 sm:max-w-[360px] sm:gap-5">
-            <button
-              type="button"
-              onClick={() => handleSelect('male')}
-              className={[
-                'group relative flex min-h-[268px] flex-col overflow-hidden rounded-[22px] bg-gradient-to-b from-[#A4C4FF] to-[#8FB8FF] p-3 shadow-[0_14px_36px_rgba(24,32,64,0.14)] ring-2 ring-transparent transition-all duration-200 ease-out sm:min-h-[288px] sm:rounded-[24px] sm:p-4',
-                'active:scale-[0.99]',
-                selected === 'male'
-                  ? 'z-[1] scale-[1.04] ring-[#9388FA] shadow-[0_16px_40px_rgba(147,136,250,0.35),0_0_0_3px_rgba(147,136,250,0.28)]'
-                  : 'hover:brightness-[1.02]',
-              ].join(' ')}
-            >
-              <div className="flex min-h-0 flex-1 flex-col items-center justify-end px-1">
-                <img
-                  src={imgMan}
-                  alt=""
-                  className="h-auto max-h-[200px] w-full max-w-[168px] object-contain object-bottom select-none sm:max-h-[216px]"
-                  draggable={false}
-                />
-              </div>
-              <span className="mt-2 pb-1 text-center text-[18px] font-bold leading-tight tracking-[-0.2px] text-[#1c2438]">
-                남자
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleSelect('female')}
-              className={[
-                'group relative flex min-h-[268px] flex-col overflow-hidden rounded-[22px] bg-gradient-to-b from-[#FF9A9A] to-[#FF8A8A] p-3 shadow-[0_14px_36px_rgba(64,24,32,0.12)] ring-2 ring-transparent transition-all duration-200 ease-out sm:min-h-[288px] sm:rounded-[24px] sm:p-4',
-                'active:scale-[0.99]',
-                selected === 'female'
-                  ? 'z-[1] scale-[1.04] ring-[#9388FA] shadow-[0_16px_40px_rgba(147,136,250,0.35),0_0_0_3px_rgba(147,136,250,0.28)]'
-                  : 'hover:brightness-[1.02]',
-              ].join(' ')}
-            >
-              <div className="flex min-h-0 flex-1 flex-col items-center justify-end px-1">
-                <img
-                  src={imgWoman}
-                  alt=""
-                  className="h-auto max-h-[200px] w-full max-w-[168px] object-contain object-bottom select-none sm:max-h-[216px]"
-                  draggable={false}
-                />
-              </div>
-              <span className="mt-2 pb-1 text-center text-[18px] font-bold leading-tight tracking-[-0.2px] text-[#1c2438]">
-                여자
-              </span>
-            </button>
-          </div>
-
-          <p className="mt-7 text-center text-[12px] leading-relaxed text-white/88 sm:mt-8">
-            성별에 맞는 간단한 설문 후 진단을 이어가요.
-          </p>
+          <motion.div
+            className="mx-auto mt-9 grid w-full max-w-[340px] grid-cols-2 gap-4"
+            initial="hidden"
+            animate="visible"
+            variants={staggerSection}
+          >
+            {(['male', 'female'] as const).map((g) => {
+              const isSelected = selected === g;
+              return (
+                <motion.button
+                  key={g}
+                  type="button"
+                  variants={fadeUp}
+                  onClick={() => void handleSelect(g)}
+                  animate={{
+                    scale: isSelected ? 1.04 : 1,
+                    borderColor: isSelected ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.2)',
+                    backgroundColor: isSelected ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.08)',
+                    boxShadow: isSelected
+                      ? '0 20px 50px rgba(147,136,250,0.4), 0 0 0 1px rgba(255,255,255,0.35)'
+                      : '0 20px 50px rgba(15,23,42,0.22)',
+                  }}
+                  whileHover={{ y: -4, scale: isSelected ? 1.04 : 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={springPremium}
+                  className={`${glassCard} flex min-h-[272px] flex-col items-center overflow-hidden p-4`}
+                >
+                  <GenderCharacterArt variant={g} className="h-[168px] w-full max-w-[140px]" />
+                  <span className="type-card-title mt-3">
+                    {g === 'male' ? '남성' : '여성'}
+                  </span>
+                </motion.button>
+              );
+            })}
+          </motion.div>
         </main>
-      </div>
+      </motion.div>
     </div>
   );
 };

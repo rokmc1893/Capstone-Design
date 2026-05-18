@@ -23,7 +23,7 @@ export function KakaoLoginButton({ onClick, className }: KakaoLoginButtonProps) 
           aria-hidden
         />
       </span>
-      <span className="text-[17px] font-semibold tracking-[-0.25px] text-[#191600]">
+      <span className="type-ink-button-lg text-[#191600]">
         카카오로 시작하기
       </span>
     </button>

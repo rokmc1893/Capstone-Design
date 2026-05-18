@@ -89,7 +89,7 @@ const NotificationSettings = () => {
         </div>
 
         <header className="relative z-10 px-6 pt-3 pb-2">
-          <div className="flex items-center justify-between text-[11px] text-white/90">
+          <div className="flex items-center justify-between type-caption-xs text-white/90">
             <span className="tracking-[-0.2px]">9:41</span>
             <div className="flex items-center gap-1.5">
               <Signal size={16} strokeWidth={1.5} className="text-white/90" />
@@ -106,7 +106,7 @@ const NotificationSettings = () => {
               aria-label="설정(마이페이지)으로 돌아가기"
             >
               <ChevronLeft size={22} strokeWidth={2} className="text-white" />
-              <span className="text-[15px] font-semibold text-white">알림 설정</span>
+              <span className="type-card-title">알림 설정</span>
             </button>
 
             <button
@@ -125,7 +125,7 @@ const NotificationSettings = () => {
         <main className="relative z-10 flex-1 overflow-y-auto px-6 pb-10">
           <section className="pt-2">
             <div className="rounded-[20px] bg-white/65 backdrop-blur-md border border-white/45 px-4 py-4 shadow-[0px_10px_24px_rgba(16,24,40,0.10)] flex items-center justify-between min-h-[56px]">
-              <span className="text-[15px] font-medium text-blackBg">전체 알림</span>
+              <span className="type-ink-button-lg text-blackBg">전체 알림</span>
               <IosSwitch checked={allOn} onChange={setAll} />
             </div>
           </section>
@@ -133,7 +133,7 @@ const NotificationSettings = () => {
           <div className="my-6 h-px w-full bg-white/35" aria-hidden />
 
           <section>
-            <p className="mb-1 text-[12px] font-medium text-white/80">알림 유형</p>
+            <p className="mb-1 type-caption text-white/80">알림 유형</p>
             <p className="mb-3 text-[11px] leading-[1.5] text-white/75">
               아래 알림을 각각 선택할 수 있고,{' '}
               <span className="font-semibold text-white/95">전체 알림</span>을 끄면
@@ -148,7 +148,7 @@ const NotificationSettings = () => {
                     allOn ? '' : '',
                   ].join(' ')}
                 >
-                  <span className="text-[15px] font-medium text-blackBg pr-3">
+                  <span className="type-ink-button-lg text-blackBg pr-3">
                     {LABELS[key]}
                   </span>
                   <IosSwitch

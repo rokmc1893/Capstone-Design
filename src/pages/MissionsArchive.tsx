@@ -148,7 +148,7 @@ const MissionsArchive = () => {
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
-            <h1 className="text-[22px] font-bold leading-tight tracking-[-0.3px] text-white">보관함</h1>
+            <h1 className="type-screen-title">보관함</h1>
           </div>
 
           <div className="mt-4">

@@ -90,9 +90,9 @@ export type ResultReport = {
   questionnaireGroups?: ResultQuestionnaireGroup[];
   comparisonTable?: ResultComparisonRow[];
   coreRiskBullets?: string[];
-  /** LLM 분석 API 등 */
+  /** `GET /api/results/{id}` LLM 분석 (intro·condition·factorAnalyses·missions·closing 포함) */
   personalizedAnalysis?: string;
-  /** 행동 가이드 API / 미션 기반 */
+  /** `GET /api/results/{id}` 행동 가이드 */
   actionGuideBullets?: string[];
   /** 홈·요약용 주요 요인 (서버가 내려주면 우선) */
   topFactors?: { label: string; value: number }[];

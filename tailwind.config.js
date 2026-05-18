@@ -3,6 +3,22 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      fontFamily: {
+        sans: [
+          '"Pretendard Variable"',
+          'Pretendard',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          '"Apple SD Gothic Neo"',
+          '"Noto Sans KR"',
+          'system-ui',
+          'sans-serif',
+        ],
+      },
+      letterSpacing: {
+        toss: '-0.03em',
+        'toss-tight': '-0.04em',
+      },
       colors: {
         gray100: '#E7E7E7',
         gray200: '#AAAAAA',

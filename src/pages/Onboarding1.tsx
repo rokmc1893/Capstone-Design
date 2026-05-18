@@ -44,11 +44,11 @@ const Onboarding1 = () => {
               />
             </div>
 
-            <h1 className="mt-8 whitespace-pre-line text-[34px] font-bold leading-[1.24] tracking-[-0.02em] text-[#1f1f1f]">
+            <h1 className="mt-8 whitespace-pre-line type-ink-title-xl whitespace-pre-line">
               {'작은 습관이\n큰 변화를 만듭니다'}
             </h1>
 
-            <p className="mt-4 whitespace-pre-line text-[16px] leading-[1.6] tracking-[-0.01em] text-[#2a2a2a]/78">
+            <p className="mt-4 whitespace-pre-line type-ink-body-sm whitespace-pre-line">
               {'내 몸의 컨디션은\n이미 신호를 보내고 있어요\n건강한 시작을 함께 준비해요'}
             </p>
           </div>

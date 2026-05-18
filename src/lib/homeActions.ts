@@ -7,7 +7,7 @@ export type HomeActionType = 'TEST' | 'BODY_STATUS' | 'GUIDE' | 'SETTINGS';
 export const DEFAULT_HOME_ACTIONS: HomeActionDto[] = [
   { type: 'TEST', title: '검사하기' },
   { type: 'BODY_STATUS', title: '내 몸상태 조회' },
-  { type: 'GUIDE', title: '검사 상세 리포트' },
+  { type: 'GUIDE', title: '행동 가이드' },
   { type: 'SETTINGS', title: '설정' },
 ];
 

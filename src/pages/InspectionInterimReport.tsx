@@ -100,7 +100,7 @@ const InspectionInterimReport = () => {
           <button
             type="button"
             onClick={() => navigate(paths.back)}
-            className="flex min-w-0 items-center gap-0.5 text-[16px] font-bold leading-6 tracking-[-0.2px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)] active:opacity-80"
+            className="flex min-w-0 items-center gap-0.5 type-inspect-back active:opacity-80"
           >
             <ChevronLeft className="h-6 w-6 shrink-0" strokeWidth={2.25} aria-hidden />
             <span className="truncate">검사하기</span>
@@ -117,7 +117,7 @@ const InspectionInterimReport = () => {
 
         <div className="relative z-10 shrink-0 px-5 pb-2 pt-1 sm:px-6">
           <p className="text-center text-[13px] font-semibold text-white/85">{paths.stepHint}</p>
-          <h1 className="mt-2 text-center text-[22px] font-bold leading-[1.35] tracking-[-0.35px] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.14)]">
+          <h1 className="type-inspect-title mt-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.14)]">
             지금까지 입력하신 내용을
             <br />
             바탕으로 본 중간 결과예요
@@ -227,7 +227,7 @@ const InspectionInterimReport = () => {
               type="button"
               disabled={loading || Boolean(error)}
               onClick={() => navigate(paths.next)}
-              className="w-full rounded-[16px] py-4 text-[17px] font-bold tracking-[-0.2px] text-white shadow-[0_10px_28px_rgba(32,24,64,0.2)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-white/35 disabled:text-white/70 disabled:shadow-none enabled:bg-[#9388FA] enabled:active:opacity-95"
+              className="w-full rounded-[16px] py-4 type-inspect-cta text-white/95 shadow-[0_10px_28px_rgba(32,24,64,0.2)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-white/35 disabled:text-white/70 disabled:shadow-none enabled:bg-[#9388FA] enabled:active:opacity-95"
             >
               {paths.nextLabel}
             </button>

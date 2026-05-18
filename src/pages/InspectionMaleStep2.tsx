@@ -3,12 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Settings } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
 import { syncMaleInspectionStep } from '../lib/testsSessionSync';
+import { inspectionInputClassName as inputClassName } from '../lib/inspectionFormStyles';
 import { useSimulatorStore } from '../store/useSimulatorStore';
-
-const inputClassName =
-  'w-full rounded-[14px] border border-black/10 bg-[#F4F4F6] px-4 py-3.5 text-[16px] leading-[1.35] text-[#1a1a1f] shadow-inner shadow-black/[0.03] outline-none transition ' +
-  'placeholder:text-[#A8A8AE] ' +
-  'focus:border-[#9388FA] focus:bg-white focus:ring-2 focus:ring-[#9388FA]/35';
 
 function digitsOnly(s: string): string {
   return s.replace(/\D/g, '');
@@ -108,7 +104,7 @@ const InspectionMaleStep2 = () => {
           <button
             type="button"
             onClick={() => navigate('/inspection/male/1')}
-            className="flex min-w-0 items-center gap-0.5 text-[16px] font-bold leading-6 tracking-[-0.2px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)] active:opacity-80"
+            className="flex min-w-0 items-center gap-0.5 type-inspect-back active:opacity-80"
           >
             <ChevronLeft className="h-6 w-6 shrink-0" strokeWidth={2.25} aria-hidden />
             <span className="truncate">검사하기</span>
@@ -128,7 +124,7 @@ const InspectionMaleStep2 = () => {
             <div className="mx-auto w-full max-w-[350px] rounded-[22px] bg-white/95 p-5 shadow-[0_16px_48px_rgba(24,24,48,0.12)] ring-1 ring-white/70 backdrop-blur-sm sm:rounded-[24px] sm:p-6">
               <div className="space-y-6">
                 <div>
-                  <label htmlFor="inspection-male-kids" className="mb-2 block text-[15px] font-semibold leading-snug text-[#2a2a32]">
+                  <label htmlFor="inspection-male-kids" className="type-form-label mb-2 block">
                     4. 생물학적 자녀가 몇 명 있으신가요?
                   </label>
                   <input
@@ -143,12 +139,12 @@ const InspectionMaleStep2 = () => {
                     aria-invalid={showNumBioKidError}
                   />
                   {showNumBioKidError && (
-                    <p className="mt-1.5 text-[12px] text-red-600">0 이상의 숫자를 입력해 주세요.</p>
+                    <p className="type-form-error mt-1.5">0 이상의 숫자를 입력해 주세요.</p>
                   )}
                 </div>
 
                 <div>
-                  <label htmlFor="inspection-male-sexfreq" className="mb-2 block text-[15px] font-semibold leading-snug text-[#2a2a32]">
+                  <label htmlFor="inspection-male-sexfreq" className="type-form-label mb-2 block">
                     5. 최근 4주간 성관계 횟수가 대략 어떻게 되시나요?
                   </label>
                   <input
@@ -163,12 +159,12 @@ const InspectionMaleStep2 = () => {
                     aria-invalid={showSexFreqError}
                   />
                   {showSexFreqError && (
-                    <p className="mt-1.5 text-[12px] text-red-600">0 이상의 숫자를 입력해 주세요.</p>
+                    <p className="type-form-error mt-1.5">0 이상의 숫자를 입력해 주세요.</p>
                   )}
                 </div>
 
                 <div>
-                  <p className="mb-3 text-[15px] font-semibold leading-snug text-[#2a2a32]">
+                  <p className="type-form-label mb-3">
                     6. 최근 1년(12개월) 내에 성관계를 가진 적이 있나요?
                   </p>
                   <div className="grid grid-cols-2 gap-2.5">
@@ -199,7 +195,7 @@ const InspectionMaleStep2 = () => {
                     &lsquo;아니요&rsquo; 선택 시 서버에서 특수 값(5)으로 처리됩니다.
                   </p>
                   {showHasSexError && (
-                    <p className="mt-1.5 text-[12px] text-red-600">네/아니요 중 하나를 선택해 주세요.</p>
+                    <p className="type-form-error mt-1.5">네/아니요 중 하나를 선택해 주세요.</p>
                   )}
                 </div>
               </div>
@@ -207,12 +203,12 @@ const InspectionMaleStep2 = () => {
           </div>
 
           <div className="mx-auto mt-4 w-full max-w-[350px] shrink-0 pt-1 sm:mt-5">
-            <p className="mb-3 text-center text-[14px] font-medium text-white/95">2 / 7</p>
+            <p className="type-inspect-progress mb-3 text-center">2 / 7</p>
             <button
               type="button"
               disabled={!validation.isValid}
               onClick={onNext}
-              className="w-full rounded-[16px] py-4 text-[17px] font-bold tracking-[-0.2px] text-white shadow-[0_10px_28px_rgba(32,24,64,0.2)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-white/35 disabled:text-white/70 disabled:shadow-none enabled:bg-[#9388FA] enabled:active:opacity-95"
+              className="w-full rounded-[16px] py-4 type-inspect-cta text-white/95 shadow-[0_10px_28px_rgba(32,24,64,0.2)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-white/35 disabled:text-white/70 disabled:shadow-none enabled:bg-[#9388FA] enabled:active:opacity-95"
             >
               다음으로
             </button>

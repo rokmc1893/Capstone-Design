@@ -4,12 +4,8 @@ import { ChevronLeft, Settings } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
 import { syncFemaleInspectionStep } from '../lib/testsSessionSync';
 import type { FemaleConditions } from '../store/useSimulatorStore';
+import { inspectionInputClassName as inputClassName } from '../lib/inspectionFormStyles';
 import { useSimulatorStore } from '../store/useSimulatorStore';
-
-const inputClassName =
-  'w-full rounded-[14px] border border-black/10 bg-[#F4F4F6] px-4 py-3.5 text-[16px] leading-[1.35] text-[#1a1a1f] shadow-inner shadow-black/[0.03] outline-none transition ' +
-  'placeholder:text-[#A8A8AE] ' +
-  'focus:border-[#9388FA] focus:bg-white focus:ring-2 focus:ring-[#9388FA]/35';
 
 function digitsOnly(s: string): string {
   return s.replace(/\D/g, '');
@@ -153,7 +149,7 @@ const InspectionFemaleStep2 = () => {
           <button
             type="button"
             onClick={() => navigate('/home')}
-            className="flex min-w-0 items-center gap-0.5 text-[16px] font-bold leading-6 tracking-[-0.2px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)] active:opacity-80"
+            className="flex min-w-0 items-center gap-0.5 type-inspect-back active:opacity-80"
           >
             <ChevronLeft className="h-6 w-6 shrink-0" strokeWidth={2.25} aria-hidden />
             <span className="truncate">검사하기</span>
@@ -173,7 +169,7 @@ const InspectionFemaleStep2 = () => {
             <div className="mx-auto w-full max-w-[350px] rounded-[22px] bg-white/95 p-5 shadow-[0_16px_48px_rgba(24,24,48,0.12)] ring-1 ring-white/70 backdrop-blur-sm sm:rounded-[24px] sm:p-6">
               <div className="space-y-6">
                 <div>
-                  <label htmlFor="inspection-menarche" className="mb-2 block text-[15px] font-semibold leading-snug text-[#2a2a32]">
+                  <label htmlFor="inspection-menarche" className="type-form-label mb-2 block">
                     4. 초경을 시작한 나이는 언제인가요?
                   </label>
                   <input
@@ -188,12 +184,12 @@ const InspectionFemaleStep2 = () => {
                     aria-invalid={showMenarcheError}
                   />
                   {showMenarcheError && (
-                    <p className="mt-1.5 text-[12px] text-red-600">8~18 사이로 입력해 주세요.</p>
+                    <p className="type-form-error mt-1.5">8~18 사이로 입력해 주세요.</p>
                   )}
                 </div>
 
                 <div>
-                  <label htmlFor="inspection-parity" className="mb-2 block text-[15px] font-semibold leading-snug text-[#2a2a32]">
+                  <label htmlFor="inspection-parity" className="type-form-label mb-2 block">
                     5. 과거 임신/출산 경험(횟수)이 있으신가요?
                   </label>
                   <input
@@ -208,12 +204,12 @@ const InspectionFemaleStep2 = () => {
                     aria-invalid={showParityError}
                   />
                   {showParityError && (
-                    <p className="mt-1.5 text-[12px] text-red-600">0 이상의 숫자를 입력해 주세요.</p>
+                    <p className="type-form-error mt-1.5">0 이상의 숫자를 입력해 주세요.</p>
                   )}
                 </div>
 
                 <div>
-                  <p className="mb-3 text-[15px] font-semibold leading-snug text-[#2a2a32]">
+                  <p className="type-form-label mb-3">
                     6. 진단받은 적이 있는 질환을 모두 선택해 주세요
                   </p>
                   <div className="space-y-2.5">
@@ -255,12 +251,12 @@ const InspectionFemaleStep2 = () => {
           </div>
 
           <div className="mx-auto mt-4 w-full max-w-[350px] shrink-0 pt-1 sm:mt-5">
-            <p className="mb-3 text-center text-[14px] font-medium text-white/95">2 / 6</p>
+            <p className="type-inspect-progress mb-3 text-center">2 / 6</p>
             <button
               type="button"
               disabled={!validation.isValid}
               onClick={onNext}
-              className="w-full rounded-[16px] py-4 text-[17px] font-bold tracking-[-0.2px] text-white shadow-[0_10px_28px_rgba(32,24,64,0.2)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-white/35 disabled:text-white/70 disabled:shadow-none enabled:bg-[#9388FA] enabled:active:opacity-95"
+              className="w-full rounded-[16px] py-4 type-inspect-cta text-white/95 shadow-[0_10px_28px_rgba(32,24,64,0.2)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-white/35 disabled:text-white/70 disabled:shadow-none enabled:bg-[#9388FA] enabled:active:opacity-95"
             >
               다음으로
             </button>

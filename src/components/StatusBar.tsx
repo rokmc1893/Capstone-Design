@@ -73,7 +73,7 @@ function StatusBarIOS({ className }: StatusBarProps) {
       className={`flex items-end justify-center h-[54px] px-3 ${className ?? ''}`}
     >
       <div className="flex flex-1 items-center justify-start pb-[4px] pl-[7px]">
-        <p className="font-semibold text-[16px] text-black leading-none tracking-[-0.4px]">
+        <p className="type-status-bar">
           9:41
         </p>
       </div>
@@ -96,7 +96,7 @@ function StatusBarAndroid({ className }: StatusBarProps) {
     <div
       className={`flex h-[44px] items-center justify-between px-4 ${className ?? ''}`}
     >
-      <span className="font-semibold text-[14px] text-black tracking-[-0.3px]">9:41</span>
+      <span className="type-status-bar text-[14px]">9:41</span>
       <div className="flex items-center gap-[5px]">
         <SignalIcon />
         <WifiIcon />

@@ -53,7 +53,7 @@ function risksAsFallbackCards(risks: string[]): HealthFactorCard[] {
 function RiskAnalysisCard({ card }: { card: HealthFactorCard }) {
   return (
     <div className="rounded-[16px] bg-black/15 p-3.5 ring-1 ring-white/12">
-      <p className="text-[14px] font-bold leading-snug text-white">{card.factor}</p>
+      <p className="type-card-title">{card.factor}</p>
       <div className="mt-3 space-y-2">
         <div className="rounded-[12px] bg-white/[0.08] px-3 py-2.5 ring-1 ring-white/10">
           <p className="text-[10px] font-semibold uppercase tracking-wide text-white/55">데이터 인사이트</p>
@@ -109,7 +109,7 @@ export function InspectionReportFullView({ record }: InspectionReportFullViewPro
     <div className="space-y-4 pb-6">
       <section className="rounded-[22px] bg-white/[0.12] px-4 py-6 text-center shadow-[0_16px_40px_rgba(45,32,95,0.2)] ring-1 ring-white/25 backdrop-blur-xl">
         <p className="text-[13px] font-medium text-white/85">종합 건강 점수</p>
-        <p className="mt-2 text-[34px] font-bold tabular-nums leading-none tracking-tight text-white">
+        <p className="mt-2 type-report-score">
           총점 {record.score}점 <span className="text-[20px] font-semibold text-white/70">/ 100점</span>
         </p>
         <div className="mx-auto mt-4 h-2.5 w-full max-w-[260px] overflow-hidden rounded-full bg-black/15 ring-1 ring-white/20">
@@ -127,7 +127,7 @@ export function InspectionReportFullView({ record }: InspectionReportFullViewPro
       </section>
 
       <section className={cardClass}>
-        <h2 className="text-[15px] font-bold text-white">검사 설문지 답변 요약</h2>
+        <h2 className="type-report-heading">검사 설문지 답변 요약</h2>
         <p className="mt-1 text-[12px] text-white/70">검사에 제출한 답변을 항목별로 정리했습니다</p>
         <ul className="mt-4 divide-y divide-white/10 rounded-[14px] bg-black/10 ring-1 ring-white/10">
           {summaryRows.map((row) => (
@@ -139,12 +139,12 @@ export function InspectionReportFullView({ record }: InspectionReportFullViewPro
         </ul>
         <div className="mt-4 flex items-center justify-between rounded-[14px] bg-white/[0.08] px-3 py-3 ring-1 ring-white/12">
           <span className="text-[13px] font-semibold text-white">스트레스 점수 (PSS)</span>
-          <span className="text-[18px] font-bold tabular-nums text-white">{record.pssScore}점</span>
+          <span className="type-report-score-sm">{record.pssScore}점</span>
         </div>
       </section>
 
       <section className={cardClass}>
-        <h2 className="text-[15px] font-bold text-white">생활 지표 분석</h2>
+        <h2 className="type-report-heading">생활 지표 분석</h2>
         <p className="mt-1 text-[12px] text-white/70">수면·스트레스 등 생활 리듬을 요약합니다</p>
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="flex gap-3 rounded-[16px] bg-black/12 px-3 py-3 ring-1 ring-white/12">
@@ -210,7 +210,7 @@ export function InspectionReportFullView({ record }: InspectionReportFullViewPro
       </section>
 
       <section className={cardClass}>
-        <h2 className="text-[15px] font-bold text-white">핵심 리스크 분석</h2>
+        <h2 className="type-report-heading">핵심 리스크 분석</h2>
         <p className="mt-1 text-[12px] text-white/70">데이터 인사이트와 기대 변화를 함께 확인해 보세요</p>
         <div className="mt-4 space-y-3">
           {factorCards.length === 0 ? (
@@ -225,14 +225,14 @@ export function InspectionReportFullView({ record }: InspectionReportFullViewPro
 
       {record.aiNarrative?.trim() ? (
         <section className={cardClass}>
-          <h2 className="text-[15px] font-bold text-white">맞춤형 건강 코멘트</h2>
+          <h2 className="type-report-heading">맞춤형 건강 코멘트</h2>
           <p className="mt-1 text-[11px] font-medium text-white/60">AI 분석</p>
           <p className="mt-4 whitespace-pre-line text-[13px] leading-[1.65] text-white/88">{record.aiNarrative}</p>
         </section>
       ) : null}
 
       <section className={`${cardClass} ring-2 ring-white/35`}>
-        <h2 className="text-[15px] font-bold text-white">미리 보는 미션 가이드</h2>
+        <h2 className="type-report-heading">미리 보는 미션 가이드</h2>
         <p className="mt-1 text-[12px] text-white/70">미션 화면에서 같은 실천을 이어갈 수 있어요</p>
         <ul className="mt-4 space-y-2.5">
           {(record.missionPreviews && record.missionPreviews.length > 0
@@ -260,7 +260,7 @@ export function InspectionReportFullView({ record }: InspectionReportFullViewPro
         <button
           type="button"
           onClick={() => navigate('/missions')}
-          className="mt-5 w-full rounded-full bg-white/20 py-3 text-[13px] font-bold text-white ring-1 ring-white/35 backdrop-blur-md transition active:scale-[0.99]"
+          className="mt-5 w-full rounded-full bg-white/20 py-3 type-body-sm font-semibold text-white/90 ring-1 ring-white/35 backdrop-blur-md transition active:scale-[0.99]"
         >
           미션 화면에서 실천하기
         </button>

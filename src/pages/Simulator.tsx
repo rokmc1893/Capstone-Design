@@ -196,7 +196,7 @@ const Simulator = () => {
                             key={`chip-${factor.label}`}
                             className="rounded-lg bg-white/70 px-1 py-2 text-center ring-1 ring-gray100/80"
                           >
-                            <span className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-blackBg text-[9px] font-bold text-white">
+                            <span className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-blackBg type-badge">
                               {idx + 1}
                             </span>
                             <p className="mt-1 truncate text-[10px] font-semibold leading-tight text-blackBg sm:text-[11px]">

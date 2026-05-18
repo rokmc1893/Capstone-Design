@@ -100,7 +100,7 @@ export function InspectionPssStepPage({
           <button
             type="button"
             onClick={() => navigate(backPath)}
-            className="flex min-w-0 items-center gap-0.5 text-[16px] font-bold leading-6 tracking-[-0.2px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)] active:opacity-80"
+            className="flex min-w-0 items-center gap-0.5 type-inspect-back active:opacity-80"
           >
             <ChevronLeft className="h-6 w-6 shrink-0" strokeWidth={2.25} aria-hidden />
             <span className="truncate">검사하기</span>
@@ -116,7 +116,7 @@ export function InspectionPssStepPage({
         </div>
 
         <div className="relative z-10 shrink-0 px-5 pb-3 pt-1 sm:px-6">
-          <h1 className="text-center text-[20px] font-bold leading-[1.45] tracking-[-0.35px] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.14)] sm:text-[22px]">
+          <h1 className="type-inspect-title">
             간단한 질문 몇 가지로
             <br />
             현재 몸 상태를 진단해볼게요!
@@ -141,7 +141,7 @@ export function InspectionPssStepPage({
               <div className="space-y-6">
                 {questions.map((q, i) => (
                   <div key={q.index}>
-                    <p className="mb-3 text-[15px] font-semibold leading-snug text-[#2a2a32]">
+                    <p className="type-form-label mb-3">
                       {q.number}. {q.text}
                     </p>
                     <PssScaleRow value={values[i]} onChange={(v) => setAt(i, v)} />
@@ -156,15 +156,15 @@ export function InspectionPssStepPage({
           </div>
 
           <div className="mx-auto mt-4 w-full max-w-[350px] shrink-0 pt-1 sm:mt-5">
-            <p className="mb-3 text-center text-[14px] font-medium text-white/95">{progressText}</p>
+            <p className="type-inspect-progress mb-3 text-center">{progressText}</p>
             <button
               type="button"
               disabled={!isValid}
               onClick={() => void onPrimary()}
               className={
                 mode === 'submit'
-                  ? 'w-full rounded-[18px] py-4 text-[18px] font-bold tracking-[-0.25px] text-white shadow-[0_14px_30px_rgba(61,46,130,0.35)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-white/35 disabled:text-white/70 disabled:shadow-none enabled:bg-[#7E6AF2] enabled:active:opacity-95'
-                  : 'w-full rounded-[16px] py-4 text-[17px] font-bold tracking-[-0.2px] text-white shadow-[0_10px_28px_rgba(32,24,64,0.2)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-white/35 disabled:text-white/70 disabled:shadow-none enabled:bg-[#9388FA] enabled:active:opacity-95'
+                  ? 'w-full rounded-[18px] py-4 type-inspect-cta-final text-white/95/70 disabled:shadow-none enabled:bg-[#7E6AF2] enabled:active:opacity-95'
+                  : 'w-full rounded-[16px] py-4 type-inspect-cta text-white/95 shadow-[0_10px_28px_rgba(32,24,64,0.2)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-white/35 disabled:text-white/70 disabled:shadow-none enabled:bg-[#9388FA] enabled:active:opacity-95'
               }
             >
               {mode === 'submit' ? '결과 확인' : '다음으로'}

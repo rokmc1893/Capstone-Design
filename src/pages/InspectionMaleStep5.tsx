@@ -101,7 +101,7 @@ const InspectionMaleStep5 = () => {
           <button
             type="button"
             onClick={() => navigate('/inspection/interim-report')}
-            className="flex min-w-0 items-center gap-0.5 text-[16px] font-bold leading-6 tracking-[-0.2px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)] active:opacity-80"
+            className="flex min-w-0 items-center gap-0.5 type-inspect-back active:opacity-80"
           >
             <ChevronLeft className="h-6 w-6 shrink-0" strokeWidth={2.25} aria-hidden />
             <span className="truncate">검사하기</span>
@@ -117,7 +117,7 @@ const InspectionMaleStep5 = () => {
         </div>
 
         <div className="relative z-10 shrink-0 px-5 pb-3 pt-1 sm:px-6">
-          <h1 className="text-center text-[20px] font-bold leading-[1.45] tracking-[-0.35px] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.14)] sm:text-[22px]">
+          <h1 className="type-inspect-title">
             간단한 질문 몇 가지로
             <br />
             현재 몸 상태를 진단해볼게요!
@@ -137,14 +137,14 @@ const InspectionMaleStep5 = () => {
 
               <div className="space-y-6">
                 <div>
-                  <p className="mb-3 text-[15px] font-semibold leading-snug text-[#2a2a32]">
+                  <p className="type-form-label mb-3">
                     1. 예상치 못한 일 때문에 당황한 적이 얼마나 있었습니까?
                   </p>
                   <ScaleRow value={q1} onChange={setQ1} />
                 </div>
 
                 <div>
-                  <p className="mb-3 text-[15px] font-semibold leading-snug text-[#2a2a32]">
+                  <p className="type-form-label mb-3">
                     2. 인생에서 중요한 일들을 조절할 수 없다는 느낌을 얼마나 경험하셨습니까?
                   </p>
                   <ScaleRow value={q2} onChange={setQ2} />
@@ -158,12 +158,12 @@ const InspectionMaleStep5 = () => {
           </div>
 
           <div className="mx-auto mt-4 w-full max-w-[350px] shrink-0 pt-1 sm:mt-5">
-            <p className="mb-3 text-center text-[14px] font-medium text-white/95">5 / 7</p>
+            <p className="type-inspect-progress mb-3 text-center">5 / 7</p>
             <button
               type="button"
               disabled={!isValid}
               onClick={onNext}
-              className="w-full rounded-[16px] py-4 text-[17px] font-bold tracking-[-0.2px] text-white shadow-[0_10px_28px_rgba(32,24,64,0.2)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-white/35 disabled:text-white/70 disabled:shadow-none enabled:bg-[#9388FA] enabled:active:opacity-95"
+              className="w-full rounded-[16px] py-4 type-inspect-cta text-white/95 shadow-[0_10px_28px_rgba(32,24,64,0.2)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-white/35 disabled:text-white/70 disabled:shadow-none enabled:bg-[#9388FA] enabled:active:opacity-95"
             >
               다음으로
             </button>

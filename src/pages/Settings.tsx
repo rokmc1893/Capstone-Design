@@ -202,7 +202,7 @@ const Settings = () => {
 
         {/* Top navigation */}
         <header className="relative z-10 px-6 pt-3 pb-2">
-          <div className="flex items-center justify-between text-[11px] text-white/90">
+          <div className="flex items-center justify-between type-caption-xs text-white/90">
             <span className="tracking-[-0.2px]">9:41</span>
             <div className="flex items-center gap-1.5">
               <Signal size={16} strokeWidth={1.5} className="text-white/90" />
@@ -219,7 +219,7 @@ const Settings = () => {
               aria-label="홈으로 돌아가기"
             >
               <ChevronLeft size={22} strokeWidth={2} className="text-white" />
-              <span className="text-[15px] font-semibold text-white">마이페이지</span>
+              <span className="type-card-title">마이페이지</span>
             </button>
 
             <button
@@ -252,16 +252,16 @@ const Settings = () => {
                 )}
               </div>
               <div className="min-w-0">
-                <p className="text-[20px] font-bold leading-[24px] text-white tracking-[-0.2px] whitespace-nowrap">
+                <p className="type-ink-title-sm text-white tracking-[-0.2px] whitespace-nowrap">
                   {displayName} 님
                 </p>
-                <p className="mt-1 text-[13px] leading-[18px] text-white/80">
+                <p className="mt-1 type-body-sm text-white/80">
                   {profileLoading ? '불러오는 중…' : profileNickname}
                 </p>
               </div>
             </div>
             {profileMessage && !profileEditModalOpen ? (
-              <p className="mt-3 rounded-[12px] bg-black/20 px-3 py-2 text-[12px] leading-snug text-white">
+              <p className="mt-3 rounded-[12px] bg-black/20 px-3 py-2 type-caption text-white">
                 {profileMessage}
               </p>
             ) : null}
@@ -269,7 +269,7 @@ const Settings = () => {
 
           {/* Section 1 */}
           <section className="mt-6">
-            <p className="text-[12px] font-medium text-white/80 mb-3">앱 설정</p>
+            <p className="type-caption text-white/80 mb-3">앱 설정</p>
             <div className="space-y-3">
               {[
                 { title: '알림 설정', key: 'notify' },
@@ -284,7 +284,7 @@ const Settings = () => {
                   }}
                   className="w-full rounded-[20px] bg-white/65 backdrop-blur-md border border-white/45 px-4 py-4 flex items-center justify-between shadow-[0px_10px_24px_rgba(16,24,40,0.10)]"
                 >
-                  <span className="text-[14px] font-medium text-blackBg">
+                  <span className="type-ink-list-row">
                     {item.title}
                   </span>
                   <ChevronRight size={20} className="text-blackBg/60" />
@@ -295,7 +295,7 @@ const Settings = () => {
 
           {/* Section 2 */}
           <section className="mt-7 pb-2">
-            <p className="text-[12px] font-medium text-white/80 mb-3">
+            <p className="type-caption text-white/80 mb-3">
               약관 및 정책
             </p>
             <div className="space-y-3">
@@ -316,7 +316,7 @@ const Settings = () => {
                   }}
                   className="w-full rounded-[20px] bg-white/65 backdrop-blur-md border border-white/45 px-4 py-4 flex items-center justify-between shadow-[0px_10px_24px_rgba(16,24,40,0.10)]"
                 >
-                  <span className="text-[14px] font-medium text-blackBg">
+                  <span className="type-ink-list-row">
                     {item.title}
                   </span>
                   <ChevronRight size={20} className="text-blackBg/60" />
@@ -351,11 +351,11 @@ const Settings = () => {
                   <div className="min-w-0">
                     <h2
                       id="terms-modal-title"
-                      className="text-[20px] font-bold leading-tight tracking-[-0.3px] text-blackBg"
+                      className="type-ink-title-sm"
                     >
                       약관
                     </h2>
-                    <p className="mt-1 text-[12px] font-medium text-gray400">
+                    <p className="mt-1 type-ink-caption">
                       약관 내용
                     </p>
                   </div>
@@ -372,23 +372,23 @@ const Settings = () => {
 
               {/* Scrollable body */}
               <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
-                <h3 className="text-[15px] font-semibold text-blackBg">
+                <h3 className="type-ink-list-row font-semibold">
                   개인정보 활용
                 </h3>
-                <p className="mt-3 text-[14px] leading-[1.65] text-gray400">
+                <p className="mt-3 type-ink-body-sm text-gray400">
                   개인정보 활용 관련 내용
                 </p>
-                <p className="mt-4 text-[14px] leading-[1.65] text-gray400">
+                <p className="mt-4 type-ink-body-sm text-gray400">
                   본 서비스는 서비스 제공 및 품질 개선을 위해 필요한 범위에서만
                   개인정보를 수집·이용합니다. 수집 항목, 이용 목적, 보관 기간은
                   관련 법령 및 내부 정책에 따라 안전하게 관리됩니다.
                 </p>
-                <p className="mt-4 text-[14px] leading-[1.65] text-gray400">
+                <p className="mt-4 type-ink-body-sm text-gray400">
                   이용자는 언제든지 개인정보 열람·정정·삭제·처리 정지를 요청할 수
                   있으며, 요청 시 지체 없이 조치합니다. 자세한 내용은 개인정보
                   처리방침 전문을 참고해 주세요.
                 </p>
-                <p className="mt-4 text-[14px] leading-[1.65] text-gray400">
+                <p className="mt-4 type-ink-body-sm text-gray400">
                   앱 사용 중 문의사항이 있으면 고객센터를 통해 연락해 주시기
                   바랍니다. 본 약관은 서비스 운영 정책에 따라 변경될 수 있으며,
                   변경 시 앱 내 공지를 통해 안내합니다.
@@ -420,7 +420,7 @@ const Settings = () => {
                 <div className="flex items-start justify-between gap-3">
                   <h2
                     id="usage-notice-modal-title"
-                    className="text-[18px] font-bold leading-tight tracking-[-0.25px] text-blackBg pr-2"
+                    className="type-ink-title-sm pr-2"
                   >
                     앱에 관하여
                   </h2>
@@ -436,7 +436,7 @@ const Settings = () => {
               </div>
 
               <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
-                <p className="text-left text-[14px] leading-[1.75] text-gray400 whitespace-pre-line">
+                <p className="text-left type-ink-body-sm text-gray400 whitespace-pre-line">
                   {`본 어플은
 더 나은 임신을 위한 건강 기록 및 관리를 위해 만들어진
 생활 습관 개선 어플입니다
@@ -472,7 +472,7 @@ const Settings = () => {
                 <div className="flex items-center justify-between gap-3">
                   <h2
                     id="profile-edit-modal-title"
-                    className="text-[15px] font-semibold tracking-[-0.2px] text-blackBg"
+                    className="type-ink-list-row font-semibold"
                   >
                     내 정보 수정
                   </h2>
@@ -492,12 +492,12 @@ const Settings = () => {
 
               <div className="min-h-0 flex-1 overflow-y-auto px-5 py-2 pb-6">
                 {hasApiBase && accessToken ? (
-                  <p className="mb-4 text-[11px] leading-relaxed text-gray400">
+                  <p className="mb-4 type-ink-caption-sm">
                     닉네임은 서버에 저장됩니다. 이름·성별은 이 기기에서만 표시돼요.
                   </p>
                 ) : null}
                 {profileMessage && profileEditModalOpen ? (
-                  <p className="mb-4 rounded-[10px] bg-gray100 px-3 py-2 text-[12px] leading-snug text-gray400">
+                  <p className="mb-4 rounded-[10px] bg-gray100 px-3 py-2 type-ink-caption">
                     {profileMessage}
                   </p>
                 ) : null}
@@ -524,7 +524,7 @@ const Settings = () => {
                   <div key={row.key}>
                     {idx > 0 && <div className="my-5 h-px w-full bg-gray100" />}
                     <div>
-                      <p className="text-[12px] font-medium text-gray400">
+                      <p className="type-ink-caption">
                         {row.label}
                         {'hint' in row && row.hint ? (
                           <span className="ml-1.5 font-normal text-gray400/80">({row.hint})</span>
@@ -542,7 +542,7 @@ const Settings = () => {
                                     e.stopPropagation();
                                     setProfileDraft(g);
                                   }}
-                                  className={`flex-1 rounded-[12px] border py-2.5 text-[15px] font-medium transition ${
+                                  className={`flex-1 rounded-[12px] border py-2.5 type-ink-button-lg transition ${
                                     profileDraft === g
                                       ? 'border-[#9388FA] bg-[#9388FA]/15 text-[#9388FA]'
                                       : 'border-gray100 bg-gray100/50 text-gray400'
@@ -559,7 +559,7 @@ const Settings = () => {
                               onChange={(e) => setProfileDraft(e.target.value)}
                               onClick={(e) => e.stopPropagation()}
                               maxLength={row.key === 'nickname' ? 10 : undefined}
-                              className="w-full rounded-[12px] border border-gray100 bg-white px-3 py-3 text-[16px] font-medium text-blackBg outline-none ring-1 ring-gray100 focus:border-[#9388FA] focus:ring-[#9388FA]/30"
+                              className="w-full rounded-[12px] border border-gray100 bg-white px-3 py-3 type-ink-body outline-none ring-1 ring-gray100 focus:border-[#9388FA] focus:ring-[#9388FA]/30"
                               placeholder={
                                 row.key === 'name' ? '이름을 입력하세요' : '닉네임 (2~10자)'
                               }
@@ -573,7 +573,7 @@ const Settings = () => {
                                 e.stopPropagation();
                                 cancelProfileEdit();
                               }}
-                              className="flex-1 rounded-[12px] bg-gray100 py-2.5 text-[14px] font-semibold text-gray400"
+                              className="flex-1 rounded-[12px] bg-gray100 py-2.5 type-ink-button text-gray400"
                             >
                               취소
                             </button>
@@ -584,7 +584,7 @@ const Settings = () => {
                                 e.stopPropagation();
                                 void saveProfileEdit();
                               }}
-                              className="flex-1 rounded-[12px] bg-[#9388FA] py-2.5 text-[14px] font-semibold text-white shadow-sm disabled:opacity-50"
+                              className="flex-1 rounded-[12px] bg-[#9388FA] py-2.5 type-ink-button text-white shadow-sm disabled:opacity-50"
                             >
                               {profileSaving ? '저장 중…' : '저장'}
                             </button>
@@ -592,10 +592,10 @@ const Settings = () => {
                         </div>
                       ) : (
                         <div className="mt-2 flex items-center justify-between gap-3">
-                          <span className="text-[16px] font-medium text-blackBg">{row.value}</span>
+                          <span className="type-ink-body">{row.value}</span>
                           <button
                             type="button"
-                            className="shrink-0 min-h-[44px] min-w-[72px] inline-flex items-center justify-end rounded-lg px-2 py-2 text-[14px] font-semibold text-[#9388FA] transition hover:bg-[#9388FA]/10 active:opacity-80"
+                            className="shrink-0 min-h-[44px] min-w-[72px] inline-flex items-center justify-end rounded-lg px-2 py-2 type-ink-button text-[#9388FA] transition hover:bg-[#9388FA]/10 active:opacity-80"
                             onClick={(e) => {
                               e.stopPropagation();
                               openProfileEdit(row.key);
@@ -634,11 +634,11 @@ const Settings = () => {
               <div className="px-5 pt-6 pb-2">
                 <h2
                   id="logout-modal-title"
-                  className="text-center text-[17px] font-bold leading-snug tracking-[-0.2px] text-blackBg"
+                  className="type-inspect-cta text-blackBg"
                 >
                   로그아웃 하시겠습니까?
                 </h2>
-                <p className="mt-4 text-center text-[14px] leading-[1.7] text-gray400 whitespace-pre-line">
+                <p className="mt-4 text-center type-ink-body-sm text-gray400 whitespace-pre-line">
                   {`로그아웃을 진행해주세요!
 다음 로그인 시, 아래 계정으로 로그인할 수 있어요.`}
                 </p>
@@ -654,7 +654,7 @@ const Settings = () => {
                         className="absolute inset-0 m-auto size-[24px] object-contain"
                       />
                     </div>
-                    <span className="text-[15px] font-medium text-blackBg">
+                    <span className="type-ink-button-lg text-blackBg">
                       카카오계정
                     </span>
                   </>
@@ -664,10 +664,10 @@ const Settings = () => {
                       <Mail className="size-[18px] text-gray400" aria-hidden />
                     </div>
                     <div className="flex min-w-0 flex-col">
-                      <span className="text-[13px] font-medium text-gray400">
+                      <span className="type-ink-caption">
                         이메일 계정
                       </span>
-                      <span className="mt-0.5 truncate text-[14px] font-semibold text-blackBg">
+                      <span className="mt-0.5 truncate type-ink-list-row font-semibold">
                         {loginEmail ?? 'example@email.com'}
                       </span>
                     </div>
@@ -679,7 +679,7 @@ const Settings = () => {
                 <button
                   type="button"
                   onClick={() => setLogoutModalOpen(false)}
-                  className="flex-1 rounded-[14px] bg-gray100 py-3.5 text-[15px] font-semibold text-gray400 transition active:scale-[0.98]"
+                  className="flex-1 rounded-[14px] bg-gray100 py-3.5 type-ink-button-lg text-gray400 transition active:scale-[0.98]"
                 >
                   취소
                 </button>
@@ -690,7 +690,7 @@ const Settings = () => {
                     logout();
                     navigate('/login', { replace: true });
                   }}
-                  className="flex-1 rounded-[14px] bg-[#9388FA] py-3.5 text-[15px] font-semibold text-white shadow-[0px_8px_20px_rgba(147,136,250,0.45)] transition active:scale-[0.98]"
+                  className="flex-1 rounded-[14px] bg-[#9388FA] py-3.5 type-card-title shadow-[0px_8px_20px_rgba(147,136,250,0.45)] transition active:scale-[0.98]"
                 >
                   로그아웃
                 </button>
@@ -720,11 +720,11 @@ const Settings = () => {
               <div className="px-5 pt-6 pb-5">
                 <h2
                   id="delete-account-modal-title"
-                  className="text-center text-[17px] font-bold leading-snug tracking-[-0.2px] text-blackBg"
+                  className="type-inspect-cta text-blackBg"
                 >
                   정말 탈퇴하시겠어요?
                 </h2>
-                <p className="mt-4 text-center text-[14px] leading-[1.75] text-gray400 whitespace-pre-line">
+                <p className="mt-4 text-center type-ink-body-sm text-gray400 whitespace-pre-line">
                   {`탈퇴 버튼 선택 시,
 계정은 삭제되며 복구되지 않습니다.`}
                 </p>
@@ -734,7 +734,7 @@ const Settings = () => {
                 <button
                   type="button"
                   onClick={() => setDeleteAccountModalOpen(false)}
-                  className="flex-1 rounded-[14px] bg-gray100 py-3.5 text-[15px] font-semibold text-gray400 transition active:scale-[0.98]"
+                  className="flex-1 rounded-[14px] bg-gray100 py-3.5 type-ink-button-lg text-gray400 transition active:scale-[0.98]"
                 >
                   취소
                 </button>
@@ -742,7 +742,7 @@ const Settings = () => {
                   type="button"
                   disabled={deleteSubmitting}
                   onClick={() => void handleDeleteAccount()}
-                  className="flex-1 rounded-[14px] bg-[#9388FA] py-3.5 text-[15px] font-semibold text-white shadow-[0px_8px_20px_rgba(147,136,250,0.45)] transition active:scale-[0.98] disabled:opacity-50"
+                  className="flex-1 rounded-[14px] bg-[#9388FA] py-3.5 type-card-title shadow-[0px_8px_20px_rgba(147,136,250,0.45)] transition active:scale-[0.98] disabled:opacity-50"
                 >
                   {deleteSubmitting ? '처리 중…' : '확인'}
                 </button>

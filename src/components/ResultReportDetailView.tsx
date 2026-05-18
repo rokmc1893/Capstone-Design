@@ -80,7 +80,7 @@ export function ResultReportDetailView({ report }: ResultReportDetailViewProps) 
             </p>
           </div>
           <div className="shrink-0 text-right">
-            <p className="text-[28px] font-bold tabular-nums leading-none text-white">{report.score}</p>
+            <p className="type-report-score-sm">{report.score}</p>
             <p className="mt-1 text-[11px] text-white/75">건강 점수</p>
           </div>
         </div>

@@ -4,12 +4,8 @@ import { ChevronLeft, Settings } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
 import { syncMaleInspectionStep } from '../lib/testsSessionSync';
 import type { BingeStatus } from '../store/useSimulatorStore';
+import { inspectionInputClassName as inputClassName } from '../lib/inspectionFormStyles';
 import { useSimulatorStore } from '../store/useSimulatorStore';
-
-const inputClassName =
-  'w-full rounded-[14px] border border-black/10 bg-[#F4F4F6] px-4 py-3.5 text-[16px] leading-[1.35] text-[#1a1a1f] shadow-inner shadow-black/[0.03] outline-none transition ' +
-  'placeholder:text-[#A8A8AE] ' +
-  'focus:border-[#9388FA] focus:bg-white focus:ring-2 focus:ring-[#9388FA]/35';
 
 function sanitizeSleepInput(s: string): string {
   let t = s.replace(/[^\d.]/g, '');
@@ -98,7 +94,7 @@ const InspectionMaleStep4 = () => {
           <button
             type="button"
             onClick={() => navigate('/inspection/male/3')}
-            className="flex min-w-0 items-center gap-0.5 text-[16px] font-bold leading-6 tracking-[-0.2px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)] active:opacity-80"
+            className="flex min-w-0 items-center gap-0.5 type-inspect-back active:opacity-80"
           >
             <ChevronLeft className="h-6 w-6 shrink-0" strokeWidth={2.25} aria-hidden />
             <span className="truncate">검사하기</span>
@@ -114,7 +110,7 @@ const InspectionMaleStep4 = () => {
         </div>
 
         <div className="relative z-10 shrink-0 px-5 pb-3 pt-1 sm:px-6">
-          <h1 className="text-center text-[20px] font-bold leading-[1.45] tracking-[-0.35px] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.14)] sm:text-[22px]">
+          <h1 className="type-inspect-title">
             간단한 질문 몇 가지로
             <br />
             현재 몸 상태를 진단해볼게요!
@@ -126,7 +122,7 @@ const InspectionMaleStep4 = () => {
             <div className="mx-auto w-full max-w-[350px] rounded-[22px] bg-white/95 p-5 shadow-[0_16px_48px_rgba(24,24,48,0.12)] ring-1 ring-white/70 backdrop-blur-sm sm:rounded-[24px] sm:p-6">
               <div className="space-y-6">
                 <div>
-                  <p className="mb-3 text-[15px] font-semibold leading-snug text-[#2a2a32]">
+                  <p className="type-form-label mb-3">
                     10. 한 번에 5잔 이상 마신 날은 얼마나 되나요?
                   </p>
                   <div className="space-y-2.5">
@@ -155,7 +151,7 @@ const InspectionMaleStep4 = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="inspection-male-sleep" className="mb-2 block text-[15px] font-semibold leading-snug text-[#2a2a32]">
+                  <label htmlFor="inspection-male-sleep" className="type-form-label mb-2 block">
                     11. 평균 수면 시간을 입력해주세요
                   </label>
                   <input
@@ -170,12 +166,12 @@ const InspectionMaleStep4 = () => {
                     aria-invalid={showSleepError}
                   />
                   {showSleepError && (
-                    <p className="mt-1.5 text-[12px] text-red-600">0~24 사이 시간을 입력해 주세요.</p>
+                    <p className="type-form-error mt-1.5">0~24 사이 시간을 입력해 주세요.</p>
                   )}
                 </div>
 
                 <div>
-                  <p className="mb-3 text-[15px] font-semibold leading-snug text-[#2a2a32]">
+                  <p className="type-form-label mb-3">
                     수면의 질은 어떠셨나요? (선택)
                   </p>
                   <div className="grid grid-cols-5 gap-2">
@@ -200,12 +196,12 @@ const InspectionMaleStep4 = () => {
           </div>
 
           <div className="mx-auto mt-4 w-full max-w-[350px] shrink-0 pt-1 sm:mt-5">
-            <p className="mb-3 text-center text-[14px] font-medium text-white/95">4 / 7</p>
+            <p className="type-inspect-progress mb-3 text-center">4 / 7</p>
             <button
               type="button"
               disabled={!validation.isValid}
               onClick={onNext}
-              className="w-full rounded-[16px] py-4 text-[17px] font-bold tracking-[-0.2px] text-white shadow-[0_10px_28px_rgba(32,24,64,0.2)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-white/35 disabled:text-white/70 disabled:shadow-none enabled:bg-[#9388FA] enabled:active:opacity-95"
+              className="w-full rounded-[16px] py-4 type-inspect-cta text-white/95 shadow-[0_10px_28px_rgba(32,24,64,0.2)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-white/35 disabled:text-white/70 disabled:shadow-none enabled:bg-[#9388FA] enabled:active:opacity-95"
             >
               다음으로
             </button>

@@ -148,7 +148,7 @@ const InspectionReportDetailPage = () => {
               <ChevronLeft className="h-5 w-5" strokeWidth={2.25} />
             </button>
 
-            <h1 className="min-w-0 flex-1 text-center text-[18px] font-bold leading-[24px] tracking-[-0.2px] text-white drop-shadow-[0_1px_8px_rgba(60,40,100,0.25)]">
+            <h1 className="min-w-0 flex-1 text-center type-screen-title text-[18px] leading-[24px] drop-shadow-[0_1px_8px_rgba(60,40,100,0.25)]">
               검사 리포트
             </h1>
 

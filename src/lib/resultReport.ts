@@ -8,22 +8,6 @@ import type { ResultReport, ResultRiskLevel } from '../types/resultReport';
 
 const RESULT_PATH = '/api/results';
 
-/** OpenAI 등 LLM 분석·행동 가이드 확장 (엔드포인트가 없으면 null) */
-export type ResultReportLlmInsights = {
-  personalizedAnalysis?: string;
-  actionGuideBullets?: string[];
-};
-
-export async function fetchReportLlmInsights(resultId: number): Promise<ResultReportLlmInsights | null> {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL as string | undefined;
-  if (!baseUrl) return null;
-  try {
-    return await api.get<ResultReportLlmInsights>(`${RESULT_PATH}/${resultId}/llm-insights`);
-  } catch {
-    return null;
-  }
-}
-
 function formatGender(gender: SimulatorState['gender']): '남성' | '여성' {
   return gender === 'male' ? '남성' : '여성';
 }
@@ -250,14 +234,6 @@ export function parseResultId(value: string | null): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function mergeWithLlmInsights(data: ResultReport, insights: ResultReportLlmInsights | null): ResultReport {
-  return {
-    ...data,
-    personalizedAnalysis: insights?.personalizedAnalysis ?? data.personalizedAnalysis,
-    actionGuideBullets: insights?.actionGuideBullets ?? data.actionGuideBullets,
-  };
-}
-
 async function resolveLatestResultIdFromApis(): Promise<number | null> {
   const home = await fetchHomeDashboard().catch(() => null);
   const rt = home?.recentTest;
@@ -284,7 +260,7 @@ async function resolveLatestResultIdFromApis(): Promise<number | null> {
 
 /**
  * 홈 카드용 최신 결과 1건.
- * `GET /home`의 `recentTest.resultId` → `GET /api/results/{id}`.
+ * `GET /home`의 `recentTest.resultId` → `GET /api/results/{id}` (LLM 필드 포함, 추가 호출 없음).
  * 없으면 `GET /results/history`에서 가장 최근 `resultId` 시도.
  */
 export async function fetchLatestResultReportForHome(): Promise<ResultReport | null> {
@@ -309,9 +285,7 @@ export async function fetchResultReport(resultId: number): Promise<ResultReport>
   }
 
   try {
-    const data = await api.get<ResultReport>(`${RESULT_PATH}/${resultId}`);
-    const insights = await fetchReportLlmInsights(resultId).catch(() => null);
-    return mergeWithLlmInsights(data, insights);
+    return await api.get<ResultReport>(`${RESULT_PATH}/${resultId}`);
   } catch {
     if (resultId === 123) return buildSampleReport();
     return buildMockReport(resultId, '담나', snapshot);

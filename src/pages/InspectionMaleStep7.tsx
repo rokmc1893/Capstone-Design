@@ -126,7 +126,7 @@ const InspectionMaleStep7 = () => {
           <button
             type="button"
             onClick={() => navigate('/inspection/male/6')}
-            className="flex min-w-0 items-center gap-0.5 text-[16px] font-bold leading-6 tracking-[-0.2px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)] active:opacity-80"
+            className="flex min-w-0 items-center gap-0.5 type-inspect-back active:opacity-80"
           >
             <ChevronLeft className="h-6 w-6 shrink-0" strokeWidth={2.25} aria-hidden />
             <span className="truncate">검사하기</span>
@@ -142,7 +142,7 @@ const InspectionMaleStep7 = () => {
         </div>
 
         <div className="relative z-10 shrink-0 px-5 pb-3 pt-1 sm:px-6">
-          <h1 className="text-center text-[20px] font-bold leading-[1.45] tracking-[-0.35px] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.14)] sm:text-[22px]">
+          <h1 className="type-inspect-title">
             간단한 질문 몇 가지로
             <br />
             현재 몸 상태를 진단해볼게요!
@@ -154,25 +154,25 @@ const InspectionMaleStep7 = () => {
             <div className="mx-auto w-full max-w-[350px] rounded-[22px] bg-white/95 p-5 shadow-[0_16px_48px_rgba(24,24,48,0.12)] ring-1 ring-white/70 backdrop-blur-sm sm:rounded-[24px] sm:p-6">
               <div className="space-y-6">
                 <div>
-                  <p className="mb-3 text-[15px] font-semibold leading-snug text-[#2a2a32]">
+                  <p className="type-form-label mb-3">
                     7. 일상생활의 짜증을 얼마나 자주 잘 다스릴 수 있었습니까?
                   </p>
                   <ScaleRow value={q7} onChange={setQ7} />
                 </div>
                 <div>
-                  <p className="mb-3 text-[15px] font-semibold leading-snug text-[#2a2a32]">
+                  <p className="type-form-label mb-3">
                     8. 최상의 컨디션이라고 얼마나 자주 느끼셨습니까?
                   </p>
                   <ScaleRow value={q8} onChange={setQ8} />
                 </div>
                 <div>
-                  <p className="mb-3 text-[15px] font-semibold leading-snug text-[#2a2a32]">
+                  <p className="type-form-label mb-3">
                     9. 당신이 통제할 수 없는 일 때문에 화가 난 경험이 얼마나 있었습니까?
                   </p>
                   <ScaleRow value={q9} onChange={setQ9} />
                 </div>
                 <div>
-                  <p className="mb-3 text-[15px] font-semibold leading-snug text-[#2a2a32]">
+                  <p className="type-form-label mb-3">
                     10. 어려운 일이 너무 많아서 극복하지 못할 것 같은 느낌을 얼마나 자주 경험하셨습니까?
                   </p>
                   <ScaleRow value={q10} onChange={setQ10} />
@@ -186,12 +186,12 @@ const InspectionMaleStep7 = () => {
           </div>
 
           <div className="mx-auto mt-4 w-full max-w-[350px] shrink-0 pt-1 sm:mt-5">
-            <p className="mb-3 text-center text-[14px] font-medium text-white/95">7 / 7</p>
+            <p className="type-inspect-progress mb-3 text-center">7 / 7</p>
             <button
               type="button"
               disabled={!isValid}
               onClick={onResult}
-              className="w-full rounded-[18px] py-4 text-[18px] font-bold tracking-[-0.25px] text-white shadow-[0_14px_30px_rgba(61,46,130,0.35)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-white/35 disabled:text-white/70 disabled:shadow-none enabled:bg-[#7E6AF2] enabled:active:opacity-95"
+              className="w-full rounded-[18px] py-4 type-inspect-cta-final text-white/95/70 disabled:shadow-none enabled:bg-[#7E6AF2] enabled:active:opacity-95"
             >
               결과 확인
             </button>
