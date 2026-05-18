@@ -2,11 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Settings as SettingsIcon } from 'lucide-react';
-import { BottomTabNav } from '../components/BottomTabNav';
-import { MobileGlassBackdrop } from '../components/ui/MobileGlassBackdrop';
 import {
-  GRADIENT_BG_STYLE,
-  MOBILE_FRAME,
   glassCard,
   glassIconWell,
   glassSettingsButton,
@@ -133,17 +129,7 @@ const Home = () => {
   const serverLoading = hasApiBase && latestReport === undefined;
 
   return (
-    <motion.div className="flex min-h-screen items-center justify-center bg-[#f4f2fa] p-4">
-      <motion.div
-        className={MOBILE_FRAME}
-        style={GRADIENT_BG_STYLE}
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={spring}
-      >
-        <MobileGlassBackdrop />
-
-        <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain px-6 pt-12 pb-[104px]">
+    <motion.div className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain px-6 pt-12 pb-[104px]">
           <motion.header
             className="flex items-start justify-between gap-4"
             initial="hidden"
@@ -303,10 +289,6 @@ const Home = () => {
               </div>
             </motion.div>
           </motion.section>
-        </div>
-
-        <BottomTabNav />
-      </motion.div>
     </motion.div>
   );
 };

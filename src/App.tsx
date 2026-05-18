@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { MainTabLayout } from './layouts/MainTabLayout';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import EmailAuth from './pages/EmailAuth';
@@ -44,8 +45,11 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/email-auth" element={<EmailAuth />} />
         <Route path="/oauth/kakao/callback" element={<KakaoCallback />} />
-        <Route path="/community" element={<Community />} />
-        <Route path="/home" element={<Home />} />
+        <Route element={<MainTabLayout />}>
+          <Route path="/home" element={<Home />} />
+          <Route path="/missions" element={<Missions />} />
+          <Route path="/community" element={<Community />} />
+        </Route>
         <Route path="/inspection-reports/archive" element={<InspectionReportArchive />} />
         <Route path="/inspection-reports/detail" element={<InspectionReportDetail />} />
         <Route path="/inspection" element={<InspectionGender />} />
@@ -63,7 +67,6 @@ function App() {
         <Route path="/inspection/male/5" element={<InspectionMaleStep5 />} />
         <Route path="/inspection/male/6" element={<InspectionMaleStep6 />} />
         <Route path="/inspection/male/7" element={<InspectionMaleStep7 />} />
-        <Route path="/missions" element={<Missions />} />
         <Route path="/missions/archive" element={<MissionsArchive />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/settings/notifications" element={<NotificationSettings />} />

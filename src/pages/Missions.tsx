@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Check, Archive, ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { StatusBar } from '../components/StatusBar';
-import { BottomTabNav } from '../components/BottomTabNav';
 import { FlowerBloomCelebrationModal } from '../components/FlowerBloomCelebrationModal';
 import {
   GROWTH_STAGE_LABELS,
@@ -201,20 +200,8 @@ const Missions = () => {
   const stages = [1, 2, 3, 4, 5] as const;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white p-4">
-      <div
-        className="relative flex h-[844px] w-[390px] flex-col min-h-0 overflow-hidden rounded-[28px] shadow-xl"
-        style={{
-          background: 'linear-gradient(to bottom, #A78BFA 0%, #F472B6 100%)',
-        }}
-      >
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-24 left-[-40px] h-[240px] w-[240px] rounded-full bg-white/20 blur-[30px]" />
-          <div className="absolute top-[220px] right-[-70px] h-[260px] w-[260px] rounded-full bg-[#F472B6]/30 blur-[40px]" />
-          <div className="absolute inset-0 bg-white/10 backdrop-blur-[2px]" />
-        </div>
-
-        <header className="relative z-10 shrink-0 pt-2">
+    <>
+      <header className="relative z-10 shrink-0 pt-2">
           <StatusBar />
         </header>
 
@@ -423,15 +410,12 @@ const Missions = () => {
           </section>
         </main>
 
-        <FlowerBloomCelebrationModal
-          flower={celebrateFlower ?? selectedFlower}
-          open={celebrateFlower !== null}
-          onClose={() => setCelebrateFlower(null)}
-        />
-
-        <BottomTabNav />
-      </div>
-    </div>
+      <FlowerBloomCelebrationModal
+        flower={celebrateFlower ?? selectedFlower}
+        open={celebrateFlower !== null}
+        onClose={() => setCelebrateFlower(null)}
+      />
+    </>
   );
 };
 

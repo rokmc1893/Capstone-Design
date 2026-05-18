@@ -6,6 +6,14 @@ import { glassNavPill } from './ui/glassStyles';
 import { springPremium } from '../lib/motionPresets';
 import { typeNavLabel } from '../lib/typography';
 
+/** 탭 pill·아이콘 — 레이아웃 고정 후 빠른 전환만 */
+const springTab: typeof springPremium = {
+  type: 'spring',
+  stiffness: 520,
+  damping: 34,
+  mass: 0.7,
+};
+
 export type TabKey = 'home' | 'missions' | 'community';
 
 type TabDef = {
@@ -39,13 +47,7 @@ export function BottomTabNav() {
   const selectedTab = getSelectedTab(location.pathname);
 
   return (
-    <motion.nav
-      className="absolute inset-x-6 bottom-8 z-20"
-      aria-label="하단 메뉴"
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ ...springPremium, delay: 0.35 }}
-    >
+    <nav className="absolute inset-x-6 bottom-8 z-20" aria-label="하단 메뉴">
       <TapCounsel className={glassNavPill}>
         <div className="relative grid h-full grid-cols-3 items-center">
           {tabs.map((t) => {
@@ -69,7 +71,7 @@ export function BottomTabNav() {
                   <motion.span
                     layoutId="bottom-tab-pill"
                     className="pointer-events-none absolute inset-x-2.5 top-1.5 bottom-1.5 rounded-[20px] bg-[#FF3AA7]/12 shadow-[0_0_28px_rgba(255,58,167,0.4)]"
-                    transition={springPremium}
+                    transition={springTab}
                     aria-hidden
                   />
                 ) : null}
@@ -79,7 +81,7 @@ export function BottomTabNav() {
                     scale: active ? 1.05 : 1,
                     opacity: active ? 1 : 0.65,
                   }}
-                  transition={springPremium}
+                  transition={springTab}
                 >
                   <Icon
                     className={`h-5 w-5 shrink-0 ${
@@ -100,7 +102,7 @@ export function BottomTabNav() {
                       scale: active ? 1 : 0,
                       opacity: active ? 1 : 0,
                     }}
-                    transition={springPremium}
+                    transition={springTab}
                     style={{ boxShadow: active ? '0 0 8px #FF3AA7' : 'none' }}
                   />
                 </motion.span>
@@ -109,6 +111,6 @@ export function BottomTabNav() {
           })}
         </div>
       </TapCounsel>
-    </motion.nav>
+    </nav>
   );
 }
