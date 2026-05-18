@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Settings } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
+import { syncMaleInspectionStep } from '../lib/testsSessionSync';
 import type { BingeStatus } from '../store/useSimulatorStore';
 import { useSimulatorStore } from '../store/useSimulatorStore';
 
@@ -73,7 +74,8 @@ const InspectionMaleStep4 = () => {
       sleepHours: validation.sleepHours,
       sleepQuality,
     });
-    navigate('/inspection/male/5');
+    void syncMaleInspectionStep(4);
+    navigate('/inspection/interim-report');
   }, [applyInspectionMaleStep4, bingeStatus, navigate, sleepQuality, validation]);
 
   return (

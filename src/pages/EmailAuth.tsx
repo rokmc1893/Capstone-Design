@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ChevronLeft, Loader2 } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
 import { emailLogin, signUp } from '../lib/auth';
+import { applyUserMeToStores } from '../lib/userProfileSync';
 import { useAuthStore } from '../store/useAuthStore';
+import { useUserProfileStore } from '../store/useUserProfileStore';
 import { ApiError } from '../lib/api';
 
 type Mode = 'login' | 'signup';
@@ -46,6 +48,10 @@ const EmailAuth = () => {
         refreshToken: result.refreshToken,
         user: result.user,
       });
+      applyUserMeToStores(result.user);
+      if (mode === 'signup' && nickname.trim()) {
+        useUserProfileStore.getState().setNickname(nickname.trim());
+      }
       navigate('/home', { replace: true });
     } catch (err) {
       if (err instanceof ApiError) {

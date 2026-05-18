@@ -2,6 +2,10 @@ import { useCallback, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Settings } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
+import { postSproutResetAfterRetest } from '../lib/homeMissionsApi';
+import { postTestsStartFromUiGender } from '../lib/testsSessionApi';
+import { useBloomMissionsStore } from '../store/useBloomMissionsStore';
+import { useTestSessionStore } from '../store/useTestSessionStore';
 import { useSimulatorStore } from '../store/useSimulatorStore';
 import imgMan from '../assets/inspection/man.png';
 import imgWoman from '../assets/inspection/woman.png';
@@ -20,12 +24,31 @@ const InspectionGender = () => {
     else navigate('/home');
   }, [navigate]);
 
-  const handleSelect = (g: 'male' | 'female') => {
+  const handleSelect = async (g: 'male' | 'female') => {
     if (navigateLock.current) return;
     setSelected(g);
     navigateLock.current = true;
-    window.setTimeout(() => {
+    window.setTimeout(async () => {
       setGender(g);
+      const base = import.meta.env.VITE_API_BASE_URL;
+      if (base) {
+        try {
+          if (useBloomMissionsStore.getState().level === 5) {
+            try {
+              await postSproutResetAfterRetest();
+              useBloomMissionsStore.getState().applyHomeSprout({ level: 1, exp: 0 });
+            } catch {
+              /* Lv.5가 아니면 MISSION400_1 — 무시하고 검사 진행 */
+            }
+          }
+          const { sessionId } = await postTestsStartFromUiGender(g);
+          useTestSessionStore.getState().setSessionId(sessionId);
+        } catch {
+          useTestSessionStore.getState().clearSession();
+        }
+      } else {
+        useTestSessionStore.getState().clearSession();
+      }
       if (g === 'female') navigate('/inspection/female/1');
       else navigate('/inspection/male/1');
       navigateLock.current = false;

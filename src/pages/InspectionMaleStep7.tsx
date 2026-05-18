@@ -4,6 +4,8 @@ import { ChevronLeft, Settings } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
 import type { PssScore } from '../store/useSimulatorStore';
 import { useSimulatorStore } from '../store/useSimulatorStore';
+import { postTestSubmitFromStore } from '../lib/testsSessionApi';
+import { useTestSessionStore } from '../store/useTestSessionStore';
 
 const SCALE_ITEMS: Array<{ value: PssScore; label: string }> = [
   { value: 0, label: '전혀 없었다' },
@@ -81,10 +83,26 @@ const InspectionMaleStep7 = () => {
     [q7, q8, q9, q10],
   );
 
-  const onResult = useCallback(() => {
+  const onResult = useCallback(async () => {
     setTouched(true);
     if (q7 === null || q8 === null || q9 === null || q10 === null) return;
     applyInspectionMaleStep7({ q7, q8, q9, q10 });
+
+    const sessionId = useTestSessionStore.getState().sessionId;
+    const base = import.meta.env.VITE_API_BASE_URL;
+    if (base && sessionId) {
+      try {
+        const { resultId } = await postTestSubmitFromStore(
+          sessionId,
+          useSimulatorStore.getState().pssAnswers,
+        );
+        useTestSessionStore.getState().clearSession();
+        navigate(`/inspection-reports/detail?resultId=${String(resultId)}`);
+        return;
+      } catch {
+        /* 세션 유지 후 보관함에서 재시도 가능 */
+      }
+    }
     navigate('/inspection-reports/archive');
   }, [applyInspectionMaleStep7, navigate, q7, q8, q9, q10]);
 

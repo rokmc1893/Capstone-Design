@@ -1,4 +1,6 @@
 import { api } from './api';
+import { fetchResultsHistoryRaw } from './homeMissionsApi';
+import { mapResultsHistoryToInspectionArchive } from './resultsHistoryMapper';
 
 export type InspectionMetric = {
   key: string;
@@ -29,8 +31,6 @@ export type InspectionYear = {
 export type InspectionArchiveResponse = {
   years: InspectionYear[];
 };
-
-const ARCHIVE_PATH = '/inspection-reports/archive';
 
 function buildMockArchive(now: Date): InspectionArchiveResponse {
   const year = now.getFullYear();
@@ -118,10 +118,23 @@ export async function fetchInspectionArchive(): Promise<InspectionArchiveRespons
   }
 
   try {
-    return await api.get<InspectionArchiveResponse>(ARCHIVE_PATH);
+    const raw = await fetchResultsHistoryRaw();
+    const mapped = mapResultsHistoryToInspectionArchive(raw);
+    if (mapped.years.length > 0) return mapped;
   } catch {
-    return { years: [] };
+    /* fallthrough */
   }
+
+  try {
+    const raw = await api.get<unknown>('/inspection-reports/archive');
+    if (raw && typeof raw === 'object' && 'years' in (raw as object)) {
+      return raw as InspectionArchiveResponse;
+    }
+  } catch {
+    /* ignore */
+  }
+
+  return { years: [] };
 }
 
 export function sortArchiveYears(years: InspectionYear[]): InspectionYear[] {

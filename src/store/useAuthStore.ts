@@ -28,6 +28,9 @@ interface AuthState {
   /** accessToken만 갱신 (리프레시 후) */
   setAccessToken: (token: string) => void;
 
+  /** 로그인 사용자 정보 일부 갱신 (`GET/PATCH /users/me` 동기화) */
+  updateUserProfile: (patch: Partial<AuthUser>) => void;
+
   /** 로그아웃 — 모든 인증 상태 초기화 */
   logout: () => void;
 }
@@ -52,6 +55,11 @@ export const useAuthStore = create<AuthState>()(
         set({ loginMethod: method, email, accessToken, refreshToken, user }),
 
       setAccessToken: (accessToken) => set({ accessToken }),
+
+      updateUserProfile: (patch) =>
+        set((s) => ({
+          user: s.user ? { ...s.user, ...patch } : s.user,
+        })),
 
       logout: () => set({ ...INITIAL }),
     }),

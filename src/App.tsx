@@ -19,10 +19,13 @@ import InspectionFemaleStep1 from './pages/InspectionFemaleStep1';
 import InspectionFemaleStep2 from './pages/InspectionFemaleStep2';
 import InspectionFemaleStep3 from './pages/InspectionFemaleStep3';
 import InspectionFemaleStep4 from './pages/InspectionFemaleStep4';
+import InspectionFemaleStep5 from './pages/InspectionFemaleStep5';
+import InspectionFemaleStep6 from './pages/InspectionFemaleStep6';
 import InspectionMaleStep1 from './pages/InspectionMaleStep1';
 import InspectionMaleStep2 from './pages/InspectionMaleStep2';
 import InspectionMaleStep3 from './pages/InspectionMaleStep3';
 import InspectionMaleStep4 from './pages/InspectionMaleStep4';
+import InspectionInterimReport from './pages/InspectionInterimReport';
 import InspectionMaleStep5 from './pages/InspectionMaleStep5';
 import InspectionMaleStep6 from './pages/InspectionMaleStep6';
 import InspectionMaleStep7 from './pages/InspectionMaleStep7';
@@ -50,10 +53,13 @@ function App() {
         <Route path="/inspection/female/2" element={<InspectionFemaleStep2 />} />
         <Route path="/inspection/female/3" element={<InspectionFemaleStep3 />} />
         <Route path="/inspection/female/4" element={<InspectionFemaleStep4 />} />
+        <Route path="/inspection/female/5" element={<InspectionFemaleStep5 />} />
+        <Route path="/inspection/female/6" element={<InspectionFemaleStep6 />} />
         <Route path="/inspection/male/1" element={<InspectionMaleStep1 />} />
         <Route path="/inspection/male/2" element={<InspectionMaleStep2 />} />
         <Route path="/inspection/male/3" element={<InspectionMaleStep3 />} />
         <Route path="/inspection/male/4" element={<InspectionMaleStep4 />} />
+        <Route path="/inspection/interim-report" element={<InspectionInterimReport />} />
         <Route path="/inspection/male/5" element={<InspectionMaleStep5 />} />
         <Route path="/inspection/male/6" element={<InspectionMaleStep6 />} />
         <Route path="/inspection/male/7" element={<InspectionMaleStep7 />} />

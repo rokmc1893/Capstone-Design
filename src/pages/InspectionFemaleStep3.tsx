@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Settings } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
+import { syncFemaleInspectionStep } from '../lib/testsSessionSync';
 import { useSimulatorStore } from '../store/useSimulatorStore';
 
 const inputClassName =
@@ -108,7 +109,8 @@ const InspectionFemaleStep3 = () => {
       binge12: validation.bingeNum,
       sleepHours: validation.sleepNum,
     });
-    navigate('/inspection/female/4');
+    void syncFemaleInspectionStep(3);
+    navigate('/inspection/interim-report');
   }, [applyInspectionStep3, navigate, validation]);
 
   return (

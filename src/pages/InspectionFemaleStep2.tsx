@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Settings } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
+import { syncFemaleInspectionStep } from '../lib/testsSessionSync';
 import type { FemaleConditions } from '../store/useSimulatorStore';
 import { useSimulatorStore } from '../store/useSimulatorStore';
 
@@ -127,6 +128,7 @@ const InspectionFemaleStep2 = () => {
       parity: validation.parityNum,
       femaleConditions: { ...conditions },
     });
+    void syncFemaleInspectionStep(2);
     navigate('/inspection/female/3');
   }, [applyInspectionStep2, conditions, navigate, validation]);
 

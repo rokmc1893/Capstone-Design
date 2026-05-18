@@ -1,4 +1,6 @@
 import { api } from './api';
+import { fetchHomeDashboard, fetchResultsHistoryRaw } from './homeMissionsApi';
+import { mapResultsHistoryToInspectionArchive } from './resultsHistoryMapper';
 import { enrichReportFromSimulator, wellnessScoreFromRisk } from './inspectionReportDerived';
 import { useSimulatorStore } from '../store/useSimulatorStore';
 import type { SimulatorState } from '../store/useSimulatorStore';
@@ -256,18 +258,42 @@ function mergeWithLlmInsights(data: ResultReport, insights: ResultReportLlmInsig
   };
 }
 
+async function resolveLatestResultIdFromApis(): Promise<number | null> {
+  const home = await fetchHomeDashboard().catch(() => null);
+  const rt = home?.recentTest;
+  if (rt && typeof rt === 'object') {
+    const rid =
+      'resultId' in rt && typeof rt.resultId === 'number'
+        ? rt.resultId
+        : 'id' in rt && typeof (rt as { id?: unknown }).id === 'number'
+          ? (rt as { id: number }).id
+          : undefined;
+    if (typeof rid === 'number' && rid > 0) return rid;
+  }
+  try {
+    const raw = await fetchResultsHistoryRaw();
+    const mapped = mapResultsHistoryToInspectionArchive(raw);
+    const y = mapped.years[0];
+    const m = y?.months[0];
+    const r = m?.rounds[0];
+    return r?.resultId ?? null;
+  } catch {
+    return null;
+  }
+}
+
 /**
- * 홈 카드용 최신 결과 1건. `GET /api/results/latest` (백엔드 제공 시).
- * 없거나 실패 시 `null` → 홈은 로컬 목에서만 스토어 폴백.
+ * 홈 카드용 최신 결과 1건.
+ * `GET /home`의 `recentTest.resultId` → `GET /api/results/{id}`.
+ * 없으면 `GET /results/history`에서 가장 최근 `resultId` 시도.
  */
 export async function fetchLatestResultReportForHome(): Promise<ResultReport | null> {
   const baseUrl = import.meta.env.VITE_API_BASE_URL as string | undefined;
   if (!baseUrl) return null;
-
+  const rid = await resolveLatestResultIdFromApis();
+  if (!rid) return null;
   try {
-    const data = await api.get<ResultReport>(`${RESULT_PATH}/latest`);
-    const insights = await fetchReportLlmInsights(data.resultId).catch(() => null);
-    return mergeWithLlmInsights(data, insights);
+    return await fetchResultReport(rid);
   } catch {
     return null;
   }
@@ -302,12 +328,15 @@ export async function fetchLatestResultReport(
     return buildMockReport(Date.now(), nickname, snapshot);
   }
 
-  try {
-    const created = await api.post<{ resultId: number }>('/api/results', snapshot);
-    return await fetchResultReport(created.resultId);
-  } catch {
-    return buildMockReport(Date.now(), nickname, snapshot);
+  const rid = await resolveLatestResultIdFromApis().catch(() => null);
+  if (rid) {
+    try {
+      return await fetchResultReport(rid);
+    } catch {
+      return buildMockReport(rid, nickname, snapshot);
+    }
   }
+  return buildMockReport(Date.now(), nickname, snapshot);
 }
 
 export function getRiskLevelLabel(riskLevel: ResultRiskLevel): string {

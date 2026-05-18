@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Settings } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
+import { syncMaleInspectionStep } from '../lib/testsSessionSync';
 import type { DrinkStatus, MaleConditions, SmokeStatus } from '../store/useSimulatorStore';
 import { useSimulatorStore } from '../store/useSimulatorStore';
 
@@ -79,6 +80,7 @@ const InspectionMaleStep3 = () => {
       smokeStatus,
       drinkStatus,
     });
+    void syncMaleInspectionStep(3);
     navigate('/inspection/male/4');
   }, [applyInspectionMaleStep3, conditions, drinkStatus, navigate, smokeStatus, validation.isValid]);
 

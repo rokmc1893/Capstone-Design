@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Settings } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
+import { syncMaleInspectionStep } from '../lib/testsSessionSync';
 import { useSimulatorStore } from '../store/useSimulatorStore';
 
 const inputClassName =
@@ -83,6 +84,7 @@ const InspectionMaleStep2 = () => {
       sexFreq: validation.sexFreq,
       hasSex12Mo,
     });
+    void syncMaleInspectionStep(2);
     navigate('/inspection/male/3');
   }, [applyInspectionMaleStep2, hasSex12Mo, navigate, validation]);
 

@@ -100,7 +100,7 @@ const InspectionMaleStep5 = () => {
         <div className="relative z-10 flex shrink-0 items-center justify-between px-5 pb-2 pt-1 sm:px-6">
           <button
             type="button"
-            onClick={() => navigate('/inspection/male/4')}
+            onClick={() => navigate('/inspection/interim-report')}
             className="flex min-w-0 items-center gap-0.5 text-[16px] font-bold leading-6 tracking-[-0.2px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)] active:opacity-80"
           >
             <ChevronLeft className="h-6 w-6 shrink-0" strokeWidth={2.25} aria-hidden />

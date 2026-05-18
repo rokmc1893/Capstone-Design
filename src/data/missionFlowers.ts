@@ -187,6 +187,11 @@ const flowerById = Object.fromEntries(MISSION_FLOWERS.map((f) => [f.id, f])) as 
   MissionFlower
 >;
 
+export function pickRandomMissionFlowerId(): FlowerId {
+  const idx = Math.floor(Math.random() * MISSION_FLOWERS.length);
+  return MISSION_FLOWERS[idx]!.id;
+}
+
 export function getMissionFlower(id: FlowerId): MissionFlower {
   return flowerById[id] ?? MISSION_FLOWERS[0];
 }

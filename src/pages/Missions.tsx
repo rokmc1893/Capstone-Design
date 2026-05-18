@@ -5,15 +5,23 @@ import { StatusBar } from '../components/StatusBar';
 import { BottomTabNav } from '../components/BottomTabNav';
 import { FlowerBloomCelebrationModal } from '../components/FlowerBloomCelebrationModal';
 import {
-  FLOWER_GROUPS,
   GROWTH_STAGE_LABELS,
-  MISSION_FLOWERS,
   getMissionFlower,
   getMissionFlowerStageImageSrc,
+  pickRandomMissionFlowerId,
 } from '../data/missionFlowers';
 import type { MissionFlower } from '../data/missionFlowers';
 import { missionsFromResultReport, type BloomMissionRow } from '../lib/bloomMissionsFromReport';
+import {
+  fetchHomeDashboard,
+  fetchMissionsToday,
+  pickSproutFromHome,
+  postMissionComplete,
+  todayMissionNumericId,
+} from '../lib/homeMissionsApi';
+import { missionErrorMessage } from '../lib/missionApiMessages';
 import { fetchLatestResultReport, fetchLatestResultReportForHome } from '../lib/resultReport';
+import { useAuthStore } from '../store/useAuthStore';
 import { useBloomMissionsStore } from '../store/useBloomMissionsStore';
 import { useSimulatorStore } from '../store/useSimulatorStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
@@ -23,44 +31,129 @@ const Missions = () => {
   const nickname = useUserProfileStore((s) => s.nickname || s.name);
   const hasApiBase = Boolean(import.meta.env.VITE_API_BASE_URL);
 
+  const accessToken = useAuthStore((s) => s.accessToken);
+
   const [missionRows, setMissionRows] = useState<BloomMissionRow[]>(() =>
     missionsFromResultReport(undefined),
   );
+  const [missionSource, setMissionSource] = useState<'api' | 'report'>('report');
+  const [missionBanner, setMissionBanner] = useState<string | null>(null);
+
+  const markMissionCompleted = useBloomMissionsStore((s) => s.markMissionCompleted);
+  const applyHomeSprout = useBloomMissionsStore((s) => s.applyHomeSprout);
 
   useEffect(() => {
     let mounted = true;
     void (async () => {
       const snapshot = useSimulatorStore.getState();
       try {
+        if (hasApiBase && accessToken) {
+          const [today, home] = await Promise.all([fetchMissionsToday(), fetchHomeDashboard()]);
+          if (!mounted) return;
+          const sprout = pickSproutFromHome(home);
+          if (sprout) applyHomeSprout({ level: sprout.level, exp: sprout.exp });
+
+          const rows: BloomMissionRow[] = [];
+          for (const t of today) {
+            const mid = todayMissionNumericId(t);
+            if (mid == null) continue;
+            const rowId = `api:${mid}`;
+            if (t.completed) markMissionCompleted(rowId);
+            rows.push({
+              id: rowId,
+              title: t.title ?? '미션',
+              description: t.description ?? t.content ?? '',
+            });
+          }
+          if (rows.length > 0) {
+            setMissionSource('api');
+            setMissionRows(rows);
+            return;
+          }
+        }
+
         const fromApi = hasApiBase ? await fetchLatestResultReportForHome() : null;
         const report = fromApi ?? (await fetchLatestResultReport(snapshot, nickname));
-        if (mounted) setMissionRows(missionsFromResultReport(report));
+        if (mounted) {
+          setMissionSource('report');
+          setMissionRows(missionsFromResultReport(report));
+        }
       } catch {
         if (!mounted) return;
         try {
           const report = await fetchLatestResultReport(snapshot, nickname);
-          if (mounted) setMissionRows(missionsFromResultReport(report));
+          if (mounted) {
+            setMissionSource('report');
+            setMissionRows(missionsFromResultReport(report));
+          }
         } catch {
-          if (mounted) setMissionRows(missionsFromResultReport(undefined));
+          if (mounted) {
+            setMissionSource('report');
+            setMissionRows(missionsFromResultReport(undefined));
+          }
         }
       }
     })();
     return () => {
       mounted = false;
     };
-  }, [hasApiBase, nickname]);
+  }, [hasApiBase, nickname, accessToken, applyHomeSprout, markMissionCompleted]);
   const level = useBloomMissionsStore((s) => s.level);
   const xp = useBloomMissionsStore((s) => s.xp);
   const completed = useBloomMissionsStore((s) => s.completed);
   const blooms = useBloomMissionsStore((s) => s.blooms);
   const bloomRecords = useBloomMissionsStore((s) => s.bloomRecords);
   const selectedFlowerId = useBloomMissionsStore((s) => s.selectedFlowerId);
-  const setSelectedFlower = useBloomMissionsStore((s) => s.setSelectedFlower);
+  const requiredExpForNext = useBloomMissionsStore((s) => s.requiredExpForNext);
   const toggleMission = useBloomMissionsStore((s) => s.toggleMission);
+  const applyMissionCompleteDto = useBloomMissionsStore((s) => s.applyMissionCompleteDto);
+
+  useEffect(() => {
+    const s = useBloomMissionsStore.getState();
+    if (s.level === 1 && s.xp === 0 && s.blooms === 0) {
+      s.setSelectedFlower(pickRandomMissionFlowerId());
+    }
+  }, []);
 
   const selectedFlower = getMissionFlower(selectedFlowerId);
   const stageImageSrc = getMissionFlowerStageImageSrc(selectedFlower, level);
-  const progress = Math.min(100, Math.max(0, xp));
+  const xpCap = requiredExpForNext ?? 100;
+  const xpBarPercent = Math.min(100, Math.max(0, xpCap > 0 ? (xp / xpCap) * 100 : 0));
+
+  const [completingMissionId, setCompletingMissionId] = useState<string | null>(null);
+
+  const handleMissionToggle = async (m: BloomMissionRow) => {
+    setMissionBanner(null);
+    const done = completed[m.id];
+    if (missionSource === 'api' && m.id.startsWith('api:')) {
+      const missionId = Number.parseInt(m.id.slice(4), 10);
+      if (!Number.isFinite(missionId) || done) return;
+      setCompletingMissionId(m.id);
+      try {
+        const dto = await postMissionComplete(missionId);
+        if (dto.alreadyCompleted) {
+          markMissionCompleted(m.id);
+          setMissionBanner('이미 완료된 미션이에요.');
+          return;
+        }
+        if (dto.dailyRewardCapReached) {
+          setMissionBanner('오늘 받을 수 있는 경험치 상한에 도달했어요.');
+        }
+        applyMissionCompleteDto(dto);
+        markMissionCompleted(m.id);
+        if (dto.newFlower) {
+          const last = useBloomMissionsStore.getState().bloomRecords.at(-1);
+          if (last) setCelebrateFlower(getMissionFlower(last.flowerId));
+        }
+      } catch (e) {
+        setMissionBanner(missionErrorMessage(e));
+      } finally {
+        setCompletingMissionId(null);
+      }
+      return;
+    }
+    toggleMission(m.id);
+  };
 
   const [celebrateFlower, setCelebrateFlower] = useState<MissionFlower | null>(null);
   const prevBlooms = useRef(blooms);
@@ -84,7 +177,7 @@ const Missions = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-white p-4">
       <div
-        className="relative h-[min(844px,100dvh)] w-full max-w-[390px] overflow-hidden rounded-[28px] shadow-xl"
+        className="relative flex h-[min(844px,100dvh)] w-full max-w-[390px] flex-col min-h-0 overflow-hidden rounded-[28px] shadow-xl"
         style={{
           background: 'linear-gradient(to bottom, #A78BFA 0%, #F472B6 100%)',
         }}
@@ -99,7 +192,7 @@ const Missions = () => {
           <StatusBar />
         </header>
 
-        <main className="relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden px-5 pb-28 pt-3">
+        <main className="relative z-10 flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain px-5 pb-28 pt-3">
           <div className="flex shrink-0 items-center justify-between">
             <div className="flex items-center gap-1">
               <button
@@ -123,46 +216,14 @@ const Missions = () => {
           </div>
 
           <p className="mt-3 shrink-0 text-[12px] leading-snug text-white/85">
-            최신 검사 결과를 바탕으로 미션이 구성됩니다. 완료할 때마다 경험치가 쌓이고, 단계가 올라가면 선택한 꽃이
-            자라요.
+            최신 검사 결과를 바탕으로 미션이 구성됩니다. 완료할 때마다 경험치가 쌓이고, 단계가 올라가면 무작위로 정해진
+            꽃이 자라요. 한 번 피우고 나면 다음에는 다른 꽃이 나올 수 있어요.
           </p>
-
-          <section className="mt-5 shrink-0 space-y-4">
-            {FLOWER_GROUPS.map((group) => (
-              <div key={group.id}>
-                <div
-                  className={`mb-2 inline-flex max-w-full rounded-full bg-gradient-to-r px-3 py-1.5 shadow-md ${group.barClass}`}
-                >
-                  <p className="text-[10px] font-bold leading-tight text-white">{group.titleKo}</p>
-                </div>
-                <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                  {MISSION_FLOWERS.filter((f) => f.groupId === group.id).map((f) => {
-                    const active = f.id === selectedFlowerId;
-                    return (
-                      <button
-                        key={f.id}
-                        type="button"
-                        onClick={() => setSelectedFlower(f.id)}
-                        className={`flex min-w-[78px] shrink-0 flex-col items-center rounded-[18px] px-2.5 py-2 text-left shadow-md ring-1 ring-white/30 backdrop-blur-md transition-transform active:scale-[0.97] ${
-                          active ? 'bg-white/35 ring-2 ring-white' : 'bg-white/15'
-                        }`}
-                      >
-                        <span className="text-[22px] leading-none" aria-hidden>
-                          {f.emoji}
-                        </span>
-                        <span className="mt-1 text-center text-[11px] font-bold leading-tight text-white">
-                          {f.nameKo}
-                        </span>
-                        <span className="mt-0.5 text-center text-[9px] font-medium leading-tight text-white/75 line-clamp-2">
-                          {f.hint}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </section>
+          {missionBanner ? (
+            <p className="mt-2 shrink-0 rounded-[12px] bg-black/20 px-3 py-2 text-[11px] leading-snug text-white">
+              {missionBanner}
+            </p>
+          ) : null}
 
           <section className="mt-5 shrink-0">
             <p className="mb-2 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-white/90">
@@ -202,12 +263,14 @@ const Missions = () => {
               <span>
                 단계 {level} · {selectedFlower.emoji} {selectedFlower.nameKo}
               </span>
-              <span>{progress} / 100 XP</span>
+              <span>
+                {Math.round(xp)} / {xpCap} XP
+              </span>
             </div>
             <div className="mt-2 h-[10px] w-full overflow-hidden rounded-full bg-white/20 ring-1 ring-white/40">
               <div
                 className="h-full rounded-full bg-white/90 transition-[width] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
-                style={{ width: `${progress}%` }}
+                style={{ width: `${xpBarPercent}%` }}
               />
             </div>
           </section>
@@ -238,11 +301,20 @@ const Missions = () => {
                   </div>
                   <button
                     type="button"
-                    onClick={() => toggleMission(m.id)}
-                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold shadow-[0_8px_20px_rgba(0,0,0,0.2)] transition-transform active:scale-95 ${
+                    disabled={missionSource === 'api' && completingMissionId === m.id}
+                    onClick={() => void handleMissionToggle(m)}
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold shadow-[0_8px_20px_rgba(0,0,0,0.2)] transition-transform active:scale-95 disabled:opacity-50 ${
                       done ? 'bg-emerald-400 text-white' : 'bg-white/90 text-[#FF3AA7]'
                     }`}
-                    aria-label={done ? '완료 취소' : '미션 완료 +5 XP'}
+                    aria-label={
+                      missionSource === 'api'
+                        ? done
+                          ? '완료됨'
+                          : '미션 완료'
+                        : done
+                          ? '완료 취소'
+                          : '미션 완료 +5 XP'
+                    }
                   >
                     {done ? <Check className="h-5 w-5" /> : '+5'}
                   </button>

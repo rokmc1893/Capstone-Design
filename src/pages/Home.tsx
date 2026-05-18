@@ -1,10 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Settings as SettingsIcon, ClipboardList, Heart } from 'lucide-react';
+import { Settings as SettingsIcon } from 'lucide-react';
 import { BottomTabNav } from '../components/BottomTabNav';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import { useSimulatorStore } from '../store/useSimulatorStore';
+import { fetchHomeDashboard } from '../lib/homeMissionsApi';
+import {
+  getHomeActionPath,
+  homeActionIcon,
+  homeActionSubtitle,
+  resolveHomeActions,
+} from '../lib/homeActions';
 import { fetchLatestResultReportForHome, getRiskLevelLabel } from '../lib/resultReport';
+import type { HomeActionDto } from '../types/backendApi';
 import type { ResultReport } from '../types/resultReport';
 
 const Home = () => {
@@ -22,20 +30,39 @@ const Home = () => {
 
   const hasApiBase = Boolean(import.meta.env.VITE_API_BASE_URL);
   const [latestReport, setLatestReport] = useState<ResultReport | null | undefined>(undefined);
+  const [homeActions, setHomeActions] = useState<HomeActionDto[]>(() =>
+    resolveHomeActions(null),
+  );
 
   useEffect(() => {
     if (!hasApiBase) {
       setLatestReport(null);
+      setHomeActions(resolveHomeActions(null));
       return;
     }
     let mounted = true;
-    void fetchLatestResultReportForHome().then((r) => {
-      if (mounted) setLatestReport(r ?? null);
-    });
+    void (async () => {
+      const [home, report] = await Promise.all([
+        fetchHomeDashboard(),
+        fetchLatestResultReportForHome(),
+      ]);
+      if (!mounted) return;
+      setHomeActions(resolveHomeActions(home?.actions));
+      const nickname = home?.user?.nickname?.trim();
+      if (nickname) useUserProfileStore.getState().setNickname(nickname);
+      setLatestReport(report ?? null);
+    })();
     return () => {
       mounted = false;
     };
   }, [hasApiBase]);
+
+  const actionCards = useMemo(
+    () => resolveHomeActions(homeActions),
+    [homeActions],
+  );
+
+  const latestResultId = latestReport?.resultId ?? null;
 
   const hasInspectionResult = heightCm > 0 && weightKg > 0;
 
@@ -98,7 +125,7 @@ const Home = () => {
           <div className="absolute inset-0 bg-white/10 backdrop-blur-[2px]" />
         </div>
 
-        <div className="relative z-10 flex min-h-0 flex-1 flex-col px-6 pt-12">
+        <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain px-6 pt-12">
           <div className="flex items-start justify-between">
             <div className="min-w-0">
               <p className="text-[16px] leading-[22px] font-bold tracking-[-0.2px] text-white">
@@ -120,44 +147,36 @@ const Home = () => {
             </button>
           </div>
 
-          <div className="mt-8 flex flex-col gap-3">
-            <button
-              type="button"
-              onClick={() => navigate('/inspection')}
-              className="group relative flex h-[92px] w-full items-center justify-between rounded-[22px] bg-white/12 px-6 text-left shadow-[0px_18px_40px_rgba(16,24,40,0.18)] ring-1 ring-white/25 backdrop-blur-xl active:scale-[0.99]"
-            >
-              <div className="min-w-0 pr-3">
-                <p className="text-[18px] font-semibold leading-[24px] tracking-[-0.2px] text-white">
-                  검사하기
-                </p>
-                <p className="mt-1 text-[12px] leading-[18px] text-white/80">
-                  현재 상태를 간편하게 체크합니다
-                </p>
-              </div>
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/30 shadow-[inset_0px_1px_0px_rgba(255,255,255,0.8)] ring-1 ring-white/40">
-                <ClipboardList className="h-6 w-6 text-white/80" />
-              </div>
-              <span className="pointer-events-none absolute inset-0 rounded-[22px] opacity-0 transition-opacity group-hover:opacity-100 bg-gradient-to-r from-white/20 via-transparent to-white/10" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => navigate('/inspection-reports/archive')}
-              className="group relative flex h-[92px] w-full items-center justify-between rounded-[22px] bg-white/12 px-6 text-left shadow-[0px_18px_40px_rgba(16,24,40,0.18)] ring-1 ring-white/25 backdrop-blur-xl active:scale-[0.99]"
-            >
-              <div className="min-w-0 pr-3">
-                <p className="text-[18px] font-semibold leading-[24px] tracking-[-0.2px] text-white">
-                  검사 상세 리포트
-                </p>
-                <p className="mt-1 text-[12px] leading-[18px] text-white/80">
-                  최근 점수와 주요 요인을 한눈에
-                </p>
-              </div>
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/30 shadow-[inset_0px_1px_0px_rgba(255,255,255,0.8)] ring-1 ring-white/40">
-                <Heart className="h-6 w-6 text-white/80" />
-              </div>
-              <span className="pointer-events-none absolute inset-0 rounded-[22px] opacity-0 transition-opacity group-hover:opacity-100 bg-gradient-to-r from-white/20 via-transparent to-white/10" />
-            </button>
+          <div className="mt-8 grid grid-cols-2 gap-3">
+            {actionCards.map((action) => {
+              const path = getHomeActionPath(action.type, { latestResultId });
+              const Icon = homeActionIcon(action.type);
+              const subtitle = homeActionSubtitle(action.type);
+              return (
+                <button
+                  key={action.type}
+                  type="button"
+                  disabled={!path}
+                  onClick={() => {
+                    if (path) navigate(path);
+                  }}
+                  className="group relative flex min-h-[108px] w-full flex-col justify-between rounded-[20px] bg-white/12 p-4 text-left shadow-[0px_18px_40px_rgba(16,24,40,0.18)] ring-1 ring-white/25 backdrop-blur-xl active:scale-[0.99] disabled:opacity-50"
+                >
+                  <div className="min-w-0">
+                    <p className="text-[15px] font-semibold leading-[20px] tracking-[-0.2px] text-white">
+                      {action.title}
+                    </p>
+                    {subtitle ? (
+                      <p className="mt-1 text-[11px] leading-[16px] text-white/75">{subtitle}</p>
+                    ) : null}
+                  </div>
+                  <div className="mt-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white/30 shadow-[inset_0px_1px_0px_rgba(255,255,255,0.8)] ring-1 ring-white/40">
+                    <Icon className="h-5 w-5 text-white/85" aria-hidden />
+                  </div>
+                  <span className="pointer-events-none absolute inset-0 rounded-[20px] opacity-0 transition-opacity group-hover:opacity-100 bg-gradient-to-br from-white/20 via-transparent to-white/10" />
+                </button>
+              );
+            })}
           </div>
 
           <div className="mt-auto grid grid-cols-2 gap-3 pb-[104px] pt-6">

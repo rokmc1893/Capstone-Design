@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   BatteryFull,
@@ -11,6 +11,9 @@ import {
   X,
   Mail,
 } from 'lucide-react';
+import { ApiError } from '../lib/api';
+import { deleteUserMe, fetchUserMe, patchUserMe } from '../lib/homeMissionsApi';
+import { applyUserMeToStores } from '../lib/userProfileSync';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import { useAuthStore } from '../store/useAuthStore';
 
@@ -26,6 +29,15 @@ const Settings = () => {
     null | 'name' | 'nickname' | 'gender'
   >(null);
   const [profileDraft, setProfileDraft] = useState('');
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileMessage, setProfileMessage] = useState<string | null>(null);
+  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
+
+  const hasApiBase = Boolean(import.meta.env.VITE_API_BASE_URL);
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const authUser = useAuthStore((s) => s.user);
+
   const profileName = useUserProfileStore((s) => s.name);
   const profileNickname = useUserProfileStore((s) => s.nickname);
   const profileGender = useUserProfileStore((s) => s.gender);
@@ -62,8 +74,29 @@ const Settings = () => {
     if (!profileEditModalOpen) {
       setProfileEditingField(null);
       setProfileDraft('');
+      setProfileMessage(null);
     }
   }, [profileEditModalOpen]);
+
+  const loadUserMe = useCallback(async () => {
+    if (!hasApiBase || !accessToken) return;
+    setProfileLoading(true);
+    setProfileMessage(null);
+    try {
+      const me = await fetchUserMe();
+      applyUserMeToStores(me);
+    } catch (err) {
+      const msg =
+        err instanceof ApiError ? err.message : '내 정보를 불러오지 못했어요.';
+      setProfileMessage(msg);
+    } finally {
+      setProfileLoading(false);
+    }
+  }, [hasApiBase, accessToken]);
+
+  useEffect(() => {
+    void loadUserMe();
+  }, [loadUserMe]);
 
   const openProfileEdit = (field: 'name' | 'nickname' | 'gender') => {
     setProfileEditingField(field);
@@ -72,18 +105,75 @@ const Settings = () => {
     else setProfileDraft(profileGender);
   };
 
-  const saveProfileEdit = () => {
+  const saveProfileEdit = async () => {
     if (!profileEditingField) return;
     const t = profileDraft.trim();
+
     if (profileEditingField === 'name') {
       if (t) setProfileName(t);
-    } else if (profileEditingField === 'nickname') {
-      if (t) setProfileNickname(t);
-    } else {
-      setProfileGender(profileDraft === '남자' ? '남자' : '여자');
+      setProfileEditingField(null);
+      setProfileDraft('');
+      return;
     }
+
+    if (profileEditingField === 'gender') {
+      setProfileGender(profileDraft === '남자' ? '남자' : '여자');
+      setProfileEditingField(null);
+      setProfileDraft('');
+      return;
+    }
+
+    if (profileEditingField === 'nickname') {
+      if (!t) {
+        setProfileMessage('닉네임을 입력해 주세요.');
+        return;
+      }
+      if (t.length < 2 || t.length > 10) {
+        setProfileMessage('닉네임은 2~10자로 입력해 주세요.');
+        return;
+      }
+
+      if (hasApiBase && accessToken) {
+        setProfileSaving(true);
+        setProfileMessage(null);
+        try {
+          const updated = await patchUserMe({ nickname: t });
+          applyUserMeToStores(updated);
+          setProfileMessage('닉네임이 저장되었어요.');
+        } catch (err) {
+          const msg =
+            err instanceof ApiError ? err.message : '닉네임 저장에 실패했어요.';
+          setProfileMessage(msg);
+          setProfileSaving(false);
+          return;
+        } finally {
+          setProfileSaving(false);
+        }
+      } else {
+        setProfileNickname(t);
+      }
+    }
+
     setProfileEditingField(null);
     setProfileDraft('');
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteSubmitting) return;
+    setDeleteSubmitting(true);
+    try {
+      if (hasApiBase && accessToken) {
+        await deleteUserMe();
+      }
+      logout();
+      navigate('/login', { replace: true });
+    } catch (err) {
+      setDeleteSubmitting(false);
+      setDeleteAccountModalOpen(false);
+      const msg =
+        err instanceof ApiError ? err.message : '회원 탈퇴에 실패했어요. 잠시 후 다시 시도해 주세요.';
+      setProfileMessage(msg);
+    }
   };
 
   const cancelProfileEdit = () => {
@@ -144,18 +234,31 @@ const Settings = () => {
           {/* Profile */}
           <section className="pt-3">
             <div className="flex items-center gap-4">
-              <div className="relative flex h-[56px] w-[56px] items-center justify-center rounded-full bg-white/70 backdrop-blur-md ring-1 ring-white/50 shadow-sm">
-                <User size={24} className="text-blackBg" />
+              <div className="relative flex h-[56px] w-[56px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/70 backdrop-blur-md ring-1 ring-white/50 shadow-sm">
+                {authUser?.profileImageUrl ? (
+                  <img
+                    src={authUser.profileImageUrl}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <User size={24} className="text-blackBg" />
+                )}
               </div>
               <div className="min-w-0">
                 <p className="text-[20px] font-bold leading-[24px] text-white tracking-[-0.2px] whitespace-nowrap">
                   {profileName} 님
                 </p>
                 <p className="mt-1 text-[13px] leading-[18px] text-white/80">
-                  {profileNickname}
+                  {profileLoading ? '불러오는 중…' : profileNickname}
                 </p>
               </div>
             </div>
+            {profileMessage && !profileEditModalOpen ? (
+              <p className="mt-3 rounded-[12px] bg-black/20 px-3 py-2 text-[12px] leading-snug text-white">
+                {profileMessage}
+              </p>
+            ) : null}
           </section>
 
           {/* Section 1 */}
@@ -382,27 +485,45 @@ const Settings = () => {
               </div>
 
               <div className="min-h-0 flex-1 overflow-y-auto px-5 py-2 pb-6">
+                {hasApiBase && accessToken ? (
+                  <p className="mb-4 text-[11px] leading-relaxed text-gray400">
+                    닉네임은 서버에 저장됩니다. 이름·성별은 이 기기에서만 표시돼요.
+                  </p>
+                ) : null}
+                {profileMessage && profileEditModalOpen ? (
+                  <p className="mb-4 rounded-[10px] bg-gray100 px-3 py-2 text-[12px] leading-snug text-gray400">
+                    {profileMessage}
+                  </p>
+                ) : null}
                 {[
                   {
                     label: '현재 이름',
                     value: profileName,
                     key: 'name' as const,
+                    hint: hasApiBase && accessToken ? '앱 표시용' : undefined,
                   },
                   {
                     label: '현재 닉네임',
                     value: profileNickname,
                     key: 'nickname' as const,
+                    hint: hasApiBase && accessToken ? '서버 저장' : undefined,
                   },
                   {
                     label: '성별',
                     value: profileGender,
                     key: 'gender' as const,
+                    hint: hasApiBase && accessToken ? '앱 표시용' : undefined,
                   },
                 ].map((row, idx) => (
                   <div key={row.key}>
                     {idx > 0 && <div className="my-5 h-px w-full bg-gray100" />}
                     <div>
-                      <p className="text-[12px] font-medium text-gray400">{row.label}</p>
+                      <p className="text-[12px] font-medium text-gray400">
+                        {row.label}
+                        {'hint' in row && row.hint ? (
+                          <span className="ml-1.5 font-normal text-gray400/80">({row.hint})</span>
+                        ) : null}
+                      </p>
                       {profileEditingField === row.key ? (
                         <div className="mt-3 space-y-3">
                           {row.key === 'gender' ? (
@@ -431,9 +552,10 @@ const Settings = () => {
                               value={profileDraft}
                               onChange={(e) => setProfileDraft(e.target.value)}
                               onClick={(e) => e.stopPropagation()}
+                              maxLength={row.key === 'nickname' ? 10 : undefined}
                               className="w-full rounded-[12px] border border-gray100 bg-white px-3 py-3 text-[16px] font-medium text-blackBg outline-none ring-1 ring-gray100 focus:border-[#9388FA] focus:ring-[#9388FA]/30"
                               placeholder={
-                                row.key === 'name' ? '이름을 입력하세요' : '닉네임을 입력하세요'
+                                row.key === 'name' ? '이름을 입력하세요' : '닉네임 (2~10자)'
                               }
                               autoFocus
                             />
@@ -451,13 +573,14 @@ const Settings = () => {
                             </button>
                             <button
                               type="button"
+                              disabled={profileSaving}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                saveProfileEdit();
+                                void saveProfileEdit();
                               }}
-                              className="flex-1 rounded-[12px] bg-[#9388FA] py-2.5 text-[14px] font-semibold text-white shadow-sm"
+                              className="flex-1 rounded-[12px] bg-[#9388FA] py-2.5 text-[14px] font-semibold text-white shadow-sm disabled:opacity-50"
                             >
-                              저장
+                              {profileSaving ? '저장 중…' : '저장'}
                             </button>
                           </div>
                         </div>
@@ -611,13 +734,11 @@ const Settings = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setDeleteAccountModalOpen(false);
-                    navigate('/');
-                  }}
-                  className="flex-1 rounded-[14px] bg-[#9388FA] py-3.5 text-[15px] font-semibold text-white shadow-[0px_8px_20px_rgba(147,136,250,0.45)] transition active:scale-[0.98]"
+                  disabled={deleteSubmitting}
+                  onClick={() => void handleDeleteAccount()}
+                  className="flex-1 rounded-[14px] bg-[#9388FA] py-3.5 text-[15px] font-semibold text-white shadow-[0px_8px_20px_rgba(147,136,250,0.45)] transition active:scale-[0.98] disabled:opacity-50"
                 >
-                  확인
+                  {deleteSubmitting ? '처리 중…' : '확인'}
                 </button>
               </div>
             </div>

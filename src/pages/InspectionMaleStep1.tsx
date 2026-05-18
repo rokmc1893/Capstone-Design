@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Settings } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
+import { syncMaleInspectionStep } from '../lib/testsSessionSync';
 import { useSimulatorStore } from '../store/useSimulatorStore';
 
 const inputClassName =
@@ -82,6 +83,7 @@ const InspectionMaleStep1 = () => {
       heightCm: validation.heightCm,
       weightKg: validation.weightKg,
     });
+    void syncMaleInspectionStep(1);
     navigate('/inspection/male/2');
   }, [applyInspectionStep1, navigate, validation]);
 
