@@ -23,6 +23,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
+import { applyUserMeToStores } from '../lib/userProfileSync';
 import { useAuthStore } from '../store/useAuthStore';
 
 const KakaoCallback = () => {
@@ -37,6 +38,7 @@ const KakaoCallback = () => {
     const nickname = searchParams.get('nickname');
 
     if (accessToken && refreshToken) {
+      const resolvedNickname = nickname?.trim() || '사용자';
       setAuth({
         method: 'kakao',
         email: null,
@@ -44,10 +46,14 @@ const KakaoCallback = () => {
         refreshToken,
         user: {
           userId: Number(userId ?? 0),
-          nickname: nickname ?? '사용자',
+          nickname: resolvedNickname,
           profileImageUrl: null,
           isTermsAgreed: false,
         },
+      });
+      applyUserMeToStores({
+        nickname: resolvedNickname,
+        profileImageUrl: null,
       });
       navigate('/home', { replace: true });
     } else {

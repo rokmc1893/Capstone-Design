@@ -15,6 +15,7 @@ import { ApiError } from '../lib/api';
 import { deleteUserMe, fetchUserMe, patchUserMe } from '../lib/homeMissionsApi';
 import { applyUserMeToStores } from '../lib/userProfileSync';
 import { useUserProfileStore } from '../store/useUserProfileStore';
+import { getDisplayName } from '../lib/displayName';
 import { useAuthStore } from '../store/useAuthStore';
 
 
@@ -40,6 +41,11 @@ const Settings = () => {
 
   const profileName = useUserProfileStore((s) => s.name);
   const profileNickname = useUserProfileStore((s) => s.nickname);
+  const displayName = getDisplayName(
+    authUser?.nickname,
+    profileNickname,
+    profileName,
+  );
   const profileGender = useUserProfileStore((s) => s.gender);
   const setProfileName = useUserProfileStore((s) => s.setName);
   const setProfileNickname = useUserProfileStore((s) => s.setNickname);
@@ -247,7 +253,7 @@ const Settings = () => {
               </div>
               <div className="min-w-0">
                 <p className="text-[20px] font-bold leading-[24px] text-white tracking-[-0.2px] whitespace-nowrap">
-                  {profileName} 님
+                  {displayName} 님
                 </p>
                 <p className="mt-1 text-[13px] leading-[18px] text-white/80">
                   {profileLoading ? '불러오는 중…' : profileNickname}

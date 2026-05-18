@@ -15,8 +15,8 @@ interface UserProfileState {
 export const useUserProfileStore = create<UserProfileState>()(
   persist(
     (set) => ({
-      name: '나담',
-      nickname: '담나',
+      name: '',
+      nickname: '',
       gender: '여자',
       setName: (name) => set({ name }),
       setNickname: (nickname) => set({ nickname }),

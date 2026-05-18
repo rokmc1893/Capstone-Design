@@ -11,13 +11,18 @@ import {
   homeActionSubtitle,
   resolveHomeActions,
 } from '../lib/homeActions';
+import { getDisplayName } from '../lib/displayName';
 import { fetchLatestResultReportForHome, getRiskLevelLabel } from '../lib/resultReport';
+import { useAuthStore } from '../store/useAuthStore';
 import type { HomeActionDto } from '../types/backendApi';
 import type { ResultReport } from '../types/resultReport';
 
 const Home = () => {
   const navigate = useNavigate();
-  const userName = useUserProfileStore((s) => s.name);
+  const authNickname = useAuthStore((s) => s.user?.nickname);
+  const profileName = useUserProfileStore((s) => s.name);
+  const profileNickname = useUserProfileStore((s) => s.nickname);
+  const userName = getDisplayName(authNickname, profileNickname, profileName);
   const risk = useSimulatorStore((s) => s.risk);
   const heightCm = useSimulatorStore((s) => s.heightCm);
   const weightKg = useSimulatorStore((s) => s.weightKg);
@@ -49,7 +54,10 @@ const Home = () => {
       if (!mounted) return;
       setHomeActions(resolveHomeActions(home?.actions));
       const nickname = home?.user?.nickname?.trim();
-      if (nickname) useUserProfileStore.getState().setNickname(nickname);
+      if (nickname) {
+        useUserProfileStore.getState().setNickname(nickname);
+        useUserProfileStore.getState().setName(nickname);
+      }
       setLatestReport(report ?? null);
     })();
     return () => {

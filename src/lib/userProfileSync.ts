@@ -7,6 +7,7 @@ export function applyUserMeToStores(dto: UserMeDto): void {
   if (dto.nickname?.trim()) {
     const nickname = dto.nickname.trim();
     useUserProfileStore.getState().setNickname(nickname);
+    useUserProfileStore.getState().setName(nickname);
     useAuthStore.getState().updateUserProfile({
       nickname,
       profileImageUrl: dto.profileImageUrl ?? null,
