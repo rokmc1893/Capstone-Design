@@ -1,0 +1,67 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# HTTPS → HTTP API (mixed content) 우회
+[[redirects]]
+  from = "/auth/*"
+  to = "http://3.27.238.246:8080/auth/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/oauth/kakao/login"
+  to = "http://3.27.238.246:8080/oauth/kakao/login"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/*"
+  to = "http://3.27.238.246:8080/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/users/*"
+  to = "http://3.27.238.246:8080/users/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tests/*"
+  to = "http://3.27.238.246:8080/tests/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/results/*"
+  to = "http://3.27.238.246:8080/results/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/missions/sprout/*"
+  to = "http://3.27.238.246:8080/missions/sprout/:splat"
+  status = 200
+  force = true
+
+# API 전용 (화면 경로와 겹침 → Accept로 구분)
+[[redirects]]
+  from = "/home"
+  to = "http://3.27.238.246:8080/home"
+  status = 200
+  force = true
+  conditions = {Accept = ["application/json"]}
+
+[[redirects]]
+  from = "/inspection-reports/*"
+  to = "http://3.27.238.246:8080/inspection-reports/:splat"
+  status = 200
+  force = true
+  conditions = {Accept = ["application/json"]}
+
+# React Router SPA (직접 URL·새로고침·공유 링크)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
