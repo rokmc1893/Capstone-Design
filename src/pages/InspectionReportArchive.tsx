@@ -229,7 +229,7 @@ const InspectionReportArchive = () => {
           {rounds.length > 0 ? (
             <section className="mt-4 shrink-0" aria-label="달력에서 검사일 선택">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-[12px] font-semibold tracking-wide text-white/88">검사일</p>
+                <p className="text-[12px] font-semibold tracking-wide text-white/88">날짜 선택</p>
                 <button
                   type="button"
                   onClick={() => setSelectedDay(null)}

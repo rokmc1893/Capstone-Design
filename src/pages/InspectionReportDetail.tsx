@@ -3,6 +3,7 @@ import { ChevronLeft, Settings as SettingsIcon, Share2 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { InspectionReportFullView } from '../components/InspectionReportFullView';
 import { BottomTabNav } from '../components/BottomTabNav';
+import { typeBodySm, typeScreenTitle } from '../lib/typography';
 import { fetchInspectionArchive } from '../lib/inspectionArchive';
 import { findRoundMetaForResultId, healthRecordFromResultReport } from '../lib/healthReportApi';
 import { fetchLatestResultReport, fetchResultReport, parseResultId } from '../lib/resultReport';
@@ -137,7 +138,7 @@ const InspectionReportDetailPage = () => {
           <div className="absolute inset-0 bg-white/[0.06] backdrop-blur-[2px]" />
         </div>
 
-        <main className="relative z-10 flex min-h-0 flex-1 flex-col px-6 pt-12 pb-28">
+        <main className="relative z-10 flex min-h-0 flex-1 flex-col px-5 pt-11 pb-[100px] sm:px-6 sm:pt-12">
           <header className="flex shrink-0 items-center justify-between gap-2">
             <button
               type="button"
@@ -148,7 +149,9 @@ const InspectionReportDetailPage = () => {
               <ChevronLeft className="h-5 w-5" strokeWidth={2.25} />
             </button>
 
-            <h1 className="min-w-0 flex-1 text-center type-screen-title text-[18px] leading-[24px] drop-shadow-[0_1px_8px_rgba(60,40,100,0.25)]">
+            <h1
+              className={`min-w-0 flex-1 text-center ${typeScreenTitle} text-[18px] leading-[24px] drop-shadow-[0_1px_8px_rgba(60,40,100,0.25)]`}
+            >
               검사 리포트
             </h1>
 
@@ -172,21 +175,17 @@ const InspectionReportDetailPage = () => {
             </div>
           </header>
 
-          {record && !loading && !error ? (
-            <p className="mt-2 text-center text-[12px] font-medium tabular-nums text-white/82">
-              {record.date.length >= 10
-                ? record.date.slice(0, 10).replace(/^(\d{4})-(\d{2})-(\d{2})/, '$1.$2.$3')
-                : record.date}
-            </p>
-          ) : null}
-
-          <div className="mt-4 min-h-0 flex-1 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="mt-4 min-h-0 flex-1 overflow-y-auto overscroll-contain pt-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {loading ? (
-              <div className="flex h-40 items-center justify-center rounded-[20px] bg-white/[0.13] text-[13px] text-white/88 shadow-[0_12px_36px_rgba(45,30,90,0.18)] ring-1 ring-white/25 backdrop-blur-xl">
+              <div
+                className={`flex h-44 items-center justify-center rounded-[24px] bg-white/[0.13] shadow-[0_12px_36px_rgba(45,30,90,0.18)] ring-1 ring-white/25 backdrop-blur-xl ${typeBodySm} text-white/88`}
+              >
                 리포트를 불러오는 중이에요...
               </div>
             ) : error ? (
-              <div className="rounded-[20px] bg-white/[0.13] px-4 py-6 text-center text-[13px] leading-relaxed text-white/92 shadow-[0_12px_36px_rgba(45,30,90,0.18)] ring-1 ring-white/25 backdrop-blur-xl">
+              <div
+                className={`rounded-[24px] bg-white/[0.13] px-5 py-8 text-center shadow-[0_12px_36px_rgba(45,30,90,0.18)] ring-1 ring-white/25 backdrop-blur-xl ${typeBodySm} leading-relaxed text-white/92`}
+              >
                 {error}
               </div>
             ) : record ? (

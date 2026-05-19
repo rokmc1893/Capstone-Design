@@ -16,12 +16,9 @@ const InspectionFemaleStep6 = () => {
     const base = import.meta.env.VITE_API_BASE_URL;
     if (base && sessionId) {
       try {
-        const { resultId } = await postTestSubmitFromStore(
-          sessionId,
-          useSimulatorStore.getState().pssAnswers,
-        );
+        await postTestSubmitFromStore(sessionId, useSimulatorStore.getState().pssAnswers);
         useTestSessionStore.getState().clearSession();
-        navigate(`/inspection-reports/detail?resultId=${String(resultId)}`);
+        navigate('/inspection-reports/archive');
         return;
       } catch {
         /* 세션 유지 후 보관함에서 재시도 가능 */
