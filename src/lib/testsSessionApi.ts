@@ -2,7 +2,7 @@ import { api } from './api';
 import type { TestSessionStartResult, TestSessionSubmitResult } from '../types/backendApi';
 import { pssAnswersFromStore, toApiGender } from './testsSessionMappers';
 
-export type ApiGender = 'MALE' | 'FEMALE';
+export type ApiGender = 'M' | 'F';
 
 export async function postTestsStart(gender: ApiGender): Promise<TestSessionStartResult> {
   const raw = await api.post<{ sessionId: number | string }>('/tests/start', { gender });

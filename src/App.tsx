@@ -13,6 +13,7 @@ import Settings from './pages/Settings';
 import NotificationSettings from './pages/NotificationSettings';
 import Simulator from './pages/Simulator';
 import Community from './pages/Community';
+import CommunityPostDetail from './pages/CommunityPostDetail';
 import Missions from './pages/Missions';
 import MissionsArchive from './pages/MissionsArchive';
 import InspectionGender from './pages/InspectionGender';
@@ -49,6 +50,7 @@ function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/missions" element={<Missions />} />
           <Route path="/community" element={<Community />} />
+          <Route path="/community/:postId" element={<CommunityPostDetail />} />
         </Route>
         <Route path="/inspection-reports/archive" element={<InspectionReportArchive />} />
         <Route path="/inspection-reports/detail" element={<InspectionReportDetail />} />

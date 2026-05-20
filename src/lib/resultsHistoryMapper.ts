@@ -21,7 +21,7 @@ function riskLevelToStatusLabel(riskLevel: string | undefined, score: number): s
   return riskToLabel(score);
 }
 
-function extractItems(raw: unknown): HistoryItemLike[] {
+export function extractHistoryItems(raw: unknown): HistoryItemLike[] {
   if (!raw) return [];
   if (Array.isArray(raw)) return raw as HistoryItemLike[];
   if (typeof raw !== 'object') return [];
@@ -49,13 +49,28 @@ function isoFromItem(it: HistoryItemLike): string {
 }
 
 function resultIdFromItem(it: HistoryItemLike): number {
-  const id = it.resultId ?? it.id;
-  return typeof id === 'number' && Number.isFinite(id) ? id : 0;
+  const direct = it.resultId ?? it.id;
+  if (typeof direct === 'number' && Number.isFinite(direct) && direct > 0) return direct;
+  if (typeof direct === 'string') {
+    const parsed = Number.parseInt(direct, 10);
+    if (Number.isFinite(parsed) && parsed > 0) return parsed;
+  }
+  const nested = (it as Record<string, unknown>).result;
+  if (nested && typeof nested === 'object') {
+    const r = nested as Record<string, unknown>;
+    const inner = r.resultId ?? r.id;
+    if (typeof inner === 'number' && Number.isFinite(inner) && inner > 0) return inner;
+    if (typeof inner === 'string') {
+      const parsed = Number.parseInt(inner, 10);
+      if (Number.isFinite(parsed) && parsed > 0) return parsed;
+    }
+  }
+  return 0;
 }
 
 /** 검사 이력 API → 보관함 캘린더용 아카이브 트리 */
 export function mapResultsHistoryToInspectionArchive(raw: unknown): InspectionArchiveResponse {
-  const items = extractItems(raw);
+  const items = extractHistoryItems(raw);
   const sorted = [...items].sort(
     (a, b) => new Date(isoFromItem(b)).getTime() - new Date(isoFromItem(a)).getTime(),
   );

@@ -22,11 +22,8 @@ import {
 import { missionErrorMessage } from '../lib/missionApiMessages';
 import { fetchLatestResultReport, fetchLatestResultReportForHome } from '../lib/resultReport';
 import { useAuthStore } from '../store/useAuthStore';
-import {
-  DAILY_REWARD_CAP_MESSAGE,
-  isDailyRewardCapActive,
-  useBloomMissionsStore,
-} from '../store/useBloomMissionsStore';
+import { DailyRewardCapBanner } from '../components/missions/DailyRewardCapBanner';
+import { isDailyRewardCapActive, useBloomMissionsStore } from '../store/useBloomMissionsStore';
 import { useSimulatorStore } from '../store/useSimulatorStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import {
@@ -54,9 +51,9 @@ const Missions = () => {
   const [missionSource, setMissionSource] = useState<'api' | 'report'>('report');
   const [missionBanner, setMissionBanner] = useState<string | null>(null);
 
-  const markMissionCompleted = useBloomMissionsStore((s) => s.markMissionCompleted);
-  const applyHomeSprout = useBloomMissionsStore((s) => s.applyHomeSprout);
-  const syncDailyRewardCapReached = useBloomMissionsStore((s) => s.syncDailyRewardCapReached);
+  const markMissionCompleted = useBloomMissionsStore.getState().markMissionCompleted;
+  const applyHomeSprout = useBloomMissionsStore.getState().applyHomeSprout;
+  const syncDailyRewardCapReached = useBloomMissionsStore.getState().syncDailyRewardCapReached;
 
   useEffect(() => {
     let mounted = true;
@@ -67,7 +64,13 @@ const Missions = () => {
           const [todayPayload, home] = await Promise.all([fetchMissionsToday(), fetchHomeDashboard()]);
           if (!mounted) return;
           const sprout = pickSproutFromHome(home);
-          if (sprout) applyHomeSprout({ level: sprout.level, exp: sprout.exp });
+          if (sprout) {
+            applyHomeSprout({
+              level: sprout.level,
+              exp: sprout.exp,
+              flowerType: sprout.flowerType ?? sprout.currentFlowerType,
+            });
+          }
           const capFromHome = pickDailyRewardCapFromHome(home);
           if (capFromHome) syncDailyRewardCapReached(true);
           if (todayPayload.dailyRewardCapReached) syncDailyRewardCapReached(true);
@@ -116,14 +119,7 @@ const Missions = () => {
     return () => {
       mounted = false;
     };
-  }, [
-    hasApiBase,
-    nickname,
-    accessToken,
-    applyHomeSprout,
-    markMissionCompleted,
-    syncDailyRewardCapReached,
-  ]);
+  }, [hasApiBase, nickname, accessToken]);
   const level = useBloomMissionsStore((s) => s.level);
   const xp = useBloomMissionsStore((s) => s.xp);
   const completed = useBloomMissionsStore((s) => s.completed);
@@ -167,8 +163,9 @@ const Missions = () => {
         applyMissionCompleteDto(dto);
         markMissionCompleted(m.id);
         if (dto.newFlower) {
-          const last = useBloomMissionsStore.getState().bloomRecords.at(-1);
-          if (last) setCelebrateFlower(getMissionFlower(last.flowerId));
+          const after = useBloomMissionsStore.getState();
+          const fid = after.bloomRecords.at(-1)?.flowerId ?? after.selectedFlowerId;
+          setCelebrateFlower(getMissionFlower(fid));
         }
       } catch (e) {
         setMissionBanner(missionErrorMessage(e));
@@ -199,18 +196,25 @@ const Missions = () => {
 
   const stages = [1, 2, 3, 4, 5] as const;
 
-  return (
-    <>
-      <header className="relative z-10 shrink-0 pt-2">
-          <StatusBar />
-        </header>
+  const plantImageKey = `${selectedFlowerId}-stage-${level}`;
 
-        <main className="relative z-10 flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain px-6 pb-[104px] pt-3">
-          <div className="flex shrink-0 items-center justify-between">
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => navigate(-1)}
+  return (
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <header className="relative z-10 shrink-0 pt-2">
+        <StatusBar />
+      </header>
+
+      <main className="relative z-10 flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain px-6 pb-[104px] pt-3">
+        {dailyRewardCapActive ? (
+          <div className="sticky top-0 z-20 -mx-6 mb-2 shrink-0 bg-gradient-to-b from-[#7B6EE8]/95 via-[#7B6EE8]/80 to-transparent px-6 pb-2 pt-0">
+            <DailyRewardCapBanner />
+          </div>
+        ) : null}
+        <div className="flex shrink-0 items-center justify-between">
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => navigate('/home')}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm active:scale-[0.97]"
                 aria-label="뒤로 이동"
               >
@@ -232,14 +236,6 @@ const Missions = () => {
             최신 검사 결과를 바탕으로 미션이 구성됩니다. 완료할 때마다 경험치가 쌓이고, 단계가 올라가면 무작위로 정해진
             꽃이 자라요. 한 번 피우고 나면 다음에는 다른 꽃이 나올 수 있어요.
           </p>
-          {dailyRewardCapActive ? (
-            <p
-              className={`mt-2.5 shrink-0 rounded-[12px] bg-black/20 px-3.5 py-2.5 ${typeCaptionXs} text-white/82`}
-              role="status"
-            >
-              {DAILY_REWARD_CAP_MESSAGE}
-            </p>
-          ) : null}
           {missionBanner ? (
             <p className={`mt-2.5 shrink-0 rounded-[12px] bg-black/20 px-3.5 py-2.5 ${typeCaptionXs} text-white/82`}>
               {missionBanner}
@@ -352,9 +348,10 @@ const Missions = () => {
               <div className="relative flex min-h-[140px] w-full max-w-[240px] items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]">
                 {stageImageSrc ? (
                   <img
+                    key={plantImageKey}
                     src={stageImageSrc}
                     alt={`${selectedFlower.nameKo} ${GROWTH_STAGE_LABELS[level]}`}
-                    className="max-h-[200px] w-auto max-w-full object-contain object-bottom drop-shadow-[0_12px_28px_rgba(15,23,42,0.45)]"
+                    className="max-h-[200px] w-auto max-w-full object-contain object-bottom drop-shadow-[0_12px_28px_rgba(15,23,42,0.45)] transition-opacity duration-500"
                   />
                 ) : (
                   <>
@@ -408,14 +405,14 @@ const Missions = () => {
               </div>
             </div>
           </section>
-        </main>
+      </main>
 
       <FlowerBloomCelebrationModal
         flower={celebrateFlower ?? selectedFlower}
         open={celebrateFlower !== null}
         onClose={() => setCelebrateFlower(null)}
       />
-    </>
+    </div>
   );
 };
 

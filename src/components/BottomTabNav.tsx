@@ -37,7 +37,7 @@ function getSelectedTab(pathname: string): TabKey {
     return 'home';
   }
   if (pathname === '/missions' || pathname.startsWith('/missions/')) return 'missions';
-  if (pathname === '/community') return 'community';
+  if (pathname === '/community' || pathname.startsWith('/community/')) return 'community';
   return 'home';
 }
 

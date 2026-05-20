@@ -28,8 +28,8 @@ interface BloomMissionsState {
   applyMissionCompleteDto: (dto: MissionCompleteResponseDto) => void;
   /** API 미션 행만 완료 체크 (경험치는 applyMissionCompleteDto에서 반영) */
   markMissionCompleted: (id: string) => void;
-  /** `GET /home`의 `user.level` / `user.exp` 반영 */
-  applyHomeSprout: (payload: { level?: number; exp?: number }) => void;
+  /** `GET /home`의 `user.level` / `user.exp` / 꽃 종류 반영 */
+  applyHomeSprout: (payload: { level?: number; exp?: number; flowerType?: string | null }) => void;
   /** 로컬 날짜(YYYY-MM-DD) 기준 오늘 일일 경험치 상한 도달일 (자정 이후 무효) */
   dailyRewardCapDate: string | null;
   /** API·미션 완료 응답으로 일일 경험치 상한 상태 동기화 */
@@ -101,21 +101,35 @@ export const useBloomMissionsStore = create<BloomMissionsState>()(
         set((prev) => {
           const next: Partial<BloomMissionsState> = {};
           if (dto.dailyRewardCapReached) next.dailyRewardCapDate = localDateKey();
+
+          const activeFlower = parseFlowerIdFromNewFlower(
+            dto.currentFlowerType ?? dto.flowerType,
+          );
+          if (activeFlower) next.selectedFlowerId = activeFlower;
+
           if (dto.currentLevel != null) next.level = clampSproutLevel(dto.currentLevel);
           if (dto.currentExp != null) next.xp = Math.max(0, Math.round(dto.currentExp));
           if (dto.requiredExpForCurrentLevel != null) {
             next.requiredExpForNext = Math.max(1, Math.round(dto.requiredExpForCurrentLevel));
           }
-          const fid = parseFlowerIdFromNewFlower(dto.newFlower);
-          if (!fid) {
+
+          const bloomFlower = parseFlowerIdFromNewFlower(dto.newFlower);
+          if (!bloomFlower) {
             return { ...prev, ...next };
           }
-          const bloomRecords = [...prev.bloomRecords, { flowerId: fid, completedAt: new Date().toISOString() }];
+
+          const bloomRecords = [
+            ...prev.bloomRecords,
+            { flowerId: bloomFlower, completedAt: new Date().toISOString() },
+          ];
           return {
             ...prev,
             ...next,
+            selectedFlowerId: bloomFlower,
             bloomRecords,
             blooms: prev.blooms + 1,
+            level: dto.currentLevel != null ? clampSproutLevel(dto.currentLevel) : 1,
+            xp: dto.currentExp != null ? Math.max(0, Math.round(dto.currentExp)) : 0,
           };
         });
       },
@@ -123,11 +137,15 @@ export const useBloomMissionsStore = create<BloomMissionsState>()(
         set((s) => ({
           completed: { ...s.completed, [id]: true },
         })),
-      applyHomeSprout: ({ level, exp }) =>
-        set((s) => ({
-          level: level != null ? clampSproutLevel(level) : s.level,
-          xp: exp != null ? Math.max(0, Math.round(exp)) : s.xp,
-        })),
+      applyHomeSprout: ({ level, exp, flowerType }) =>
+        set((s) => {
+          const fid = flowerType != null ? parseFlowerIdFromNewFlower(flowerType) : null;
+          return {
+            level: level != null ? clampSproutLevel(level) : s.level,
+            xp: exp != null ? Math.max(0, Math.round(exp)) : s.xp,
+            ...(fid ? { selectedFlowerId: fid } : {}),
+          };
+        }),
       toggleMission: (id) => {
         const prev = get();
         const wasDone = prev.completed[id];

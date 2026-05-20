@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { InspectionPssStepPage } from '../components/inspection/InspectionPssStepPage';
+import { navigateAfterTestSubmit } from '../lib/inspectionReportNav';
 import { postTestSubmitFromStore } from '../lib/testsSessionApi';
 import { syncFemaleInspectionProgressStep } from '../lib/testsSessionSync';
 import { useSimulatorStore } from '../store/useSimulatorStore';
@@ -16,9 +17,12 @@ const InspectionFemaleStep6 = () => {
     const base = import.meta.env.VITE_API_BASE_URL;
     if (base && sessionId) {
       try {
-        await postTestSubmitFromStore(sessionId, useSimulatorStore.getState().pssAnswers);
+        const submitResult = await postTestSubmitFromStore(
+          sessionId,
+          useSimulatorStore.getState().pssAnswers,
+        );
         useTestSessionStore.getState().clearSession();
-        navigate('/inspection-reports/archive');
+        navigateAfterTestSubmit(navigate, submitResult);
         return;
       } catch {
         /* 세션 유지 후 보관함에서 재시도 가능 */

@@ -128,6 +128,33 @@ export function sortArchiveYears(years: InspectionYear[]): InspectionYear[] {
   return [...years].sort((a, b) => b.year - a.year);
 }
 
+/** 전체 검사 라운드 — 최신순 */
+export function flattenArchiveRounds(archive: InspectionArchiveResponse): InspectionRound[] {
+  const out: InspectionRound[] = [];
+  for (const y of archive.years) {
+    for (const mo of y.months) {
+      out.push(...mo.rounds);
+    }
+  }
+  return out.sort(
+    (a, b) => new Date(b.inspectedAt).getTime() - new Date(a.inspectedAt).getTime(),
+  );
+}
+
+/** 같은 연·월 검사만 — 최신순 */
+export function roundsInMonth(
+  archive: InspectionArchiveResponse,
+  year: number,
+  month: number,
+): InspectionRound[] {
+  const yearEntry = getYearEntry(archive, year);
+  const monthEntry = getMonthEntry(yearEntry, month);
+  const rounds = monthEntry?.rounds ?? [];
+  return [...rounds].sort(
+    (a, b) => new Date(b.inspectedAt).getTime() - new Date(a.inspectedAt).getTime(),
+  );
+}
+
 export function getYearEntry(
   archive: InspectionArchiveResponse,
   year: number,
@@ -183,12 +210,34 @@ export function pickMonthWhenYearChanges(
   return active[0];
 }
 
+/** ISO 시각 → 로컬 달력 날짜(YYYY-MM-DD). UTC slice만 쓰면 달력 점·필터가 어긋날 수 있음 */
+export function localDateKeyFromIso(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) {
+    const fallback = iso.slice(0, 10);
+    return /^\d{4}-\d{2}-\d{2}$/.test(fallback) ? fallback : '';
+  }
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+export function roundsOnLocalDate(
+  rounds: InspectionRound[],
+  localDateKey: string,
+): InspectionRound[] {
+  return rounds
+    .filter((r) => localDateKeyFromIso(r.inspectedAt) === localDateKey)
+    .sort((a, b) => new Date(b.inspectedAt).getTime() - new Date(a.inspectedAt).getTime());
+}
+
 /** 해당 월 검사일(로컬 YYYY-MM-DD) 목록 — 중복 제거·정렬 */
 export function distinctInspectionDatesInMonth(rounds: InspectionRound[]): string[] {
   const set = new Set<string>();
   for (const r of rounds) {
-    const d = r.inspectedAt.slice(0, 10);
-    if (/^\d{4}-\d{2}-\d{2}$/.test(d)) set.add(d);
+    const d = localDateKeyFromIso(r.inspectedAt);
+    if (d) set.add(d);
   }
   return [...set].sort();
 }

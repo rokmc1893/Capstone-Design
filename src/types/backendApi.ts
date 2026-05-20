@@ -4,12 +4,18 @@ export type HomeUserDto = {
   level?: number;
   exp?: number;
   dailyRewardCapReached?: boolean;
+  /** 서버 새싹 꽃 종류 (`PEONY` 등) */
+  flowerType?: string;
+  currentFlowerType?: string;
 };
 
+/** `GET /home` — `result.recentTest` */
 export type HomeRecentTestDto = {
   resultId?: number;
   score?: number;
   riskLevel?: string;
+  topFactors?: string[];
+  createdAt?: string;
 };
 
 export type HomeActionType = 'TEST' | 'BODY_STATUS' | 'GUIDE' | 'SETTINGS';
@@ -70,8 +76,11 @@ export type MissionCompleteResponseDto = {
   isLevelUp?: boolean;
   alreadyCompleted?: boolean;
   dailyRewardCapReached?: boolean;
-  /** `PEONY` | `BABYS_BREATH` | `LOTUS` 또는 null */
+  /** `PEONY` | `BABYS_BREATH` | `LOTUS` 또는 null — 개화(보관함 추가) 시 */
   newFlower?: string | null;
+  /** 레벨 5 달성 중·개화 전 현재 키우는 꽃 */
+  currentFlowerType?: string | null;
+  flowerType?: string | null;
 };
 
 export type MissionHistoryLogDto = {
@@ -90,11 +99,25 @@ export type FlowerCollectionEntryDto = {
   achievedAt?: string;
 };
 
+export type UserMeGender = 'M' | 'F' | 'MALE' | 'FEMALE';
+
+/** `GET /users/me` · `PATCH /users/me` 응답 (`UserInfoDTO`) */
 export type UserMeDto = {
   userId?: number;
   nickname?: string;
+  /** 홈 인사말용 표시 이름 (1~20자) */
+  displayName?: string | null;
   profileImageUrl?: string | null;
+  gender?: UserMeGender | string | null;
   isTermsAgreed?: boolean;
+};
+
+/** `PATCH /users/me` 요청 (`UpdateProfileDTO`) */
+export type UpdateProfileDto = {
+  nickname?: string;
+  displayName?: string | null;
+  profileImageUrl?: string | null;
+  gender?: UserMeGender | string;
 };
 
 export type ResultsHistoryItemDto = {

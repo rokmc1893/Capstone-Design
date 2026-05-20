@@ -1,10 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ChevronLeft, Settings as SettingsIcon, Share2 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Activity, ChevronLeft } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { InspectionReportFullView } from '../components/InspectionReportFullView';
-import { BottomTabNav } from '../components/BottomTabNav';
+import { MobileGlassBackdrop } from '../components/ui/MobileGlassBackdrop';
+import { GRADIENT_BG_STYLE, MOBILE_FRAME } from '../components/ui/glassStyles';
 import { typeBodySm, typeScreenTitle } from '../lib/typography';
-import { fetchInspectionArchive } from '../lib/inspectionArchive';
+import {
+  fetchInspectionArchive,
+  flattenArchiveRounds,
+  type InspectionRound,
+} from '../lib/inspectionArchive';
 import { findRoundMetaForResultId, healthRecordFromResultReport } from '../lib/healthReportApi';
 import { fetchLatestResultReport, fetchResultReport, parseResultId } from '../lib/resultReport';
 import type { HealthRecord } from '../types/healthReport';
@@ -32,6 +37,7 @@ const InspectionReportDetailPage = () => {
   const nickname = useUserProfileStore((state) => state.nickname || state.name);
 
   const [record, setRecord] = useState<HealthRecord | null>(null);
+  const [inspectionRounds, setInspectionRounds] = useState<InspectionRound[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,7 +61,10 @@ const InspectionReportDetailPage = () => {
 
         if (source === 'latest') {
           const hr = await resolveLatestHealthRecord();
-          if (mounted) setRecord(hr);
+          if (!mounted) return;
+          setRecord(hr);
+          const archive = await fetchInspectionArchive();
+          if (mounted) setInspectionRounds(flattenArchiveRounds(archive));
           return;
         }
 
@@ -77,7 +86,10 @@ const InspectionReportDetailPage = () => {
 
         if (resultId === null) {
           const hr = await resolveLatestHealthRecord();
-          if (mounted) setRecord(hr);
+          if (!mounted) return;
+          setRecord(hr);
+          const archive = await fetchInspectionArchive();
+          if (mounted) setInspectionRounds(flattenArchiveRounds(archive));
           return;
         }
 
@@ -88,7 +100,9 @@ const InspectionReportDetailPage = () => {
         const meta = findRoundMetaForResultId(archive, resultId) ?? todayMeta(String(resultId));
         const hr = healthRecordFromResultReport(rp, meta);
 
-        if (mounted) setRecord(hr);
+        if (!mounted) return;
+        setRecord(hr);
+        setInspectionRounds(flattenArchiveRounds(archive));
       } catch {
         if (!mounted) return;
         setError('상세 리포트를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
@@ -104,97 +118,52 @@ const InspectionReportDetailPage = () => {
     };
   }, [nickname, resultIdParam, roundId, source]);
 
-  const shareReport = useCallback(async () => {
-    if (!record) return;
-    const title = '검사 리포트';
-    const text = `${nickname}님의 종합 점수는 ${record.score}점 / 100점입니다.`;
-    const url = window.location.href;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title, text, url });
-      } else {
-        await navigator.clipboard.writeText(`${title}\n${text}\n${url}`);
-      }
-    } catch {
-      /* 사용자 취소 또는 미지원 */
-    }
-  }, [nickname, record]);
-
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white p-4">
-      <div
-        className="relative flex h-[844px] w-[390px] flex-col overflow-hidden rounded-[28px] shadow-xl"
-        style={{
-          background:
-            'linear-gradient(180deg, #9388FA 0%, #A894F0 38%, #D4A8D8 72%, #E0A1CD 100%)',
-        }}
-      >
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-28 left-1/2 h-[320px] w-[320px] -translate-x-1/2 rounded-full bg-white/[0.18] blur-[48px]" />
-          <div className="absolute -top-24 left-[-40px] h-[240px] w-[240px] rounded-full bg-white/22 blur-[36px]" />
-          <div className="absolute top-[200px] right-[-80px] h-[280px] w-[280px] rounded-full bg-[#E0A1CD]/40 blur-[44px]" />
-          <div className="absolute bottom-[-60px] left-[-50px] h-[220px] w-[220px] rounded-full bg-[#9388FA]/35 blur-[40px]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.12] via-transparent to-white/[0.06]" />
-          <div className="absolute inset-0 bg-white/[0.06] backdrop-blur-[2px]" />
-        </div>
+    <div className="flex min-h-screen items-center justify-center bg-[#f4f2fa] p-4 font-sans">
+      <div className={MOBILE_FRAME} style={GRADIENT_BG_STYLE}>
+        <MobileGlassBackdrop />
 
-        <main className="relative z-10 flex min-h-0 flex-1 flex-col px-5 pt-11 pb-[100px] sm:px-6 sm:pt-12">
-          <header className="flex shrink-0 items-center justify-between gap-2">
-            <button
-              type="button"
-              onClick={() => navigate(backPath)}
-              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/15 text-white shadow-[0_8px_24px_rgba(60,40,120,0.2)] ring-1 ring-white/30 backdrop-blur-md transition active:scale-[0.98]"
-              aria-label="이전 화면으로 이동"
+        <header className="relative z-20 flex shrink-0 items-center justify-between gap-2 px-6 pt-11 pb-2">
+          <button
+            type="button"
+            onClick={() => navigate(backPath)}
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center text-white transition active:opacity-70"
+            aria-label="이전 화면으로 이동"
+          >
+            <ChevronLeft className="h-6 w-6" strokeWidth={2.25} />
+          </button>
+
+          <h1 className={`min-w-0 flex-1 text-center ${typeScreenTitle} text-[17px] text-white`}>
+            검사 리포트
+          </h1>
+
+          <button
+            type="button"
+            aria-label="검사 기록"
+            onClick={() => navigate('/inspection-reports/archive')}
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/90 text-[#7B6EE8] shadow-md active:scale-[0.97]"
+          >
+            <Activity className="h-5 w-5" strokeWidth={2} />
+          </button>
+        </header>
+
+        <main className="relative z-10 min-h-0 flex-1 overflow-y-auto overscroll-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {loading ? (
+            <div
+              className={`mx-6 flex h-44 items-center justify-center rounded-[24px] bg-white/15 ${typeBodySm} text-white/88`}
             >
-              <ChevronLeft className="h-5 w-5" strokeWidth={2.25} />
-            </button>
-
-            <h1
-              className={`min-w-0 flex-1 text-center ${typeScreenTitle} text-[18px] leading-[24px] drop-shadow-[0_1px_8px_rgba(60,40,100,0.25)]`}
-            >
-              검사 리포트
-            </h1>
-
-            <div className="flex shrink-0 items-center gap-1.5">
-              <button
-                type="button"
-                aria-label="리포트 공유"
-                onClick={() => void shareReport()}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-white/30 backdrop-blur-md transition active:scale-[0.98]"
-              >
-                <Share2 className="h-[18px] w-[18px]" strokeWidth={2.25} />
-              </button>
-              <button
-                type="button"
-                aria-label="설정"
-                onClick={() => navigate('/settings')}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/90 text-blackBg shadow-[0_10px_28px_rgba(40,30,80,0.22)] ring-1 ring-white/60 backdrop-blur-md transition active:scale-[0.98]"
-              >
-                <SettingsIcon className="h-5 w-5" />
-              </button>
+              리포트를 불러오는 중이에요...
             </div>
-          </header>
-
-          <div className="mt-4 min-h-0 flex-1 overflow-y-auto overscroll-contain pt-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {loading ? (
-              <div
-                className={`flex h-44 items-center justify-center rounded-[24px] bg-white/[0.13] shadow-[0_12px_36px_rgba(45,30,90,0.18)] ring-1 ring-white/25 backdrop-blur-xl ${typeBodySm} text-white/88`}
-              >
-                리포트를 불러오는 중이에요...
-              </div>
-            ) : error ? (
-              <div
-                className={`rounded-[24px] bg-white/[0.13] px-5 py-8 text-center shadow-[0_12px_36px_rgba(45,30,90,0.18)] ring-1 ring-white/25 backdrop-blur-xl ${typeBodySm} leading-relaxed text-white/92`}
-              >
-                {error}
-              </div>
-            ) : record ? (
-              <InspectionReportFullView record={record} />
-            ) : null}
-          </div>
+          ) : error ? (
+            <div
+              className={`mx-6 rounded-[24px] bg-white/15 px-5 py-8 text-center ${typeBodySm} leading-relaxed text-white/92`}
+            >
+              {error}
+            </div>
+          ) : record ? (
+            <InspectionReportFullView record={record} inspectionRounds={inspectionRounds} />
+          ) : null}
         </main>
-
-        <BottomTabNav />
       </div>
     </div>
   );

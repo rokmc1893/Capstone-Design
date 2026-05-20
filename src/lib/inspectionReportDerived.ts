@@ -5,6 +5,11 @@ import type {
   ResultQuestionnaireGroup,
   ResultReport,
 } from '../types/resultReport';
+import {
+  API_BINGE_LABELS,
+  API_DRINK_LABELS,
+  API_SMOKE_LABELS,
+} from './testsSessionMappers';
 
 export type ReportSnapshot = Pick<
   SimulatorState,
@@ -80,24 +85,18 @@ function femaleDrinkLabel(binge12: number): string {
 }
 
 function maleSmokeLabel(status: SimulatorState['smokeStatus']): string {
-  if (status === 'none') return '없음';
-  if (status === 'sometimes') return '가끔';
-  if (status === 'daily') return '매일';
-  return '—';
+  if (!status) return '—';
+  return API_SMOKE_LABELS[status];
 }
 
 function maleDrinkLabel(status: SimulatorState['drinkStatus']): string {
-  if (status === 'none') return '없음';
-  if (status === 'monthly1to3') return '월 1~3회';
-  if (status === 'weeklyOrMore') return '주 1회 이상';
-  return '—';
+  if (!status) return '—';
+  return API_DRINK_LABELS[status];
 }
 
 function maleBingeLabel(status: SimulatorState['bingeStatus']): string {
-  if (status === 'none') return '없음';
-  if (status === 'monthly1') return '월 1회';
-  if (status === 'weeklyOrMore') return '주 1회 이상';
-  return '—';
+  if (!status) return '—';
+  return API_BINGE_LABELS[status];
 }
 
 function femaleDiseaseSummary(fc: SimulatorState['femaleConditions']): string {

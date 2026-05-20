@@ -2,6 +2,7 @@ import { api } from './api';
 import { fetchHomeDashboard, fetchResultsHistoryRaw } from './homeMissionsApi';
 import { mapResultsHistoryToInspectionArchive } from './resultsHistoryMapper';
 import { enrichReportFromSimulator, wellnessScoreFromRisk } from './inspectionReportDerived';
+import { normalizeDetailReport } from './resultReportMapper';
 import { useSimulatorStore } from '../store/useSimulatorStore';
 import type { SimulatorState } from '../store/useSimulatorStore';
 import type { ResultReport, ResultRiskLevel } from '../types/resultReport';
@@ -285,7 +286,10 @@ export async function fetchResultReport(resultId: number): Promise<ResultReport>
   }
 
   try {
-    return await api.get<ResultReport>(`${RESULT_PATH}/${resultId}`);
+    const raw = await api.get<unknown>(`${RESULT_PATH}/${resultId}`);
+    const normalized = normalizeDetailReport(raw);
+    if (normalized) return normalized;
+    throw new Error('Invalid detail report payload');
   } catch {
     if (resultId === 123) return buildSampleReport();
     return buildMockReport(resultId, '담나', snapshot);

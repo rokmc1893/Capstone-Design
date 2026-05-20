@@ -18,6 +18,13 @@ export const glassCardInteractive = [
   'active:scale-[0.98]',
 ].join(' ');
 
+/** 홈 가로형 CTA 버튼 */
+export const glassHomeActionRow = [
+  glassCardInteractive,
+  'flex w-full flex-row items-center justify-between gap-4 p-5 text-left',
+  'min-h-[88px]',
+].join(' ');
+
 export const glassStatCard = [
   glassCard,
   'relative overflow-hidden',

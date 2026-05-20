@@ -1,23 +1,34 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Settings as SettingsIcon } from 'lucide-react';
+import { HomeScoreGauge } from '../components/home/HomeScoreGauge';
 import {
-  glassCard,
+  glassHomeActionRow,
   glassIconWell,
   glassSettingsButton,
   glassStatCard,
 } from '../components/ui/glassStyles';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import { useSimulatorStore } from '../store/useSimulatorStore';
-import { fetchHomeDashboard } from '../lib/homeMissionsApi';
+import {
+  fetchHomeDashboard,
+  fetchUserMe,
+  pickDailyRewardCapFromHome,
+} from '../lib/homeMissionsApi';
+import { applyUserMeToStores } from '../lib/userProfileSync';
+import { fetchHomeSummaryWithFallback } from '../lib/fetchHomeSummary';
+import { refreshUserProfileFromServer } from '../lib/userProfileApi';
+import type { HomeSummary } from '../lib/homeSummary';
 import {
   getHomeActionPath,
   homeActionIcon,
   homeActionSubtitle,
-  resolveHomeActions,
+  resolveHomePrimaryActions,
 } from '../lib/homeActions';
+import { inspectionReportDetailPath } from '../lib/inspectionReportNav';
 import { getDisplayName } from '../lib/displayName';
+import { wellnessScoreFromRisk } from '../lib/inspectionReportDerived';
 import { usePremiumMotion } from '../lib/motionPresets';
 import {
   typeBadge,
@@ -29,16 +40,16 @@ import {
   typeStatLabel,
   typeCaptionXs,
   typeStatPlaceholder,
-  typeStatValue,
 } from '../lib/typography';
-import { fetchLatestResultReportForHome, getRiskLevelLabel } from '../lib/resultReport';
+import { getRiskLevelLabel } from '../lib/resultReport';
 import { useAuthStore } from '../store/useAuthStore';
+import { useBloomMissionsStore } from '../store/useBloomMissionsStore';
 import type { HomeActionDto } from '../types/backendApi';
-import type { ResultReport } from '../types/resultReport';
 
 const Home = () => {
   const navigate = useNavigate();
   const { variants, stagger, spring, cardHover, cardTap } = usePremiumMotion();
+  const accessToken = useAuthStore((s) => s.accessToken);
   const authNickname = useAuthStore((s) => s.user?.nickname);
   const profileName = useUserProfileStore((s) => s.name);
   const profileNickname = useUserProfileStore((s) => s.nickname);
@@ -54,43 +65,71 @@ const Home = () => {
   const stressLevel = useSimulatorStore((s) => s.stressLevel);
 
   const hasApiBase = Boolean(import.meta.env.VITE_API_BASE_URL);
-  const [latestReport, setLatestReport] = useState<ResultReport | null | undefined>(undefined);
+  const [homeSummary, setHomeSummary] = useState<HomeSummary | null | undefined>(undefined);
   const [homeActions, setHomeActions] = useState<HomeActionDto[]>(() =>
-    resolveHomeActions(null),
+    resolveHomePrimaryActions(null),
   );
 
-  useEffect(() => {
+  const loadHomeData = useCallback(async () => {
     if (!hasApiBase) {
-      setLatestReport(null);
-      setHomeActions(resolveHomeActions(null));
+      setHomeSummary(null);
+      setHomeActions(resolveHomePrimaryActions(null, { hasRecentTest: false }));
       return;
     }
+    const [home, me] = await Promise.all([
+      fetchHomeDashboard(),
+      accessToken ? fetchUserMe().catch(() => null) : Promise.resolve(null),
+    ]);
+    if (me) applyUserMeToStores(me);
+
+    const nickname = home?.user?.nickname?.trim();
+    if (nickname) {
+      useUserProfileStore.getState().setNickname(nickname);
+    }
+    if (pickDailyRewardCapFromHome(home)) {
+      useBloomMissionsStore.getState().syncDailyRewardCapReached(true);
+    }
+    const summary = await fetchHomeSummaryWithFallback(home);
+    setHomeSummary(summary);
+    setHomeActions(
+      resolveHomePrimaryActions(home?.actions, {
+        hasRecentTest: summary != null && summary.resultId != null,
+      }),
+    );
+  }, [hasApiBase, accessToken]);
+
+  useEffect(() => {
     let mounted = true;
     void (async () => {
-      const [home, report] = await Promise.all([
-        fetchHomeDashboard(),
-        fetchLatestResultReportForHome(),
-      ]);
+      await loadHomeData();
       if (!mounted) return;
-      setHomeActions(resolveHomeActions(home?.actions));
-      const nickname = home?.user?.nickname?.trim();
-      if (nickname) {
-        useUserProfileStore.getState().setNickname(nickname);
-        useUserProfileStore.getState().setName(nickname);
-      }
-      setLatestReport(report ?? null);
     })();
     return () => {
       mounted = false;
     };
-  }, [hasApiBase]);
+  }, [loadHomeData]);
 
-  const actionCards = useMemo(
-    () => resolveHomeActions(homeActions),
-    [homeActions],
+  useEffect(() => {
+    if (!hasApiBase || !accessToken) return;
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') {
+        void refreshUserProfileFromServer();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [hasApiBase, accessToken]);
+
+  const latestResultId = homeSummary?.resultId ?? null;
+
+  const primaryActions = useMemo(
+    () =>
+      resolveHomePrimaryActions(homeActions, {
+        hasRecentTest: latestResultId != null && latestResultId > 0,
+      }),
+    [homeActions, latestResultId],
   );
 
-  const latestResultId = latestReport?.resultId ?? null;
   const hasInspectionResult = heightCm > 0 && weightKg > 0;
 
   const riskFactors = useMemo(() => {
@@ -109,186 +148,200 @@ const Home = () => {
     return factors.sort((a, b) => b.value - a.value);
   }, [age, alcohol, bmi, sleepHours, smoking, stressLevel]);
 
-  const serverFactors = useMemo(() => {
-    if (!latestReport) return null;
-    if (latestReport.topFactors?.length) return latestReport.topFactors;
-    if (latestReport.factorAnalyses?.length) {
-      return latestReport.factorAnalyses.map((f) => ({ label: f.factor, value: 0 }));
+  const showServerSummary = hasApiBase && homeSummary !== undefined && homeSummary !== null;
+  const showServerEmpty = hasApiBase && homeSummary === null;
+  const serverLoading = hasApiBase && homeSummary === undefined;
+  const canOpenLatestReport =
+    latestResultId != null && latestResultId > 0 && !serverLoading;
+
+  const displayScore = useMemo(() => {
+    if (showServerSummary && homeSummary?.score != null) return homeSummary.score;
+    if (hasInspectionResult) return wellnessScoreFromRisk(risk);
+    return null;
+  }, [showServerSummary, homeSummary, hasInspectionResult, risk]);
+
+  const displayRiskLabel = useMemo(() => {
+    if (showServerSummary && homeSummary?.riskLevel) {
+      return getRiskLevelLabel(homeSummary.riskLevel);
     }
-    if (latestReport.coreRiskBullets?.length) {
-      return latestReport.coreRiskBullets.slice(0, 6).map((t) => ({
-        label: t.length > 28 ? `${t.slice(0, 28)}…` : t,
-        value: 0,
-      }));
+    if (hasInspectionResult) {
+      return risk < 30 ? '양호' : risk < 60 ? '주의' : '고위험';
     }
     return null;
-  }, [latestReport]);
+  }, [showServerSummary, homeSummary, hasInspectionResult, risk]);
 
-  const showServerCards = hasApiBase && latestReport !== undefined && latestReport !== null;
-  const showServerEmpty = hasApiBase && latestReport === null;
-  const serverLoading = hasApiBase && latestReport === undefined;
+  const factorChips = useMemo(() => {
+    if (serverLoading) return null;
+    if (showServerSummary && homeSummary) {
+      return homeSummary.topFactors.length > 0
+        ? homeSummary.topFactors.slice(0, 4).map((label) => ({ label, value: 0 }))
+        : [];
+    }
+    if (showServerEmpty || !hasInspectionResult) return [];
+    return riskFactors.slice(0, 4);
+  }, [
+    serverLoading,
+    showServerSummary,
+    homeSummary,
+    showServerEmpty,
+    hasInspectionResult,
+    riskFactors,
+  ]);
+
+  const hasMoreFactors =
+    showServerSummary && homeSummary
+      ? homeSummary.topFactors.length > 4
+      : riskFactors.length > 4;
 
   return (
     <motion.div className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain px-6 pt-12 pb-[104px]">
-          <motion.header
-            className="flex items-start justify-between gap-4"
-            initial="hidden"
-            animate="visible"
-            variants={variants}
-          >
-            <div className="min-w-0">
-              <p className={typeGreeting}>반가워요, {userName} 님!</p>
-              <h1 className={`mt-2.5 ${typeHeroTitle} drop-shadow-[0_2px_16px_rgba(0,0,0,0.1)]`}>
-                오늘 하루도
-                <br />
-                좋은 결과가 있길
-              </h1>
-            </div>
-            <motion.button
+      <motion.header
+        className="flex items-start justify-between gap-4"
+        initial="hidden"
+        animate="visible"
+        variants={variants}
+      >
+        <div className="min-w-0">
+          <p className={typeGreeting}>반가워요, {userName} 님!</p>
+          <h1 className={`mt-2.5 ${typeHeroTitle} drop-shadow-[0_2px_16px_rgba(0,0,0,0.1)]`}>
+            오늘 하루도
+            <br />
+            좋은 결과가 있길
+          </h1>
+        </div>
+        <motion.button
+          type="button"
+          aria-label="설정"
+          onClick={() => navigate('/settings')}
+          className={glassSettingsButton}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.94 }}
+          transition={spring}
+        >
+          <SettingsIcon className="h-5 w-5" strokeWidth={2} />
+        </motion.button>
+      </motion.header>
+
+      <motion.section
+        className="mt-6 grid grid-cols-2 gap-3.5"
+        aria-label="검사 요약"
+        initial="hidden"
+        animate="visible"
+        variants={stagger}
+      >
+        <motion.div variants={variants} className="min-h-[148px]">
+          {canOpenLatestReport ? (
+            <button
               type="button"
-              aria-label="설정"
-              onClick={() => navigate('/settings')}
-              className={glassSettingsButton}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.94 }}
-              transition={spring}
-            >
-              <SettingsIcon className="h-5 w-5" strokeWidth={2} />
-            </motion.button>
-          </motion.header>
-
-          <motion.section
-            className="mt-9 grid grid-cols-2 gap-3.5"
-            aria-label="메인 메뉴"
-            initial="hidden"
-            animate="visible"
-            variants={stagger}
-          >
-            {actionCards.map((action) => {
-              const path = getHomeActionPath(action.type, { latestResultId });
-              const Icon = homeActionIcon(action.type);
-              const subtitle = homeActionSubtitle(action.type);
-              return (
-                <motion.button
-                  key={action.type}
-                  type="button"
-                  variants={variants}
-                  disabled={!path}
-                  onClick={() => {
-                    if (path) navigate(path);
-                  }}
-                  whileHover={cardHover}
-                  whileTap={cardTap}
-                  transition={spring}
-                  className={`group relative flex min-h-[122px] w-full flex-col justify-between p-5 text-left disabled:opacity-45 ${glassCard}`}
-                >
-                  <div className="min-w-0 pr-1">
-                    <p className={typeCardTitle}>{action.title}</p>
-                    {subtitle ? <p className={`mt-2 ${typeCardDesc}`}>{subtitle}</p> : null}
-                  </div>
-                  <div className={`mt-5 ${glassIconWell}`}>
-                    <Icon className="h-5 w-5 text-white/90" aria-hidden />
-                  </div>
-                  <span className="pointer-events-none absolute inset-0 rounded-[24px] bg-gradient-to-br from-white/[0.14] via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                </motion.button>
-              );
-            })}
-          </motion.section>
-
-          <motion.section
-            className="mt-7 grid grid-cols-2 gap-3.5"
-            aria-label="검사 요약"
-            initial="hidden"
-            animate="visible"
-            variants={stagger}
-          >
-            <motion.div
-              variants={variants}
-              className={`${glassStatCard} flex min-h-[124px] flex-col px-5 py-5`}
+              onClick={() => navigate(inspectionReportDetailPath(latestResultId!))}
+              className={`${glassStatCard} flex h-full min-h-[148px] w-full flex-col px-4 py-4 text-left transition active:scale-[0.98]`}
+              aria-label="최근 검사 결과 상세 리포트 보기"
             >
               <p className={typeStatLabel}>최근 검사 결과</p>
-              <div className="relative mt-auto flex flex-1 flex-col justify-end pt-3">
-                <motion.div className="pointer-events-none absolute -right-2 bottom-2 h-16 w-16 rounded-full bg-white/10 blur-2xl" aria-hidden />
-                {serverLoading ? (
-                  <p className={typeCaption}>불러오는 중…</p>
-                ) : showServerCards ? (
-                  <>
-                    <motion.p
-                      key={`score-${latestReport.score}`}
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className={typeStatValue}
-                    >
-                      {latestReport.score}점
-                    </motion.p>
-                    <p className={`mt-2.5 inline-flex w-fit rounded-full border border-white/20 bg-white/12 px-2.5 py-1 ${typeBadge}`}>
-                      {getRiskLevelLabel(latestReport.riskLevel)}
-                    </p>
-                  </>
-                ) : showServerEmpty || !hasInspectionResult ? (
-                  <p className={typeStatPlaceholder}>---</p>
-                ) : (
-                  <>
-                    <motion.p
-                      key={`risk-${risk}`}
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className={typeStatValue}
-                    >
-                      {risk.toFixed(0)}점
-                    </motion.p>
-                    <p className={`mt-2.5 inline-flex w-fit rounded-full border border-white/20 bg-white/12 px-2.5 py-1 ${typeBadge}`}>
-                      {risk < 30 ? '양호' : risk < 60 ? '주의' : '고위험'}
-                    </p>
-                  </>
-                )}
+              <div className="relative mt-2 flex flex-1 flex-col items-center justify-center">
+                <HomeScoreGauge score={displayScore!} />
+                {displayRiskLabel ? (
+                  <p
+                    className={`mt-2 inline-flex w-fit rounded-full border border-white/20 bg-white/12 px-2.5 py-1 ${typeBadge}`}
+                  >
+                    {displayRiskLabel}
+                  </p>
+                ) : null}
               </div>
-            </motion.div>
-
-            <motion.div
-              variants={variants}
-              className={`${glassStatCard} flex min-h-[124px] flex-col px-5 py-5`}
-            >
-              <p className={typeStatLabel}>주요 요인</p>
-              <div className="relative mt-auto flex flex-1 flex-col justify-end pt-3">
-                <div
-                  className="pointer-events-none absolute -left-1 bottom-0 h-14 w-14 rounded-full bg-[#F9A8D4]/20 blur-2xl"
-                  aria-hidden
-                />
+            </button>
+          ) : (
+            <div className={`${glassStatCard} flex min-h-[148px] flex-col px-4 py-4`}>
+              <p className={typeStatLabel}>최근 검사 결과</p>
+              <div className="relative mt-2 flex flex-1 flex-col items-center justify-center">
                 {serverLoading ? (
                   <p className={typeCaption}>불러오는 중…</p>
-                ) : showServerCards ? (
-                  <motion.div className="flex flex-wrap gap-1.5">
-                    {serverFactors && serverFactors.length > 0 ? (
-                      serverFactors.map((factor) => (
-                        <span
-                          key={`${factor.label}-${factor.value}`}
-                          className={`inline-flex max-w-full rounded-full border border-white/20 bg-white/12 px-2.5 py-1 ${typeBadge}`}
-                        >
-                          {factor.label}
-                        </span>
-                      ))
-                    ) : (
-                      <p className={typeCaptionXs}>표시할 주요 요인이 없습니다.</p>
-                    )}
-                  </motion.div>
-                ) : showServerEmpty || (!hasInspectionResult && !showServerCards) ? (
-                  <p className={typeStatPlaceholder}>---</p>
-                ) : (
-                  <div className="flex flex-wrap gap-1.5">
-                    {riskFactors.map((factor) => (
-                      <span
-                        key={factor.label}
-                        className={`inline-flex max-w-full rounded-full border border-white/20 bg-white/12 px-2.5 py-1 ${typeBadge}`}
+                ) : displayScore != null ? (
+                  <>
+                    <HomeScoreGauge score={displayScore} />
+                    {displayRiskLabel ? (
+                      <p
+                        className={`mt-2 inline-flex w-fit rounded-full border border-white/20 bg-white/12 px-2.5 py-1 ${typeBadge}`}
                       >
-                        {factor.label}
-                      </span>
-                    ))}
-                  </div>
+                        {displayRiskLabel}
+                      </p>
+                    ) : null}
+                  </>
+                ) : (
+                  <p className={typeStatPlaceholder}>---</p>
                 )}
               </div>
-            </motion.div>
-          </motion.section>
+            </div>
+          )}
+        </motion.div>
+
+        <motion.div
+          variants={variants}
+          className={`${glassStatCard} flex min-h-[148px] flex-col px-4 py-4`}
+        >
+          <p className={typeStatLabel}>주요 요인</p>
+          <div className="relative mt-3 flex flex-1 flex-col justify-center">
+            {serverLoading ? (
+              <p className={typeCaption}>불러오는 중…</p>
+            ) : factorChips && factorChips.length > 0 ? (
+              <div className="flex flex-col gap-1.5">
+                {factorChips.map((factor) => (
+                  <span
+                    key={factor.label}
+                    className={`inline-flex max-w-full truncate rounded-full border border-white/20 bg-white/12 px-2.5 py-1 ${typeBadge}`}
+                  >
+                    {factor.label}
+                  </span>
+                ))}
+                {hasMoreFactors ? (
+                  <span className={`${typeBadge} text-white/60`}>…</span>
+                ) : null}
+              </div>
+            ) : showServerSummary ? (
+              <p className={typeCaptionXs}>표시할 주요 요인이 없습니다.</p>
+            ) : (
+              <p className={typeStatPlaceholder}>---</p>
+            )}
+          </div>
+        </motion.div>
+      </motion.section>
+
+      <motion.section
+        className="mt-5 flex flex-col gap-3.5"
+        aria-label="메인 메뉴"
+        initial="hidden"
+        animate="visible"
+        variants={stagger}
+      >
+        {primaryActions.map((action) => {
+          const path = getHomeActionPath(action.type, { latestResultId });
+          const Icon = homeActionIcon(action.type);
+          const subtitle = homeActionSubtitle(action.type);
+          return (
+            <motion.button
+              key={action.type}
+              type="button"
+              variants={variants}
+              disabled={!path}
+              onClick={() => {
+                if (path) navigate(path);
+              }}
+              whileHover={cardHover}
+              whileTap={cardTap}
+              transition={spring}
+              className={`group relative disabled:opacity-45 ${glassHomeActionRow}`}
+            >
+              <div className="min-w-0 flex-1">
+                <p className={typeCardTitle}>{action.title}</p>
+                {subtitle ? <p className={`mt-1.5 ${typeCardDesc}`}>{subtitle}</p> : null}
+              </div>
+              <div className={glassIconWell}>
+                <Icon className="h-5 w-5 text-white/90" aria-hidden />
+              </div>
+              <span className="pointer-events-none absolute inset-0 rounded-[24px] bg-gradient-to-br from-white/[0.14] via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+            </motion.button>
+          );
+        })}
+      </motion.section>
     </motion.div>
   );
 };

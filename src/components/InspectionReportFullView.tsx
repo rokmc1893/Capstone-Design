@@ -1,112 +1,62 @@
-import { Moon, Sparkles, Target } from 'lucide-react';
+import { Check, Info, Sparkles, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { glassCard } from './ui/glassStyles';
-import {
-  typeBodySm,
-  typeCaption,
-  typeCaptionXs,
-  typeCardTitle,
-  typeReportBody,
-  typeReportHeading,
-  typeReportScore,
-  typeReportScoreSm,
-  typeReportSection,
-} from '../lib/typography';
-import type { HealthComparisonRow, HealthFactorCard, HealthRecord } from '../types/healthReport';
+import { InspectionDateSwitcher } from './inspection/InspectionDateSwitcher';
+import type { InspectionRound } from '../lib/inspectionArchive';
+import { formatReportDateLong } from '../lib/reportFormat';
+import type { HealthComparisonRow, HealthRecord } from '../types/healthReport';
 
 type InspectionReportFullViewProps = {
   record: HealthRecord;
+  inspectionRounds?: InspectionRound[];
 };
 
-const sectionCard = `${glassCard} p-5`;
-const innerPanel = 'rounded-[16px] bg-black/12 ring-1 ring-white/12';
+const whiteCard = 'rounded-[20px] bg-white px-4 py-4 shadow-[0_4px_20px_rgba(15,23,42,0.06)] ring-1 ring-black/[0.04]';
 
-function ReportSectionHeader({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
+function SectionIconBadge({ letter }: { letter: string }) {
   return (
-    <header className="mb-4">
-      <h2 className={typeReportHeading}>{title}</h2>
-      <p className={`mt-1.5 ${typeReportSection}`}>{description}</p>
-    </header>
-  );
-}
-
-function statusTone(status: HealthComparisonRow['status']): 'red' | 'blue' | 'green' {
-  if (status === 'Normal') return 'green';
-  if (status === 'Low') return 'blue';
-  return 'red';
-}
-
-function ComparisonBadge({ row }: { row: HealthComparisonRow }) {
-  const tone = statusTone(row.status);
-  const label = row.status === 'Normal' ? '정상' : row.status === 'Low' ? '낮음' : '높음';
-  const cls =
-    tone === 'green'
-      ? 'bg-emerald-500/30 text-emerald-50 ring-emerald-200/35'
-      : tone === 'blue'
-        ? 'bg-sky-500/30 text-sky-50 ring-sky-200/35'
-        : 'bg-rose-500/30 text-rose-50 ring-rose-200/35';
-  return (
-    <span className={`inline-flex shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ring-1 ${cls}`}>
-      {label}
+    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#7B6EE8] text-[12px] font-bold text-white">
+      {letter}
     </span>
   );
 }
 
-function ComparisonResultText({ row }: { row: HealthComparisonRow }) {
-  const tone = statusTone(row.status);
-  const cls =
-    tone === 'green' ? 'text-emerald-100' : tone === 'blue' ? 'text-sky-100' : 'text-rose-100';
-  return <span className={`text-[12px] font-medium leading-snug ${cls}`}>{row.result}</span>;
-}
-
-function risksAsFallbackCards(risks: string[]): HealthFactorCard[] {
-  return risks.map((line) => ({
-    factor: line.length > 36 ? `${line.slice(0, 36)}…` : line,
-    insight: line,
-    expectedChange: '생활 습관을 조금씩 바꾸면 체감될 수 있어요.',
-  }));
-}
-
-function RiskAnalysisCard({ card }: { card: HealthFactorCard }) {
-  return (
-    <article className={`${innerPanel} p-4`}>
-      <p className={typeCardTitle}>{card.factor}</p>
-      <div className="mt-3.5 space-y-2.5">
-        <div className="rounded-[14px] bg-white/[0.08] px-3.5 py-3 ring-1 ring-white/10">
-          <p className={`${typeCaptionXs} font-semibold uppercase tracking-wide text-white/55`}>
-            데이터 인사이트
-          </p>
-          <p className={`mt-1.5 ${typeReportBody}`}>{card.insight}</p>
-        </div>
-        <div className="rounded-[14px] bg-white/[0.08] px-3.5 py-3 ring-1 ring-white/10">
-          <p className={`${typeCaptionXs} font-semibold uppercase tracking-wide text-white/55`}>
-            기대 변화
-          </p>
-          <p className={`mt-1.5 ${typeReportBody}`}>{card.expectedChange}</p>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function formatInspectedDate(iso: string): string {
-  if (iso.length >= 10) {
-    return iso.slice(0, 10).replace(/^(\d{4})-(\d{2})-(\d{2})/, '$1.$2.$3');
+function comparisonPillClass(row: HealthComparisonRow): string {
+  const r = row.result;
+  if (row.status === 'High' || r.includes('위험') || r.includes('+')) {
+    return 'bg-[#FEE2E2] text-[#DC2626]';
   }
-  return iso;
+  if (row.status === 'Low' || r.includes('-') || r.includes('낮')) {
+    return 'bg-[#DBEAFE] text-[#2563EB]';
+  }
+  if (r.includes('좋') || r.includes('양호')) {
+    return 'bg-[#D1FAE5] text-[#059669]';
+  }
+  return 'bg-[#F3F4F6] text-[#4B5563]';
 }
 
-export function InspectionReportFullView({ record }: InspectionReportFullViewProps) {
+export function InspectionReportFullView({
+  record,
+  inspectionRounds = [],
+}: InspectionReportFullViewProps) {
   const navigate = useNavigate();
   const { inputData } = record;
   const genderLabel = record.gender === 'male' ? '남성' : '여성';
-  const inspectedLabel = formatInspectedDate(record.date);
+  const activeResultId = record.resultId ?? null;
+  const dateLabel = formatReportDateLong(record.date, record.week);
+  const scorePercent = Math.min(100, Math.max(0, record.score));
+
+  const openArchiveForDate = () => {
+    const [y, m] = record.date.split('-');
+    const year = parseInt(y, 10);
+    const month = parseInt(m, 10);
+    if (!Number.isFinite(year) || !Number.isFinite(month)) {
+      navigate('/inspection-reports/archive');
+      return;
+    }
+    navigate(
+      `/inspection-reports/archive?year=${year}&month=${month}&day=${record.date.slice(0, 10)}`,
+    );
+  };
 
   const summaryRows: { label: string; value: string }[] = [
     { label: '나이', value: `${inputData.age}세` },
@@ -133,226 +83,207 @@ export function InspectionReportFullView({ record }: InspectionReportFullViewPro
     { label: '수면 시간', value: inputData.sleep },
   );
 
-  const factorCards: HealthFactorCard[] =
-    record.factorCards && record.factorCards.length > 0
-      ? record.factorCards
-      : risksAsFallbackCards(record.risks);
+  const keyFactors =
+    record.risks.length > 0
+      ? record.risks
+      : (record.factorCards ?? []).map((c) => c.factor);
 
-  const pssLabel = `${record.pssScore}점 / 40점`;
-  const scorePercent = Math.min(100, Math.max(0, record.score));
-
-  const missionLines =
-    record.missionPreviews && record.missionPreviews.length > 0
-      ? record.missionPreviews.map((m) => `${m.title} — ${m.description}`)
-      : record.guides;
+  const guideLines =
+    record.guides.length > 0
+      ? record.guides
+      : (record.missionPreviews ?? []).map((m) => `${m.title}. ${m.description}`);
 
   return (
-    <div className="space-y-5 pb-2">
-      {/* 종합 점수 */}
+    <div className="-mx-6">
+      {activeResultId != null && inspectionRounds.length > 1 ? (
+        <div className="px-6 pb-3">
+          <InspectionDateSwitcher
+            rounds={inspectionRounds}
+            activeResultId={activeResultId}
+            className="rounded-[16px] bg-white/15 px-3 py-3 ring-1 ring-white/25"
+          />
+        </div>
+      ) : null}
+
+      {/* 목업: 보라 히어로 + HEALTH SCORE */}
       <section
-        className={`${glassCard} px-5 py-6 text-center shadow-[0_20px_48px_rgba(45,32,95,0.24)]`}
+        className="px-6 pb-10 pt-2 text-center text-white"
         aria-label="종합 건강 점수"
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(155,140,248,0.95) 0%, rgba(183,148,244,0.9) 55%, rgba(232,164,200,0.85) 100%)',
+        }}
       >
-        <p className={typeReportSection}>종합 건강 점수</p>
-        <p className={`mt-3 ${typeReportScore}`}>
+        <p className="text-[11px] font-semibold tracking-[0.2em] text-white/85">HEALTH SCORE</p>
+        <p className="mt-3 text-[40px] font-bold leading-none tracking-tight">
           {record.score}
-          <span className="ml-1 text-[22px] font-semibold text-white/65">/ 100</span>
+          <span className="ml-1 text-[22px] font-semibold text-white/75">점</span>
+          <span className="mx-2 text-[20px] font-medium text-white/50">/</span>
+          <span className="text-[22px] font-semibold text-white/75">100점</span>
         </p>
         <div
-          className="mx-auto mt-5 h-2 w-full max-w-[280px] overflow-hidden rounded-full bg-black/20 ring-1 ring-white/25"
+          className="mx-auto mt-5 h-2.5 w-full max-w-[280px] overflow-hidden rounded-full bg-black/15"
           role="progressbar"
           aria-valuenow={scorePercent}
           aria-valuemin={0}
           aria-valuemax={100}
         >
           <div
-            className="h-full rounded-full bg-gradient-to-r from-white via-white/85 to-white/55 transition-[width] duration-700 ease-out"
+            className="h-full rounded-full bg-white transition-[width] duration-700"
             style={{ width: `${scorePercent}%` }}
           />
         </div>
-        <p className={`mt-4 ${typeBodySm} text-white/78`}>
+        <p className="mt-5 text-[13px] leading-relaxed text-white/88">
           현재 건강 상태를 종합적으로 분석한 결과입니다
         </p>
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-          <span className="inline-flex rounded-full bg-white/18 px-3.5 py-1.5 text-[11px] font-semibold tabular-nums text-white/92 ring-1 ring-white/28">
-            검사일 {inspectedLabel}
-          </span>
-          <span className="inline-flex rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-medium text-white/75 ring-1 ring-white/18">
-            {record.year}년 {record.month}월 · {record.week}주차
-          </span>
-        </div>
-      </section>
-
-      {/* 설문 요약 */}
-      <section className={sectionCard} aria-labelledby="report-summary">
-        <ReportSectionHeader
-          title="검사 설문지 답변 요약"
-          description="검사에 제출한 답변을 항목별로 정리했습니다"
-        />
-        <ul
-          id="report-summary"
-          className={`${innerPanel} divide-y divide-white/10 overflow-hidden`}
+        <button
+          type="button"
+          onClick={openArchiveForDate}
+          className="mt-5 inline-flex rounded-full bg-white/20 px-5 py-2 text-[13px] font-semibold text-white ring-1 ring-white/30 backdrop-blur-sm transition active:scale-[0.98]"
         >
-          {summaryRows.map((row) => (
-            <li
-              key={row.label}
-              className="flex items-start justify-between gap-4 px-4 py-3 first:pt-3 last:pb-3"
-            >
-              <span className={`shrink-0 ${typeBodySm} text-white/72`}>{row.label}</span>
-              <span className={`max-w-[55%] text-right ${typeCardTitle} text-[14px]`}>{row.value}</span>
-            </li>
-          ))}
-        </ul>
-        <div className={`mt-4 flex items-center justify-between ${innerPanel} px-4 py-3.5`}>
-          <span className={typeCardTitle}>스트레스 점수 (PSS)</span>
-          <span className={typeReportScoreSm}>{record.pssScore}점</span>
-        </div>
+          {dateLabel}
+        </button>
       </section>
 
-      {/* 생활 지표 */}
-      <section className={sectionCard} aria-labelledby="report-lifestyle">
-        <ReportSectionHeader
-          title="생활 지표 분석"
-          description="수면·스트레스 등 생활 리듬을 요약합니다"
-        />
-        <div id="report-lifestyle" className="grid grid-cols-2 gap-3">
-          <div className={`flex gap-3 ${innerPanel} px-3.5 py-3.5`}>
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-indigo-400/35 text-white ring-1 ring-white/20">
-              <Moon className="h-5 w-5" aria-hidden />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className={typeCaption}>수면</p>
-              <p className={`mt-1 ${typeCardTitle} text-[14px] leading-snug`}>{inputData.sleep}</p>
-            </div>
+      {/* 목업: 흰 시트 본문 */}
+      <div className="rounded-t-[28px] bg-[#F5F5F7] px-5 pb-10 pt-6">
+        {/* 설문 요약 */}
+        <section className={whiteCard}>
+          <div className="mb-4 flex items-center gap-2">
+            <SectionIconBadge letter="A" />
+            <h2 className="text-[16px] font-bold text-[#1a1a1f]">검사 설문지 답변 요약</h2>
           </div>
-          <div className={`flex gap-3 ${innerPanel} px-3.5 py-3.5`}>
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber-400/35 text-white ring-1 ring-white/20">
-              <Sparkles className="h-5 w-5" aria-hidden />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className={typeCaption}>스트레스</p>
-              <p className={`mt-1 ${typeCardTitle} text-[14px] leading-snug tabular-nums`}>{pssLabel}</p>
-            </div>
+          <ul className="divide-y divide-[#EFEFEF]">
+            {summaryRows.map((row) => (
+              <li key={row.label} className="flex items-center justify-between gap-4 py-3.5 first:pt-0 last:pb-0">
+                <span className="text-[14px] text-[#8E8E93]">{row.label}</span>
+                <span className="text-right text-[14px] font-semibold text-[#1a1a1f]">{row.value}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-3 flex items-center justify-between border-t border-[#EFEFEF] pt-3">
+            <span className="text-[14px] text-[#8E8E93]">스트레스 점수 (PSS)</span>
+            <span className="text-[14px] font-semibold text-[#1a1a1f]">{record.pssScore}점</span>
           </div>
-        </div>
+        </section>
 
-        <div className="mt-6">
-          <h3 className={`${typeCardTitle} text-[14px]`}>동일 연령·성별 대비</h3>
-          <p className={`mt-1 ${typeCaption}`}>참고 평균과 비교한 값입니다</p>
-          <div className="mt-3 overflow-x-auto rounded-[16px] ring-1 ring-white/15 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {record.comparisonTable.length === 0 ? (
-              <p
-                className={`${innerPanel} px-4 py-8 text-center ${typeBodySm} text-white/75`}
-              >
-                동일 연령·성별 평균 비교 데이터는 서버에서 내려주면 표시됩니다.
-              </p>
-            ) : (
-              <table className="w-full min-w-[300px] border-separate border-spacing-0 text-left">
+        {/* 지표 비교 */}
+        <section className={`mt-4 ${whiteCard}`}>
+          <h2 className="text-[16px] font-bold text-[#1a1a1f]">지표 비교 분석</h2>
+          {record.comparisonTable.length === 0 ? (
+            <p className="mt-4 text-center text-[13px] text-[#8E8E93]">
+              비교 데이터가 없습니다.
+            </p>
+          ) : (
+            <div className="mt-4 overflow-hidden rounded-[14px] ring-1 ring-[#EFEFEF]">
+              <table className="w-full table-fixed text-left text-[13px]">
+                <colgroup>
+                  <col className="w-[22%]" />
+                  <col className="w-[22%]" />
+                  <col className="w-[22%]" />
+                  <col className="w-[34%]" />
+                </colgroup>
                 <thead>
-                  <tr className="bg-black/18 text-[11px] font-semibold text-white/72">
-                    <th className="rounded-tl-[14px] px-3 py-3">항목</th>
-                    <th className="px-3 py-3">내 값</th>
-                    <th className="px-3 py-3">평균</th>
-                    <th className="rounded-tr-[14px] px-3 py-3">비교</th>
+                  <tr className="bg-[#F9FAFB] text-[12px] font-semibold text-[#6B7280]">
+                    <th className="px-2.5 py-2.5">항목</th>
+                    <th className="px-2.5 py-2.5">내 값</th>
+                    <th className="px-2.5 py-2.5">평균</th>
+                    <th className="px-2.5 py-2.5">비교</th>
                   </tr>
                 </thead>
                 <tbody>
                   {record.comparisonTable.map((row) => (
-                    <tr
-                      key={`${row.label}-${row.myValue}`}
-                      className="border-t border-white/10 bg-white/[0.05] text-[12px] text-white/90"
-                    >
-                      <td className="px-3 py-3 font-medium text-white">{row.label}</td>
-                      <td className="px-3 py-3 tabular-nums text-white/88">{row.myValue}</td>
-                      <td className="px-3 py-3 text-white/78">{row.avgValue}</td>
-                      <td className="px-3 py-3">
-                        <div className="flex flex-col items-start gap-1.5">
-                          <ComparisonResultText row={row} />
-                          <ComparisonBadge row={row} />
-                        </div>
+                    <tr key={`${row.label}-${row.myValue}`} className="border-t border-[#EFEFEF] bg-white">
+                      <td className="whitespace-nowrap px-2.5 py-3 font-medium text-[#1a1a1f]">
+                        {row.label}
+                      </td>
+                      <td className="whitespace-nowrap px-2.5 py-3 tabular-nums text-[#374151]">
+                        {row.myValue}
+                      </td>
+                      <td className="whitespace-nowrap px-2.5 py-3 text-[#6B7280]">{row.avgValue}</td>
+                      <td className="px-2.5 py-3">
+                        <span
+                          className={`inline-block max-w-full rounded-full px-2 py-0.5 text-[11px] font-semibold leading-snug break-keep ${comparisonPillClass(row)}`}
+                        >
+                          {row.result}
+                        </span>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            )}
-          </div>
-          {record.comparisonTable.length > 0 ? (
-            <p className={`mt-3 text-center ${typeCaptionXs} text-white/50`}>
-              비교 결과는 서버에서 (내 값 − 평균) ÷ 평균 기준으로 산출됩니다.
-            </p>
-          ) : null}
-        </div>
-      </section>
-
-      {/* 리스크 */}
-      <section className={sectionCard}>
-        <ReportSectionHeader
-          title="핵심 리스크 분석"
-          description="데이터 인사이트와 기대 변화를 함께 확인해 보세요"
-        />
-        <div className="space-y-3">
-          {factorCards.length === 0 ? (
-            <p className={`${innerPanel} px-4 py-8 text-center ${typeBodySm} text-white/75`}>
-              표시할 핵심 리스크가 없습니다.
-            </p>
-          ) : (
-            factorCards.map((c, i) => <RiskAnalysisCard key={`${c.factor}-${i}`} card={c} />)
+            </div>
           )}
-        </div>
-      </section>
-
-      {/* AI 코멘트 */}
-      {record.aiNarrative?.trim() ? (
-        <section className={sectionCard}>
-          <ReportSectionHeader title="맞춤형 건강 코멘트" description="검사 결과를 바탕으로 한 안내입니다" />
-          <div className={`${innerPanel} px-4 py-4`}>
-            <p className={`whitespace-pre-line ${typeReportBody}`}>{record.aiNarrative}</p>
-          </div>
         </section>
-      ) : null}
 
-      {/* 미션 가이드 */}
-      <section className={`${sectionCard} ring-2 ring-white/30`}>
-        <ReportSectionHeader
-          title="미리 보는 미션 가이드"
-          description="미션 화면에서 같은 실천을 이어갈 수 있어요"
-        />
-        <ul className="space-y-2.5">
-          {missionLines.length === 0 ? (
-            <li className={`${innerPanel} px-4 py-5 text-center ${typeBodySm} text-white/75`}>
-              제안된 미션 가이드가 없습니다. 미션 탭에서 루틴을 시작해 보세요.
-            </li>
-          ) : (
-            missionLines.map((line, i) => (
-              <li
-                key={i}
-                className={`flex gap-3 ${innerPanel} px-4 py-3 ${typeReportBody}`}
-              >
-                <span
-                  className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-400/25 text-[11px] text-emerald-100 ring-1 ring-emerald-200/30"
-                  aria-hidden
+        {/* 행동 가이드 */}
+        {guideLines.length > 0 ? (
+          <section
+            className="mt-4 rounded-[20px] px-4 py-5 text-white shadow-[0_8px_28px_rgba(123,110,232,0.25)]"
+            style={{
+              background: 'linear-gradient(135deg, #9B8CF8 0%, #B794F4 50%, #C4A8F0 100%)',
+            }}
+          >
+            <h2 className="text-[16px] font-bold">행동 가이드</h2>
+            <div className="mt-4 space-y-3">
+              {guideLines.map((line, i) => (
+                <p
+                  key={i}
+                  className="rounded-[14px] bg-white/15 px-3.5 py-3 text-[13px] leading-relaxed text-white/95 ring-1 ring-white/20"
                 >
-                  ✓
-                </span>
-                <span className="min-w-0 flex-1">{line}</span>
-              </li>
-            ))
-          )}
-        </ul>
+                  {line}
+                </p>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {/* AI 분석 */}
+        {record.aiNarrative?.trim() ? (
+          <section className={`mt-4 ${whiteCard}`}>
+            <div className="mb-3 flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-[#7B6EE8]" aria-hidden />
+              <h2 className="text-[16px] font-bold text-[#1a1a1f]">AI 맞춤형 분석</h2>
+            </div>
+            <p className="whitespace-pre-line text-[14px] leading-relaxed text-[#4B5563]">
+              {record.aiNarrative}
+            </p>
+          </section>
+        ) : null}
+
+        {/* 핵심 리스크 */}
+        {keyFactors.length > 0 ? (
+          <section className={`mt-4 ${whiteCard}`}>
+            <div className="mb-4 flex items-center gap-2">
+              <Info className="h-5 w-5 text-[#7B6EE8]" aria-hidden />
+              <h2 className="text-[16px] font-bold text-[#1a1a1f]">핵심 리스크 요인</h2>
+            </div>
+            <ul className="space-y-3">
+              {keyFactors.map((line, i) => (
+                <li key={i} className="flex gap-3">
+                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#DBEAFE] text-[#2563EB]">
+                    <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden />
+                  </span>
+                  <span className="min-w-0 flex-1 text-[14px] leading-relaxed text-[#374151]">{line}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
         <button
           type="button"
           onClick={() => navigate('/missions')}
-          className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-white/95 py-3.5 text-[15px] font-semibold text-[#7B6EE8] shadow-[0_12px_32px_rgba(50,35,100,0.25)] ring-1 ring-white transition active:scale-[0.99]"
+          className="mt-5 flex w-full items-center justify-center gap-2 rounded-[16px] bg-[#7B6EE8] py-3.5 text-[15px] font-semibold text-white shadow-[0_8px_24px_rgba(123,110,232,0.35)] active:scale-[0.99]"
         >
-          <Target className="h-4 w-4" strokeWidth={2.25} aria-hidden />
-          미션 화면에서 실천하기
+          <Zap className="h-4 w-4" aria-hidden />
+          미션에서 실천하기
         </button>
-      </section>
 
-      <p className={`px-2 pb-1 text-center ${typeCaptionXs} text-white/55`}>
-        본 결과는 참고용이며, 정확한 진단은 의료 전문가와 상담해 주세요.
-      </p>
+        <p className="mt-4 text-center text-[11px] leading-relaxed text-[#9CA3AF]">
+          본 결과는 참고용이며, 정확한 진단은 의료 전문가와 상담해 주세요.
+        </p>
+      </div>
     </div>
   );
 }

@@ -65,6 +65,7 @@ export function healthRecordFromResultReport(
 
   return {
     id: meta.id,
+    resultId: report.resultId,
     date: meta.date,
     year: meta.year,
     month: meta.month,

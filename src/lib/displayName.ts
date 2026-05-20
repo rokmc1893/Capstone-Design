@@ -1,13 +1,16 @@
-/** 홈·설정 등에 표시할 이름 (로그인 계정 우선) */
+/**
+ * 홈·설정 인사말 — `displayName`(로컬 name) → nickname → 로그인 nickname
+ * @param profileDisplayName `GET /users/me`의 displayName (로컬 `name`에 동기화)
+ */
 export function getDisplayName(
   authNickname?: string | null,
   profileNickname?: string,
-  profileName?: string,
+  profileDisplayName?: string,
 ): string {
   return (
-    authNickname?.trim() ||
+    profileDisplayName?.trim() ||
     profileNickname?.trim() ||
-    profileName?.trim() ||
+    authNickname?.trim() ||
     '회원'
   );
 }

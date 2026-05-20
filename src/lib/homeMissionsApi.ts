@@ -1,4 +1,5 @@
 import { api } from './api';
+import { normalizeMissionCompleteResponse } from './missionCompleteNormalize';
 import type {
   FlowerCollectionEntryDto,
   HomeDashboardDto,
@@ -8,6 +9,7 @@ import type {
   MissionsTodayPayload,
   MissionsTodayResultDto,
   TodayMissionDto,
+  UpdateProfileDto,
   UserMeDto,
 } from '../types/backendApi';
 
@@ -24,10 +26,7 @@ export async function fetchUserMe(): Promise<UserMeDto> {
   return api.get<UserMeDto>('/users/me');
 }
 
-export async function patchUserMe(body: {
-  nickname?: string;
-  profileImageUrl?: string | null;
-}): Promise<UserMeDto> {
+export async function patchUserMe(body: UpdateProfileDto): Promise<UserMeDto> {
   return api.patch<UserMeDto>('/users/me', body);
 }
 
@@ -90,7 +89,8 @@ export function todayMissionNumericId(m: TodayMissionDto): number | null {
 }
 
 export async function postMissionComplete(missionId: number): Promise<MissionCompleteResponseDto> {
-  return api.post<MissionCompleteResponseDto>(`/api/missions/${missionId}/complete`, {});
+  const raw = await api.post<unknown>(`/api/missions/${missionId}/complete`, {});
+  return normalizeMissionCompleteResponse(raw);
 }
 
 export async function fetchMissionHistoryPage(params: {

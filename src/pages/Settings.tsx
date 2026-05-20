@@ -14,6 +14,12 @@ import {
 import { ApiError } from '../lib/api';
 import { deleteUserMe, fetchUserMe, patchUserMe } from '../lib/homeMissionsApi';
 import { applyUserMeToStores } from '../lib/userProfileSync';
+import {
+  apiGenderToProfile,
+  profileGenderToApi,
+  profileGenderToSimulator,
+} from '../lib/userProfileGender';
+import { useSimulatorStore } from '../store/useSimulatorStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import { getDisplayName } from '../lib/displayName';
 import { useAuthStore } from '../store/useAuthStore';
@@ -116,14 +122,68 @@ const Settings = () => {
     const t = profileDraft.trim();
 
     if (profileEditingField === 'name') {
-      if (t) setProfileName(t);
+      if (t.length > 20) {
+        setProfileMessage('표시 이름은 20자 이하로 입력해 주세요.');
+        return;
+      }
+      if (hasApiBase && accessToken) {
+        setProfileSaving(true);
+        setProfileMessage(null);
+        try {
+          const updated = await patchUserMe({
+            displayName: t.length > 0 ? t : null,
+          });
+          applyUserMeToStores(updated);
+          setProfileName(updated.displayName?.trim() ?? (t.length > 0 ? t : ''));
+          setProfileMessage(
+            t.length > 0 ? '표시 이름이 저장되었어요.' : '표시 이름을 삭제했어요.',
+          );
+        } catch (err) {
+          if (t.length > 0) setProfileName(t);
+          const msg =
+            err instanceof ApiError ? err.message : '표시 이름 저장에 실패했어요.';
+          setProfileMessage(msg);
+        } finally {
+          setProfileSaving(false);
+        }
+      } else {
+        if (t.length > 0) setProfileName(t);
+        else setProfileName('');
+        setProfileMessage(
+          t.length > 0 ? '표시 이름이 저장되었어요.' : '표시 이름을 비웠어요.',
+        );
+      }
       setProfileEditingField(null);
       setProfileDraft('');
       return;
     }
 
     if (profileEditingField === 'gender') {
-      setProfileGender(profileDraft === '남자' ? '남자' : '여자');
+      const nextGender = profileDraft === '남자' ? '남자' : '여자';
+      if (hasApiBase && accessToken) {
+        setProfileSaving(true);
+        setProfileMessage(null);
+        try {
+          const updated = await patchUserMe({ gender: profileGenderToApi(nextGender) });
+          applyUserMeToStores(updated);
+          const synced = apiGenderToProfile(updated.gender) ?? nextGender;
+          setProfileGender(synced);
+          useSimulatorStore.getState().setGender(profileGenderToSimulator(synced));
+          setProfileMessage('성별이 저장되었어요. 검사 시작 시 이 성별이 사용됩니다.');
+        } catch (err) {
+          setProfileGender(nextGender);
+          useSimulatorStore.getState().setGender(profileGenderToSimulator(nextGender));
+          const msg =
+            err instanceof ApiError ? err.message : '성별 저장에 실패했어요.';
+          setProfileMessage(msg);
+        } finally {
+          setProfileSaving(false);
+        }
+      } else {
+        setProfileGender(nextGender);
+        useSimulatorStore.getState().setGender(profileGenderToSimulator(nextGender));
+        setProfileMessage('성별이 저장되었어요.');
+      }
       setProfileEditingField(null);
       setProfileDraft('');
       return;
@@ -157,6 +217,7 @@ const Settings = () => {
         }
       } else {
         setProfileNickname(t);
+        setProfileMessage('닉네임이 저장되었어요.');
       }
     }
 
@@ -493,7 +554,8 @@ const Settings = () => {
               <div className="min-h-0 flex-1 overflow-y-auto px-5 py-2 pb-6">
                 {hasApiBase && accessToken ? (
                   <p className="mb-4 type-ink-caption-sm">
-                    닉네임은 서버에 저장됩니다. 이름·성별은 이 기기에서만 표시돼요.
+                    표시 이름·닉네임·성별은 서버에 저장됩니다. 성별은 다음 «검사하기» 시작 시
+                    API에 반영돼요.
                   </p>
                 ) : null}
                 {profileMessage && profileEditModalOpen ? (
@@ -503,10 +565,10 @@ const Settings = () => {
                 ) : null}
                 {[
                   {
-                    label: '현재 이름',
-                    value: profileName,
+                    label: '표시 이름',
+                    value: profileName || '—',
                     key: 'name' as const,
-                    hint: hasApiBase && accessToken ? '앱 표시용' : undefined,
+                    hint: hasApiBase && accessToken ? '홈 인사말 · 서버' : undefined,
                   },
                   {
                     label: '현재 닉네임',
@@ -518,7 +580,7 @@ const Settings = () => {
                     label: '성별',
                     value: profileGender,
                     key: 'gender' as const,
-                    hint: hasApiBase && accessToken ? '앱 표시용' : undefined,
+                    hint: hasApiBase && accessToken ? '검사 시작 · 서버' : undefined,
                   },
                 ].map((row, idx) => (
                   <div key={row.key}>
@@ -561,7 +623,9 @@ const Settings = () => {
                               maxLength={row.key === 'nickname' ? 10 : undefined}
                               className="w-full rounded-[12px] border border-gray100 bg-white px-3 py-3 type-ink-body outline-none ring-1 ring-gray100 focus:border-[#9388FA] focus:ring-[#9388FA]/30"
                               placeholder={
-                                row.key === 'name' ? '이름을 입력하세요' : '닉네임 (2~10자)'
+                                row.key === 'name'
+                                  ? '표시 이름 (1~20자, 비우면 삭제)'
+                                  : '닉네임 (2~10자)'
                               }
                               autoFocus
                             />

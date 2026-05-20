@@ -1,5 +1,5 @@
 /**
- * 검사 상세 리포트 — 서버 `GET /inspection-reports/results/:resultId` 응답 형태
+ * 검사 상세 리포트 화면 모델 — `GET /api/results/{resultId}` 정규화 후 `healthRecordFromResultReport`로 변환
  * (필드명은 백엔드와 camelCase로 맞춤; snake_case 응답이면 normalize 단계에서 변환)
  */
 export type HealthRecordGender = 'male' | 'female';
@@ -41,6 +41,8 @@ export type HealthMissionPreview = {
 
 export type HealthRecord = {
   id: string;
+  /** `GET /api/results/{resultId}` PK — 다른 검사일로 이동 시 사용 */
+  resultId?: number;
   date: string;
   year: number;
   month: number;

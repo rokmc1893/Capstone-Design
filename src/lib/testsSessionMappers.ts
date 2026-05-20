@@ -6,27 +6,101 @@ import type {
   SmokeStatus,
 } from '../store/useSimulatorStore';
 
-/** UI 성별 → API `POST /tests/start` */
-export function toApiGender(gender: 'male' | 'female'): 'MALE' | 'FEMALE' {
-  return gender === 'male' ? 'MALE' : 'FEMALE';
+/** UI 성별 → API `POST /tests/start` (`Start.gender`: M | F) */
+export function toApiGender(gender: 'male' | 'female'): 'M' | 'F' {
+  return gender === 'male' ? 'M' : 'F';
 }
 
+/** API 세션 성별 → UI */
+export function fromApiGender(gender: string | undefined): 'male' | 'female' | null {
+  if (!gender) return null;
+  const g = gender.trim().toUpperCase();
+  if (g === 'M' || g === 'MALE') return 'male';
+  if (g === 'F' || g === 'FEMALE') return 'female';
+  return null;
+}
+
+/**
+ * PATCH `/tests/{sessionId}/step/male` — 백엔드·AI가 인식하는 한글 (완전 일치).
+ * 띄어쓰기·기호 하나만 달라도 0(비흡연·비음주)으로 처리됨.
+ */
+export const API_SMOKE_LABELS: Record<SmokeStatus, string> = {
+  none: '안 피움',
+  sometimes: '가끔 피움',
+  daily: '매일 피움',
+};
+
+export const API_DRINK_LABELS: Record<DrinkStatus, string> = {
+  none: '안 마심',
+  monthly1to3: '월 1~3회',
+  weeklyOrMore: '주 1회 이상',
+};
+
+export const API_BINGE_LABELS: Record<BingeStatus, string> = {
+  none: '없음',
+  monthly1: '월 1회',
+  weeklyOrMore: '주 1회 이상',
+};
+
+/** 구버전·Swagger 실수로 보낸 영문 enum → UI store (세션 복구용) */
+const LEGACY_SMOKE: Record<string, SmokeStatus> = {
+  NEVER: 'none',
+  OCCASIONAL: 'sometimes',
+  DAILY: 'daily',
+};
+
+const LEGACY_DRINK: Record<string, DrinkStatus> = {
+  NEVER: 'none',
+  MONTHLY_1_TO_3: 'monthly1to3',
+  WEEKLY_OR_MORE: 'weeklyOrMore',
+};
+
+const LEGACY_BINGE: Record<string, BingeStatus> = {
+  NEVER: 'none',
+  MONTHLY_1: 'monthly1',
+  WEEKLY_OR_MORE: 'weeklyOrMore',
+};
+
 export function toApiSmokeStatus(status: SmokeStatus): string {
-  if (status === 'none') return 'NEVER';
-  if (status === 'sometimes') return 'OCCASIONAL';
-  return 'DAILY';
+  return API_SMOKE_LABELS[status];
 }
 
 export function toApiDrinkStatus(status: DrinkStatus): string {
-  if (status === 'none') return 'NEVER';
-  if (status === 'monthly1to3') return 'MONTHLY_1_TO_3';
-  return 'WEEKLY_OR_MORE';
+  return API_DRINK_LABELS[status];
 }
 
 export function toApiBingeStatus(status: BingeStatus): string {
-  if (status === 'none') return 'NEVER';
-  if (status === 'monthly1') return 'MONTHLY_1';
-  return 'WEEKLY_OR_MORE';
+  return API_BINGE_LABELS[status];
+}
+
+export function fromApiSmokeStatus(value: string | null | undefined): SmokeStatus | null {
+  if (!value) return null;
+  const v = value.trim();
+  const hit = (Object.entries(API_SMOKE_LABELS) as [SmokeStatus, string][]).find(
+    ([, label]) => label === v,
+  );
+  if (hit) return hit[0];
+  return LEGACY_SMOKE[v.toUpperCase()] ?? null;
+}
+
+export function fromApiDrinkStatus(value: string | null | undefined): DrinkStatus | null {
+  if (!value) return null;
+  const v = value.trim();
+  const hit = (Object.entries(API_DRINK_LABELS) as [DrinkStatus, string][]).find(
+    ([, label]) => label === v,
+  );
+  if (hit) return hit[0];
+  return LEGACY_DRINK[v.toUpperCase()] ?? null;
+}
+
+export function fromApiBingeStatus(value: string | null | undefined): BingeStatus | null {
+  if (!value) return null;
+  const v = value.trim();
+  const hit = (Object.entries(API_BINGE_LABELS) as [BingeStatus, string][]).find(
+    ([, label]) => label === v,
+  );
+  if (hit) return hit[0];
+  return LEGACY_BINGE[v.toUpperCase()] ?? null;
 }
 
 /** 수면 시간(소수 시간) → API sleepHours + sleepMinutes */

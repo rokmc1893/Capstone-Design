@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Settings } from 'lucide-react';
@@ -11,19 +11,30 @@ import {
   glassCard,
   glassSettingsButton,
 } from '../components/ui/glassStyles';
-import { postSproutResetAfterRetest } from '../lib/homeMissionsApi';
 import { fadeUp, springPremium, staggerSection } from '../lib/motionPresets';
+import { startTestSessionAfterGenderPick } from '../lib/startTestSession';
 import { typeBodySm, typeScreenTitleLg } from '../lib/typography';
-import { postTestsStartFromUiGender } from '../lib/testsSessionApi';
-import { useBloomMissionsStore } from '../store/useBloomMissionsStore';
+import { refreshUserProfileFromServer } from '../lib/userProfileApi';
+import { profileGenderToSimulator } from '../lib/userProfileGender';
+import { useUserProfileStore } from '../store/useUserProfileStore';
 import { useTestSessionStore } from '../store/useTestSessionStore';
 import { useSimulatorStore } from '../store/useSimulatorStore';
 
 const InspectionGender = () => {
   const navigate = useNavigate();
   const setGender = useSimulatorStore((s) => s.setGender);
-  const [selected, setSelected] = useState<'male' | 'female' | null>(null);
+  const profileGender = useUserProfileStore((s) => s.gender);
+  const [selected, setSelected] = useState<'male' | 'female' | null>(() =>
+    profileGenderToSimulator(profileGender),
+  );
   const navigateLock = useRef(false);
+
+  useEffect(() => {
+    void refreshUserProfileFromServer().then(() => {
+      const g = profileGenderToSimulator(useUserProfileStore.getState().gender);
+      setSelected(g);
+    });
+  }, []);
 
   const goBack = useCallback(() => {
     if (window.history.length > 1) navigate(-1);
@@ -36,22 +47,9 @@ const InspectionGender = () => {
     navigateLock.current = true;
     window.setTimeout(async () => {
       setGender(g);
-      const base = import.meta.env.VITE_API_BASE_URL;
-      if (base) {
-        try {
-          if (useBloomMissionsStore.getState().level === 5) {
-            try {
-              await postSproutResetAfterRetest();
-              useBloomMissionsStore.getState().applyHomeSprout({ level: 1, exp: 0 });
-            } catch {
-              /* Lv.5가 아니면 MISSION400_1 — 무시하고 검사 진행 */
-            }
-          }
-          const { sessionId } = await postTestsStartFromUiGender(g);
-          useTestSessionStore.getState().setSessionId(sessionId);
-        } catch {
-          useTestSessionStore.getState().clearSession();
-        }
+      const sessionId = await startTestSessionAfterGenderPick(g);
+      if (sessionId) {
+        useTestSessionStore.getState().setSessionId(sessionId);
       } else {
         useTestSessionStore.getState().clearSession();
       }

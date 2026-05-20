@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import type { MissionFlower } from '../data/missionFlowers';
+import { getMissionFlowerStageImageSrc } from '../data/missionFlowers';
 import { springPremium } from '../lib/motionPresets';
 
 type FlowerBloomCelebrationModalProps = {
@@ -11,6 +12,7 @@ type FlowerBloomCelebrationModalProps = {
 export function FlowerBloomCelebrationModal({ flower, open, onClose }: FlowerBloomCelebrationModalProps) {
   const [m1, m2] = flower.flowerMeaningsPopup;
   const displayName = `${flower.nameKo} (${flower.nameEn})`;
+  const bloomImageSrc = getMissionFlowerStageImageSrc(flower, 5);
 
   return (
     <AnimatePresence>
@@ -41,13 +43,22 @@ export function FlowerBloomCelebrationModal({ flower, open, onClose }: FlowerBlo
             transition={springPremium}
           >
             <motion.div
-              className="mb-4 flex justify-center text-[52px] leading-none"
-              aria-hidden
-              initial={{ scale: 0.5, rotate: -12 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ ...springPremium, delay: 0.08 }}
+              className="mb-4 flex min-h-[120px] items-end justify-center"
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ ...springPremium, delay: 0.06 }}
             >
-              {flower.emoji}
+              {bloomImageSrc ? (
+                <img
+                  src={bloomImageSrc}
+                  alt={`${flower.nameKo} 개화`}
+                  className="max-h-[140px] w-auto max-w-full object-contain drop-shadow-[0_12px_28px_rgba(15,23,42,0.2)]"
+                />
+              ) : (
+                <span className="text-[52px] leading-none" aria-hidden>
+                  {flower.emoji}
+                </span>
+              )}
             </motion.div>
             <h2 id="flower-bloom-title" className="sr-only">
               꽃 개화 축하
