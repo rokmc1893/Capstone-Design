@@ -20,6 +20,7 @@ type PostCardProps = {
   onOpen: () => void;
   onToggleLike: () => void;
   onToggleBookmark: () => void;
+  onCommentIntent?: (openComposer: () => void) => void;
   onAddComment: (body: string) => void;
 };
 
@@ -31,6 +32,7 @@ export const PostCard = memo(function PostCard({
   onOpen,
   onToggleLike,
   onToggleBookmark,
+  onCommentIntent,
   onAddComment,
 }: PostCardProps) {
   const [composerOpen, setComposerOpen] = useState(false);
@@ -92,7 +94,15 @@ export const PostCard = memo(function PostCard({
           <CommentActionButton
             count={commentCount}
             active={composerOpen}
-            onClick={() => setComposerOpen((open) => !open)}
+            onClick={() => {
+              if (composerOpen) {
+                setComposerOpen(false);
+                return;
+              }
+              const open = () => setComposerOpen(true);
+              if (onCommentIntent) onCommentIntent(open);
+              else open();
+            }}
           />
         </div>
         <BookmarkButton active={bookmarked} onToggle={onToggleBookmark} />

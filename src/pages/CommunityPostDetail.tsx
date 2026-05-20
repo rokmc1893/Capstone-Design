@@ -1,17 +1,23 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { CommunityCoachMark } from '../components/community/CommunityCoachMark';
 import { CommunityLayout } from '../components/community/CommunityLayout';
+import { CommunityToast } from '../components/community/CommunityToast';
+import { ReportBottomSheet } from '../components/community/ReportBottomSheet';
 import { CommentSection } from '../components/community/PostDetail/CommentSection';
 import { PostContent } from '../components/community/PostDetail/PostContent';
+import { useCommunityFeatureHint } from '../hooks/useCommunityFeatureHint';
 import { useCommunityAuthor } from '../lib/community/useCommunityAuthor';
 import { useCommunityStore } from '../store/useCommunityStore';
+import type { CommunityReportReason } from '../types/community';
 import { typeBodySm } from '../lib/typography';
 
 const CommunityPostDetail = () => {
   const navigate = useNavigate();
   const { postId } = useParams<{ postId: string }>();
   const { displayName, userId } = useCommunityAuthor();
+  const { activeHint, runWithHint, closeHint, completeHint } = useCommunityFeatureHint();
 
   const posts = useCommunityStore((s) => s.posts);
   const rawComments = useCommunityStore((s) => s.comments);
@@ -27,11 +33,20 @@ const CommunityPostDetail = () => {
   const deletePost = useCommunityStore((s) => s.deletePost);
 
   const [hydrated, setHydrated] = useState(() => useCommunityStore.persist.hasHydrated());
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
     if (hydrated) return;
     return useCommunityStore.persist.onFinishHydration(() => setHydrated(true));
   }, [hydrated]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = window.setTimeout(() => setToast(null), 2600);
+    return () => window.clearTimeout(t);
+  }, [toast]);
 
   const post = useMemo(
     () => (postId ? posts.find((p) => p.id === postId) : undefined),
@@ -43,7 +58,22 @@ const CommunityPostDetail = () => {
     return rawComments.filter((c) => c.postId === postId);
   }, [rawComments, postId]);
 
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const showBookmarkToast = useCallback(() => {
+    if (!postId) return;
+    const saved = togglePostBookmark(postId, userId);
+    setToast(saved ? '저장되었습니다' : '저장을 해제했어요');
+  }, [postId, togglePostBookmark, userId]);
+
+  const handleReportSubmit = useCallback(
+    (reason: CommunityReportReason) => {
+      if (!postId) return;
+      reportPost(postId, reason);
+      setReportOpen(false);
+      setToast('신고가 접수되었어요. 더 나은 커뮤니티를 위해 검토할게요');
+      window.setTimeout(() => navigate('/community'), 1200);
+    },
+    [postId, reportPost, navigate],
+  );
 
   if (!hydrated) {
     return (
@@ -99,6 +129,10 @@ const CommunityPostDetail = () => {
     pinComment(postId, displayName, currently ? null : commentId);
   };
 
+  const openReportSheet = () => {
+    runWithHint('report', () => setReportOpen(true));
+  };
+
   return (
     <CommunityLayout
       title="게시글"
@@ -115,29 +149,35 @@ const CommunityPostDetail = () => {
         </button>
       }
     >
+      <CommunityToast message={toast} />
+      <CommunityCoachMark
+        hintKey={activeHint}
+        onClose={closeHint}
+        onComplete={completeHint}
+      />
+      <ReportBottomSheet
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+        onSubmit={handleReportSubmit}
+      />
+
       <div className="mt-2 min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <PostContent
           post={post}
           liked={post.likeUserIds.includes(userId)}
           bookmarked={post.bookmarkUserIds.includes(userId)}
           isAuthor={isPostAuthor}
-          onToggleLike={() => togglePostLike(postId, userId)}
-          onToggleBookmark={() => togglePostBookmark(postId, userId)}
+          onToggleLike={() => runWithHint('like', () => togglePostLike(postId, userId))}
+          onToggleBookmark={() => runWithHint('bookmark', showBookmarkToast)}
           onEdit={isPostAuthor ? () => navigate(`/community/${postId}/edit`) : undefined}
           onDelete={isPostAuthor ? handleDelete : undefined}
-          onReport={
-            !isPostAuthor
-              ? () => {
-                  reportPost(postId);
-                  navigate('/community');
-                }
-              : undefined
-          }
+          onReportClick={!isPostAuthor ? openReportSheet : undefined}
           onBlockAuthor={
             !isPostAuthor
               ? () => {
                   blockUser(post.authorNickname);
-                  navigate('/community');
+                  setToast('작성자를 차단했어요');
+                  window.setTimeout(() => navigate('/community'), 1000);
                 }
               : undefined
           }
@@ -153,6 +193,7 @@ const CommunityPostDetail = () => {
           displayName={displayName}
           isPostAuthor={isPostAuthor}
           pinnedCommentId={post.pinnedCommentId ?? null}
+          onCommentFocus={() => runWithHint('comment', () => {})}
           onAddComment={(body, parentId) =>
             addComment({ postId, authorNickname: displayName, body, parentId })
           }

@@ -1,15 +1,18 @@
 import type {
   CommunityCategoryFilter,
   CommunityComment,
+  CommunityFeedTab,
   CommunityPost,
   CommunitySortKey,
 } from '../../types/community';
 
 export type PostListFilters = {
+  feedTab: CommunityFeedTab;
   category: CommunityCategoryFilter;
   sort: CommunitySortKey;
   search: string;
   tags: string[];
+  bookmarkUserId?: string;
 };
 
 export function countCommentsForPost(comments: CommunityComment[], postId: string): number {
@@ -26,6 +29,13 @@ export function filterAndSortPosts(
   const tagSet = new Set(filters.tags.map((t) => t.toLowerCase()));
 
   let list = posts.filter((p) => !hiddenPostIds.has(p.id));
+
+  if (filters.feedTab === 'saved' && filters.bookmarkUserId) {
+    list = list.filter((p) => p.bookmarkUserIds.includes(filters.bookmarkUserId!));
+  }
+
+  const effectiveSort: CommunitySortKey =
+    filters.feedTab === 'popular' ? 'popular' : filters.sort;
 
   if (filters.category !== 'all') {
     list = list.filter((p) => p.category === filters.category);
@@ -46,7 +56,7 @@ export function filterAndSortPosts(
 
   const commentCount = (postId: string) => countCommentsForPost(comments, postId);
 
-  switch (filters.sort) {
+  switch (effectiveSort) {
     case 'popular':
       return [...list].sort((a, b) => {
         const d = b.likeUserIds.length - a.likeUserIds.length;

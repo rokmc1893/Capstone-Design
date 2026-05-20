@@ -19,6 +19,7 @@ type CommentSectionProps = {
   onDeleteComment: (commentId: string) => void;
   onToggleCommentLike: (commentId: string) => void;
   onPinComment?: (commentId: string) => void;
+  onCommentFocus?: () => void;
 };
 
 type CommentNode = CommunityComment & { children: CommentNode[] };
@@ -66,6 +67,7 @@ export function CommentSection({
   onDeleteComment,
   onToggleCommentLike,
   onPinComment,
+  onCommentFocus,
 }: CommentSectionProps) {
   const [text, setText] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -158,6 +160,7 @@ export function CommentSection({
           id={`comment-${postId}`}
           value={text}
           onChange={(e) => setText(e.target.value)}
+          onFocus={onCommentFocus}
           rows={2}
           placeholder="댓글을 입력해 주세요"
           className="mt-2 w-full resize-none rounded-[14px] border border-white/25 bg-white/10 px-3.5 py-3 text-[14px] text-white placeholder:text-white/45 focus:border-white/40 focus:outline-none"

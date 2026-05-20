@@ -11,6 +11,7 @@ import type {
   CommunityCategory,
   CommunityComment,
   CommunityPost,
+  CommunityReportReason,
   CreatePostPayload,
   UpdatePostPayload,
 } from '../types/community';
@@ -27,8 +28,9 @@ type CommunityState = PersistSlice & {
   updatePost: (postId: string, editorId: string, payload: UpdatePostPayload) => boolean;
   deletePost: (postId: string, editorId: string) => boolean;
   togglePostLike: (postId: string, userId: string) => void;
-  togglePostBookmark: (postId: string, userId: string) => void;
-  reportPost: (postId: string) => void;
+  /** @returns 저장 후 북마크 활성 여부 */
+  togglePostBookmark: (postId: string, userId: string) => boolean;
+  reportPost: (postId: string, reason: CommunityReportReason) => void;
   blockUser: (userId: string) => void;
   addComment: (payload: {
     postId: string;
@@ -282,14 +284,21 @@ export const useCommunityStore = create<CommunityState>()(
       },
 
       togglePostBookmark: (postId, userId) => {
-        set((s) => ({
-          posts: asPostList(s.posts).map((p) =>
-            p.id === postId ? { ...p, bookmarkUserIds: toggleId(p.bookmarkUserIds, userId) } : p,
-          ),
-        }));
+        let bookmarked = false;
+        set((s) => {
+          const posts = asPostList(s.posts);
+          const idx = posts.findIndex((p) => p.id === postId);
+          if (idx < 0) return s;
+          const nextIds = toggleId(posts[idx].bookmarkUserIds, userId);
+          bookmarked = nextIds.includes(userId);
+          const copy = [...posts];
+          copy[idx] = { ...copy[idx], bookmarkUserIds: nextIds };
+          return { posts: copy };
+        });
+        return bookmarked;
       },
 
-      reportPost: (postId) => {
+      reportPost: (postId, _reason) => {
         set((s) => ({
           reportedPostIds: s.reportedPostIds.includes(postId)
             ? s.reportedPostIds

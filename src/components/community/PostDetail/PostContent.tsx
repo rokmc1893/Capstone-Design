@@ -21,7 +21,7 @@ type PostContentProps = {
   onToggleBookmark: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
-  onReport?: () => void;
+  onReportClick?: () => void;
   onBlockAuthor?: () => void;
 };
 
@@ -34,7 +34,7 @@ export const PostContent = memo(function PostContent({
   onToggleBookmark,
   onEdit,
   onDelete,
-  onReport,
+  onReportClick,
   onBlockAuthor,
 }: PostContentProps) {
   return (
@@ -88,7 +88,7 @@ export const PostContent = memo(function PostContent({
               <button
                 type="button"
                 onClick={onEdit}
-                className="rounded-full bg-white/15 px-3 py-1.5 text-[12px] font-semibold text-white/90"
+                className="rounded-full bg-white/15 px-3 py-1.5 text-[12px] font-semibold text-white/90 transition active:scale-[0.97]"
               >
                 수정
               </button>
@@ -97,7 +97,7 @@ export const PostContent = memo(function PostContent({
               <button
                 type="button"
                 onClick={onDelete}
-                className="rounded-full bg-rose-400/20 px-3 py-1.5 text-[12px] font-semibold text-rose-100"
+                className="rounded-full bg-rose-400/20 px-3 py-1.5 text-[12px] font-semibold text-rose-100 transition active:scale-[0.97]"
               >
                 삭제
               </button>
@@ -105,11 +105,11 @@ export const PostContent = memo(function PostContent({
           </>
         ) : (
           <>
-            {onReport ? (
+            {onReportClick ? (
               <button
                 type="button"
-                onClick={onReport}
-                className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1.5 text-[12px] text-white/70"
+                onClick={onReportClick}
+                className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1.5 text-[12px] text-white/70 transition active:scale-[0.97] active:bg-white/15"
               >
                 <Flag className="h-3.5 w-3.5" aria-hidden />
                 신고
@@ -119,7 +119,7 @@ export const PostContent = memo(function PostContent({
               <button
                 type="button"
                 onClick={onBlockAuthor}
-                className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1.5 text-[12px] text-white/70"
+                className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1.5 text-[12px] text-white/70 transition active:scale-[0.97] active:bg-white/15"
               >
                 <UserX className="h-3.5 w-3.5" aria-hidden />
                 작성자 차단

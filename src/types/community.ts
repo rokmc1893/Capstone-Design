@@ -10,6 +10,18 @@ export type CommunityCategoryFilter = 'all' | CommunityCategory;
 
 export type CommunitySortKey = 'latest' | 'popular' | 'comments';
 
+/** 커뮤니티 목록 상단 피드 (전체 / 인기 / 저장) */
+export type CommunityFeedTab = 'all' | 'popular' | 'saved';
+
+export type CommunityReportReason =
+  | 'inappropriate'
+  | 'abuse'
+  | 'misinformation'
+  | 'spam'
+  | 'other';
+
+export type CommunityHintKey = 'bookmark' | 'comment' | 'report' | 'like';
+
 export type CommunityPost = {
   id: string;
   authorNickname: string;
