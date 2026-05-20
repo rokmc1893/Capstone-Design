@@ -29,7 +29,7 @@ export const LikeButton = memo(function LikeButton({
         active ? 'text-[#FF3AA7]' : 'text-white/70'
       }`}
       aria-pressed={active}
-      aria-label={`${label} ${count}개`}
+      aria-label={active ? `${label} 취소, ${count}개` : `${label} ${count}개`}
     >
       <motion.span
         key={active ? 'on' : 'off'}

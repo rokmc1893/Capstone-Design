@@ -5,6 +5,11 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* 데스크톱 목업 프레임 등 safe-area가 0일 때 최소 상단 여백(필요 시 페이지에서 덮어쓰기) */
+  --app-status-bar-min: 0px;
+}
+
 html,
 body,
 #root {
@@ -72,6 +77,25 @@ body,
     letter-spacing: -0.02em;
     color: rgba(255, 255, 255, 0.78);
   }
+
+  /** 홈 — 작은 인사 (상단 1줄) */
+  .type-home-greeting {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  /** 홈 — 케어 헤드라인 (감성 메인, 1~2줄) */
+  .type-home-care-headline {
+    font-size: 25px;
+    font-weight: 700;
+    line-height: 1.42;
+    letter-spacing: -0.038em;
+    color: rgba(255, 255, 255, 0.96);
+  }
+
   .type-hero-title {
     font-size: 26px;
     font-weight: 700;

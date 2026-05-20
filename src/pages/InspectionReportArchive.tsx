@@ -3,7 +3,8 @@ import { ChevronLeft, Settings as SettingsIcon } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { InspectionArchiveRoundCard } from '../components/inspection/InspectionArchiveRoundCard';
 import { MobileGlassBackdrop } from '../components/ui/MobileGlassBackdrop';
-import { GRADIENT_BG_STYLE, MOBILE_FRAME } from '../components/ui/glassStyles';
+import { StatusBar } from '../components/StatusBar';
+import { GRADIENT_BG_STYLE, MOBILE_FRAME, MOBILE_SHELL } from '../components/ui/glassStyles';
 import {
   fetchInspectionArchive,
   getDefaultSelection,
@@ -126,11 +127,13 @@ const InspectionReportArchive = () => {
     sortedYears.length > 0 ? sortedYears : [{ year: selectedYear, months: [] }];
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f4f2fa] p-4 font-sans">
+    <div className={MOBILE_SHELL}>
       <div className={MOBILE_FRAME} style={GRADIENT_BG_STYLE}>
         <MobileGlassBackdrop />
 
-        <header className="relative z-10 flex shrink-0 items-center justify-between gap-3 px-6 pt-11 pb-2">
+        <header className="relative z-10 shrink-0 px-6 pb-2">
+          <StatusBar />
+          <div className="flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={() => navigate('/home')}
@@ -152,6 +155,7 @@ const InspectionReportArchive = () => {
           >
             <SettingsIcon className="h-5 w-5" />
           </button>
+          </div>
         </header>
 
         <div className="relative z-10 min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-6 pb-8 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

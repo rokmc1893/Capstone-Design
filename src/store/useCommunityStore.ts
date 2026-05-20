@@ -132,17 +132,34 @@ const SEED_COMMENTS: CommunityComment[] = [
   }),
 ];
 
-/** 저장된 시드 글은 최신 데모 내용으로 갱신 (예전 하드코딩 닉네임 제거) */
+/** 저장된 시드 글은 최신 데모 내용으로 갱신하되, 좋아요·북마크 등 사용자 상호작용은 유지 */
 function applySeedOverrides(posts: CommunityPost[]): CommunityPost[] {
   const byId = new Map(SEED_POSTS.map((p) => [p.id, p]));
-  return posts.map((p) => (byId.has(p.id) ? byId.get(p.id)! : p));
+  return posts.map((p) => {
+    const seed = byId.get(p.id);
+    if (!seed) return p;
+    return {
+      ...seed,
+      likeUserIds: p.likeUserIds,
+      bookmarkUserIds: p.bookmarkUserIds,
+      updatedAt: p.updatedAt,
+    };
+  });
 }
 
 function applySeedCommentOverrides(comments: CommunityComment[]): CommunityComment[] {
   const seeds = new Map(SEED_COMMENTS.map((c) => [c.id, c]));
   const hasSeed = comments.some((c) => seeds.has(c.id));
   if (!hasSeed && comments.length === 0) return SEED_COMMENTS;
-  return comments.map((c) => (seeds.has(c.id) ? seeds.get(c.id)! : c));
+  return comments.map((c) => {
+    const seed = seeds.get(c.id);
+    if (!seed) return c;
+    return {
+      ...seed,
+      likeUserIds: c.likeUserIds,
+      updatedAt: c.updatedAt,
+    };
+  });
 }
 
 function asPostList(value: unknown): CommunityPost[] {
@@ -227,11 +244,17 @@ export const useCommunityStore = create<CommunityState>()(
       },
 
       togglePostLike: (postId, userId) => {
-        set((s) => ({
-          posts: asPostList(s.posts).map((p) =>
-            p.id === postId ? { ...p, likeUserIds: toggleId(p.likeUserIds, userId) } : p,
-          ),
-        }));
+        set((s) => {
+          const posts = asPostList(s.posts);
+          const idx = posts.findIndex((p) => p.id === postId);
+          if (idx < 0) return s;
+          const copy = [...posts];
+          copy[idx] = {
+            ...copy[idx],
+            likeUserIds: toggleId(copy[idx].likeUserIds, userId),
+          };
+          return { posts: copy };
+        });
       },
 
       togglePostBookmark: (postId, userId) => {

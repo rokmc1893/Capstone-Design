@@ -1,11 +1,12 @@
-import { memo } from 'react';
-import { MessageCircle } from 'lucide-react';
+import { memo, useState } from 'react';
 import { formatCommunityDate } from '../../lib/communityFormat';
 import type { CommunityPost } from '../../types/community';
 import { glassCard } from '../ui/glassStyles';
 import { typeCaption, typeCardDesc, typeCardTitle } from '../../lib/typography';
 import { BookmarkButton } from './shared/BookmarkButton';
 import { CategoryBadge } from './shared/CategoryBadge';
+import { CommentActionButton } from './shared/CommentActionButton';
+import { CommentComposerBar } from './shared/CommentComposerBar';
 import { LikeButton } from './shared/LikeButton';
 import { UserAvatar } from './shared/UserAvatar';
 
@@ -19,6 +20,7 @@ type PostCardProps = {
   onOpen: () => void;
   onToggleLike: () => void;
   onToggleBookmark: () => void;
+  onAddComment: (body: string) => void;
 };
 
 export const PostCard = memo(function PostCard({
@@ -29,7 +31,19 @@ export const PostCard = memo(function PostCard({
   onOpen,
   onToggleLike,
   onToggleBookmark,
+  onAddComment,
 }: PostCardProps) {
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [commentText, setCommentText] = useState('');
+
+  const submitComment = () => {
+    const body = commentText.trim();
+    if (!body) return;
+    onAddComment(body);
+    setCommentText('');
+    setComposerOpen(false);
+  };
+
   return (
     <article className={SURFACE}>
       <button type="button" onClick={onOpen} className="w-full text-left">
@@ -75,13 +89,23 @@ export const PostCard = memo(function PostCard({
       <div className="mt-3 flex items-center justify-between border-t border-white/15 pt-3">
         <div className="flex items-center gap-1">
           <LikeButton count={post.likeUserIds.length} active={liked} onToggle={onToggleLike} />
-          <span className="inline-flex items-center gap-1 px-2 text-white/65">
-            <MessageCircle className="h-4 w-4" strokeWidth={2} aria-hidden />
-            <span className="text-[12px] font-semibold tabular-nums">{commentCount}</span>
-          </span>
+          <CommentActionButton
+            count={commentCount}
+            active={composerOpen}
+            onClick={() => setComposerOpen((open) => !open)}
+          />
         </div>
         <BookmarkButton active={bookmarked} onToggle={onToggleBookmark} />
       </div>
+
+      {composerOpen ? (
+        <CommentComposerBar
+          value={commentText}
+          onChange={setCommentText}
+          onSubmit={submitComment}
+          autoFocus
+        />
+      ) : null}
     </article>
   );
 });

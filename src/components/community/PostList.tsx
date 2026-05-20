@@ -11,6 +11,7 @@ type PostListProps = {
   onOpenPost: (postId: string) => void;
   onToggleLike: (postId: string) => void;
   onToggleBookmark: (postId: string) => void;
+  onAddComment: (postId: string, body: string) => void;
   loading?: boolean;
 };
 
@@ -21,6 +22,7 @@ export const PostList = memo(function PostList({
   onOpenPost,
   onToggleLike,
   onToggleBookmark,
+  onAddComment,
   loading,
 }: PostListProps) {
   if (loading) {
@@ -59,6 +61,7 @@ export const PostList = memo(function PostList({
             onOpen={() => onOpenPost(post.id)}
             onToggleLike={() => onToggleLike(post.id)}
             onToggleBookmark={() => onToggleBookmark(post.id)}
+            onAddComment={(body) => onAddComment(post.id, body)}
           />
         </li>
       ))}

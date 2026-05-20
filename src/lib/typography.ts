@@ -5,6 +5,10 @@
 
 /** 그라디언트(다크) 화면 */
 export const typeGreeting = 'type-greeting';
+/** 홈 상단 — 작은 인사 */
+export const typeHomeGreeting = 'type-home-greeting';
+/** 홈 상단 — 랜덤 케어 헤드라인 */
+export const typeHomeCareHeadline = 'type-home-care-headline';
 export const typeHeroTitle = 'type-hero-title';
 export const typeScreenTitle = 'type-screen-title';
 export const typeScreenTitleLg = 'type-screen-title-lg';

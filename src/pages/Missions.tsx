@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Check, Archive, ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { StatusBar } from '../components/StatusBar';
@@ -22,7 +22,7 @@ import {
 import { missionErrorMessage } from '../lib/missionApiMessages';
 import { fetchLatestResultReport, fetchLatestResultReportForHome } from '../lib/resultReport';
 import { useAuthStore } from '../store/useAuthStore';
-import { DailyRewardCapBanner } from '../components/missions/DailyRewardCapBanner';
+import { DailyRewardCapToast } from '../components/missions/DailyRewardCapToast';
 import { isDailyRewardCapActive, useBloomMissionsStore } from '../store/useBloomMissionsStore';
 import { useSimulatorStore } from '../store/useSimulatorStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
@@ -145,13 +145,35 @@ const Missions = () => {
   const xpBarPercent = Math.min(100, Math.max(0, xpCap > 0 ? (xp / xpCap) * 100 : 0));
 
   const [completingMissionId, setCompletingMissionId] = useState<string | null>(null);
+  const [capToastOpen, setCapToastOpen] = useState(false);
+  const capToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showDailyCapToast = useCallback(() => {
+    if (capToastTimerRef.current) clearTimeout(capToastTimerRef.current);
+    setCapToastOpen(true);
+    capToastTimerRef.current = setTimeout(() => {
+      setCapToastOpen(false);
+      capToastTimerRef.current = null;
+    }, 3800);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (capToastTimerRef.current) clearTimeout(capToastTimerRef.current);
+    },
+    [],
+  );
 
   const handleMissionToggle = async (m: BloomMissionRow) => {
     setMissionBanner(null);
     const done = completed[m.id];
+    if (done) return;
+
+    if (dailyRewardCapActive) showDailyCapToast();
+
     if (missionSource === 'api' && m.id.startsWith('api:')) {
       const missionId = Number.parseInt(m.id.slice(4), 10);
-      if (!Number.isFinite(missionId) || done) return;
+      if (!Number.isFinite(missionId)) return;
       setCompletingMissionId(m.id);
       try {
         const dto = await postMissionComplete(missionId);
@@ -162,6 +184,9 @@ const Missions = () => {
         }
         applyMissionCompleteDto(dto);
         markMissionCompleted(m.id);
+        if (dto.dailyRewardCapReached || (dto.expGained != null && dto.expGained <= 0)) {
+          showDailyCapToast();
+        }
         if (dto.newFlower) {
           const after = useBloomMissionsStore.getState();
           const fid = after.bloomRecords.at(-1)?.flowerId ?? after.selectedFlowerId;
@@ -205,11 +230,9 @@ const Missions = () => {
       </header>
 
       <main className="relative z-10 flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain px-6 pb-[104px] pt-3">
-        {dailyRewardCapActive ? (
-          <div className="sticky top-0 z-20 -mx-6 mb-2 shrink-0 bg-gradient-to-b from-[#7B6EE8]/95 via-[#7B6EE8]/80 to-transparent px-6 pb-2 pt-0">
-            <DailyRewardCapBanner />
-          </div>
-        ) : null}
+        <div className="pointer-events-none sticky top-0 z-30 -mx-6 mb-1 shrink-0 px-6">
+          <DailyRewardCapToast show={capToastOpen} />
+        </div>
         <div className="flex shrink-0 items-center justify-between">
           <div className="flex items-center gap-1">
             <button

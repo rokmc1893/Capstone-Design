@@ -11,12 +11,13 @@ import type { CommunityCategoryFilter, CommunitySortKey } from '../types/communi
 
 const Community = () => {
   const navigate = useNavigate();
-  const { userId } = useCommunityAuthor();
+  const { userId, displayName } = useCommunityAuthor();
 
   const rawPosts = useCommunityStore((s) => s.posts);
   const rawComments = useCommunityStore((s) => s.comments);
   const reportedPostIds = useCommunityStore((s) => s.reportedPostIds);
   const blockedUserIds = useCommunityStore((s) => s.blockedUserIds);
+  const addComment = useCommunityStore((s) => s.addComment);
   const togglePostLike = useCommunityStore((s) => s.togglePostLike);
   const togglePostBookmark = useCommunityStore((s) => s.togglePostBookmark);
 
@@ -57,6 +58,9 @@ const Community = () => {
           onOpenPost={(id) => navigate(`/community/${id}`)}
           onToggleLike={(id) => togglePostLike(id, userId)}
           onToggleBookmark={(id) => togglePostBookmark(id, userId)}
+          onAddComment={(postId, body) =>
+            addComment({ postId, authorNickname: displayName, body })
+          }
         />
       </div>
     </CommunityLayout>

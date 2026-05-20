@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  BatteryFull,
-  Wifi,
-  Signal,
   ChevronLeft,
   Settings as SettingsIcon,
   ChevronRight,
@@ -11,6 +8,7 @@ import {
   X,
   Mail,
 } from 'lucide-react';
+import { StatusBar } from '../components/StatusBar';
 import { ApiError } from '../lib/api';
 import { deleteUserMe, fetchUserMe, patchUserMe } from '../lib/homeMissionsApi';
 import { applyUserMeToStores } from '../lib/userProfileSync';
@@ -262,16 +260,8 @@ const Settings = () => {
         </div>
 
         {/* Top navigation */}
-        <header className="relative z-10 px-6 pt-3 pb-2">
-          <div className="flex items-center justify-between type-caption-xs text-white/90">
-            <span className="tracking-[-0.2px]">9:41</span>
-            <div className="flex items-center gap-1.5">
-              <Signal size={16} strokeWidth={1.5} className="text-white/90" />
-              <Wifi size={16} strokeWidth={1.5} className="text-white/90" />
-              <BatteryFull size={18} strokeWidth={1.5} className="text-white/90" />
-            </div>
-          </div>
-
+        <header className="relative z-10 px-6 pb-2">
+          <StatusBar />
           <div className="mt-3 flex items-center justify-between">
             <button
               type="button"

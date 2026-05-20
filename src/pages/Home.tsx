@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { getSessionCareHeadline, splitCareHeadlineLines } from '../data/homeCareHeadlines';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Settings as SettingsIcon } from 'lucide-react';
 import { HomeScoreGauge } from '../components/home/HomeScoreGauge';
 import {
-  glassHomeActionRow,
+  glassHomePrimaryCta,
+  glassHomePrimaryIconWell,
+  glassHomeSecondaryCta,
+  glassHomeStatCard,
   glassIconWell,
   glassSettingsButton,
-  glassStatCard,
 } from '../components/ui/glassStyles';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import { useSimulatorStore } from '../store/useSimulatorStore';
@@ -24,19 +27,32 @@ import {
   getHomeActionPath,
   homeActionIcon,
   homeActionSubtitle,
+  normalizeHomeActionType,
   resolveHomePrimaryActions,
 } from '../lib/homeActions';
 import { inspectionReportDetailPath } from '../lib/inspectionReportNav';
 import { getDisplayName } from '../lib/displayName';
 import { wellnessScoreFromRisk } from '../lib/inspectionReportDerived';
+import {
+  homeCtaStack,
+  homeCtaTextStack,
+  homeFactorChip,
+  homeFactorStack,
+  homeHeroStack,
+  homePage,
+  homeSectionGap,
+  homeStatBody,
+  homeStatCardShell,
+  homeStatsGrid,
+} from '../lib/homeSpacing';
 import { usePremiumMotion } from '../lib/motionPresets';
 import {
   typeBadge,
   typeCaption,
   typeCardDesc,
   typeCardTitle,
-  typeGreeting,
-  typeHeroTitle,
+  typeHomeCareHeadline,
+  typeHomeGreeting,
   typeStatLabel,
   typeCaptionXs,
   typeStatPlaceholder,
@@ -45,6 +61,10 @@ import { getRiskLevelLabel } from '../lib/resultReport';
 import { useAuthStore } from '../store/useAuthStore';
 import { useBloomMissionsStore } from '../store/useBloomMissionsStore';
 import type { HomeActionDto } from '../types/backendApi';
+
+function isPrimaryHomeAction(type: string | undefined): boolean {
+  return normalizeHomeActionType(type) === 'TEST';
+}
 
 const Home = () => {
   const navigate = useNavigate();
@@ -68,6 +88,11 @@ const Home = () => {
   const [homeSummary, setHomeSummary] = useState<HomeSummary | null | undefined>(undefined);
   const [homeActions, setHomeActions] = useState<HomeActionDto[]>(() =>
     resolveHomePrimaryActions(null),
+  );
+  const [careHeadline] = useState(() => getSessionCareHeadline());
+  const careHeadlineLines = useMemo(
+    () => splitCareHeadlineLines(careHeadline),
+    [careHeadline],
   );
 
   const loadHomeData = useCallback(async () => {
@@ -193,21 +218,48 @@ const Home = () => {
       ? homeSummary.topFactors.length > 4
       : riskFactors.length > 4;
 
+  const riskBadgeClass = `inline-flex w-fit rounded-full border border-white/22 bg-white/14 px-3 py-1.5 ${typeBadge}`;
+
+  const renderScoreCardBody = () => {
+    if (serverLoading) {
+      return <p className={`flex flex-1 items-center justify-center ${typeCaption}`}>불러오는 중…</p>;
+    }
+    if (displayScore != null) {
+      return (
+        <>
+          <div className="flex flex-1 items-center justify-center py-2">
+            <HomeScoreGauge score={displayScore} />
+          </div>
+          {displayRiskLabel ? <p className={riskBadgeClass}>{displayRiskLabel}</p> : null}
+        </>
+      );
+    }
+    return <p className={`flex flex-1 items-center justify-center ${typeStatPlaceholder}`}>---</p>;
+  };
+
   return (
-    <motion.div className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain px-6 pt-12 pb-[104px]">
+    <motion.div className={homePage}>
       <motion.header
-        className="flex items-start justify-between gap-4"
+        className="flex items-start justify-between gap-5"
         initial="hidden"
         animate="visible"
         variants={variants}
       >
-        <div className="min-w-0">
-          <p className={typeGreeting}>반가워요, {userName} 님!</p>
-          <h1 className={`mt-2.5 ${typeHeroTitle} drop-shadow-[0_2px_16px_rgba(0,0,0,0.1)]`}>
-            오늘 하루도
-            <br />
-            좋은 결과가 있길
-          </h1>
+        <div className="min-w-0 flex-1 pr-3">
+          <p className={typeHomeGreeting}>반가워요, {userName} 님</p>
+          <motion.h1
+            key={careHeadline}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: [0.2, 0.8, 0.2, 1] }}
+            className={`${homeHeroStack} ${typeHomeCareHeadline} drop-shadow-[0_2px_20px_rgba(0,0,0,0.12)]`}
+          >
+            {careHeadlineLines.map((line, index) => (
+              <span key={`${careHeadline}-${index}`} className="block">
+                {line}
+              </span>
+            ))}
+          </motion.h1>
         </div>
         <motion.button
           type="button"
@@ -223,81 +275,53 @@ const Home = () => {
       </motion.header>
 
       <motion.section
-        className="mt-6 grid grid-cols-2 gap-3.5"
+        className={`${homeSectionGap} ${homeStatsGrid}`}
         aria-label="검사 요약"
         initial="hidden"
         animate="visible"
         variants={stagger}
       >
-        <motion.div variants={variants} className="min-h-[148px]">
+        <motion.div variants={variants} className="min-h-[164px]">
           {canOpenLatestReport ? (
             <button
               type="button"
               onClick={() => navigate(inspectionReportDetailPath(latestResultId!))}
-              className={`${glassStatCard} flex h-full min-h-[148px] w-full flex-col px-4 py-4 text-left transition active:scale-[0.98]`}
+              className={`${glassHomeStatCard} ${homeStatCardShell} h-full w-full text-left transition active:scale-[0.98]`}
               aria-label="최근 검사 결과 상세 리포트 보기"
             >
               <p className={typeStatLabel}>최근 검사 결과</p>
-              <div className="relative mt-2 flex flex-1 flex-col items-center justify-center">
-                <HomeScoreGauge score={displayScore!} />
-                {displayRiskLabel ? (
-                  <p
-                    className={`mt-2 inline-flex w-fit rounded-full border border-white/20 bg-white/12 px-2.5 py-1 ${typeBadge}`}
-                  >
-                    {displayRiskLabel}
-                  </p>
-                ) : null}
+              <div className={`${homeStatBody} items-center justify-between`}>
+                {renderScoreCardBody()}
               </div>
             </button>
           ) : (
-            <div className={`${glassStatCard} flex min-h-[148px] flex-col px-4 py-4`}>
+            <div className={`${glassHomeStatCard} ${homeStatCardShell}`}>
               <p className={typeStatLabel}>최근 검사 결과</p>
-              <div className="relative mt-2 flex flex-1 flex-col items-center justify-center">
-                {serverLoading ? (
-                  <p className={typeCaption}>불러오는 중…</p>
-                ) : displayScore != null ? (
-                  <>
-                    <HomeScoreGauge score={displayScore} />
-                    {displayRiskLabel ? (
-                      <p
-                        className={`mt-2 inline-flex w-fit rounded-full border border-white/20 bg-white/12 px-2.5 py-1 ${typeBadge}`}
-                      >
-                        {displayRiskLabel}
-                      </p>
-                    ) : null}
-                  </>
-                ) : (
-                  <p className={typeStatPlaceholder}>---</p>
-                )}
+              <div className={`${homeStatBody} items-center justify-between`}>
+                {renderScoreCardBody()}
               </div>
             </div>
           )}
         </motion.div>
 
-        <motion.div
-          variants={variants}
-          className={`${glassStatCard} flex min-h-[148px] flex-col px-4 py-4`}
-        >
+        <motion.div variants={variants} className={`${glassHomeStatCard} ${homeStatCardShell}`}>
           <p className={typeStatLabel}>주요 요인</p>
-          <div className="relative mt-3 flex flex-1 flex-col justify-center">
+          <div className={`${homeStatBody} justify-center py-1`}>
             {serverLoading ? (
               <p className={typeCaption}>불러오는 중…</p>
             ) : factorChips && factorChips.length > 0 ? (
-              <div className="flex flex-col gap-1.5">
+              <div className={homeFactorStack}>
                 {factorChips.map((factor) => (
-                  <span
-                    key={factor.label}
-                    className={`inline-flex max-w-full truncate rounded-full border border-white/20 bg-white/12 px-2.5 py-1 ${typeBadge}`}
-                  >
+                  <span key={factor.label} className={`${homeFactorChip} ${typeBadge}`}>
                     {factor.label}
                   </span>
                 ))}
                 {hasMoreFactors ? (
-                  <span className={`${typeBadge} text-white/60`}>…</span>
+                  <span className={`pl-1 ${typeBadge} text-white/55`}>…</span>
                 ) : null}
               </div>
             ) : showServerSummary ? (
-              <p className={typeCaptionXs}>표시할 주요 요인이 없습니다.</p>
+              <p className={`${typeCaptionXs} leading-relaxed`}>표시할 주요 요인이 없습니다.</p>
             ) : (
               <p className={typeStatPlaceholder}>---</p>
             )}
@@ -306,7 +330,7 @@ const Home = () => {
       </motion.section>
 
       <motion.section
-        className="mt-5 flex flex-col gap-3.5"
+        className={`${homeSectionGap} ${homeCtaStack}`}
         aria-label="메인 메뉴"
         initial="hidden"
         animate="visible"
@@ -316,6 +340,10 @@ const Home = () => {
           const path = getHomeActionPath(action.type, { latestResultId });
           const Icon = homeActionIcon(action.type);
           const subtitle = homeActionSubtitle(action.type);
+          const isPrimary = isPrimaryHomeAction(action.type);
+          const rowClass = isPrimary ? glassHomePrimaryCta : glassHomeSecondaryCta;
+          const iconWellClass = isPrimary ? glassHomePrimaryIconWell : glassIconWell;
+
           return (
             <motion.button
               key={action.type}
@@ -328,16 +356,31 @@ const Home = () => {
               whileHover={cardHover}
               whileTap={cardTap}
               transition={spring}
-              className={`group relative disabled:opacity-45 ${glassHomeActionRow}`}
+              className={`group disabled:opacity-45 ${rowClass}`}
             >
-              <div className="min-w-0 flex-1">
-                <p className={typeCardTitle}>{action.title}</p>
-                {subtitle ? <p className={`mt-1.5 ${typeCardDesc}`}>{subtitle}</p> : null}
+              <div className="relative z-[1] min-w-0 flex-1">
+                <p className={isPrimary ? `${typeCardTitle} text-white` : typeCardTitle}>
+                  {action.title}
+                </p>
+                {subtitle ? (
+                  <p
+                    className={`${homeCtaTextStack} ${isPrimary ? 'text-white/82' : ''} ${typeCardDesc}`}
+                  >
+                    {subtitle}
+                  </p>
+                ) : null}
               </div>
-              <div className={glassIconWell}>
+              <div className={`relative z-[1] ${iconWellClass}`}>
                 <Icon className="h-5 w-5 text-white/90" aria-hidden />
               </div>
-              <span className="pointer-events-none absolute inset-0 rounded-[24px] bg-gradient-to-br from-white/[0.14] via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+              {isPrimary ? (
+                <span
+                  className="pointer-events-none absolute inset-0 rounded-[24px] bg-gradient-to-br from-white/[0.22] via-white/[0.06] to-transparent opacity-100"
+                  aria-hidden
+                />
+              ) : (
+                <span className="pointer-events-none absolute inset-0 rounded-[24px] bg-gradient-to-br from-white/[0.1] via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+              )}
             </motion.button>
           );
         })}

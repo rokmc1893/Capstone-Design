@@ -47,7 +47,7 @@ export function BottomTabNav() {
   const selectedTab = getSelectedTab(location.pathname);
 
   return (
-    <nav className="absolute inset-x-6 bottom-8 z-20" aria-label="하단 메뉴">
+    <nav className="absolute inset-x-6 bottom-10 z-20" aria-label="하단 메뉴">
       <TapCounsel className={glassNavPill}>
         <div className="relative grid h-full grid-cols-3 items-center">
           {tabs.map((t) => {

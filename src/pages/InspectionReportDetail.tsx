@@ -3,7 +3,8 @@ import { Activity, ChevronLeft } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { InspectionReportFullView } from '../components/InspectionReportFullView';
 import { MobileGlassBackdrop } from '../components/ui/MobileGlassBackdrop';
-import { GRADIENT_BG_STYLE, MOBILE_FRAME } from '../components/ui/glassStyles';
+import { StatusBar } from '../components/StatusBar';
+import { GRADIENT_BG_STYLE, MOBILE_FRAME, MOBILE_SHELL } from '../components/ui/glassStyles';
 import { typeBodySm, typeScreenTitle } from '../lib/typography';
 import {
   fetchInspectionArchive,
@@ -119,11 +120,13 @@ const InspectionReportDetailPage = () => {
   }, [nickname, resultIdParam, roundId, source]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f4f2fa] p-4 font-sans">
+    <div className={MOBILE_SHELL}>
       <div className={MOBILE_FRAME} style={GRADIENT_BG_STYLE}>
         <MobileGlassBackdrop />
 
-        <header className="relative z-20 flex shrink-0 items-center justify-between gap-2 px-6 pt-11 pb-2">
+        <header className="relative z-20 shrink-0 px-6 pb-2">
+          <StatusBar />
+          <div className="flex items-center justify-between gap-2">
           <button
             type="button"
             onClick={() => navigate(backPath)}
@@ -145,6 +148,7 @@ const InspectionReportDetailPage = () => {
           >
             <Activity className="h-5 w-5" strokeWidth={2} />
           </button>
+          </div>
         </header>
 
         <main className="relative z-10 min-h-0 flex-1 overflow-y-auto overscroll-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

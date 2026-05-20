@@ -1,7 +1,11 @@
 /** 프리미엄 글래스모피즘 — 홈·검사 등 모바일 화면 공통 */
 
+/** 데스크톱: 목업 프레임 · 실제 기기(sm 이하): 화면 전체 */
+export const MOBILE_SHELL =
+  'flex min-h-screen items-center justify-center bg-[#f4f2fa] p-4 font-sans max-sm:min-h-[100dvh] max-sm:items-stretch max-sm:p-0';
+
 export const MOBILE_FRAME =
-  'relative flex h-[844px] w-[390px] flex-col min-h-0 overflow-hidden rounded-[28px] shadow-[0_24px_80px_rgba(15,23,42,0.35)]';
+  'relative flex h-[844px] w-[390px] flex-col min-h-0 overflow-hidden rounded-[28px] shadow-[0_24px_80px_rgba(15,23,42,0.35)] max-sm:h-[100dvh] max-sm:min-h-[100dvh] max-sm:w-full max-sm:max-w-none max-sm:rounded-none max-sm:shadow-none';
 
 export const GRADIENT_BG_STYLE = {
   background: 'linear-gradient(180deg, #9B8CF8 0%, #B794F4 42%, #E8A4C8 100%)',
@@ -29,6 +33,40 @@ export const glassStatCard = [
   glassCard,
   'relative overflow-hidden',
   'shadow-[0_16px_40px_rgba(15,23,42,0.2),0_0_40px_rgba(255,255,255,0.06)]',
+].join(' ');
+
+/** 홈 — 요약 통계 카드 (서브) */
+export const glassHomeStatCard = [
+  glassCard,
+  'relative overflow-hidden bg-white/[0.10]',
+  'border-white/22',
+  'shadow-[0_12px_36px_rgba(15,23,42,0.18),0_0_32px_rgba(255,255,255,0.05)]',
+].join(' ');
+
+/** 홈 — 메인 CTA (검사하기) */
+export const glassHomePrimaryCta = [
+  glassCardInteractive,
+  'relative flex w-full flex-row items-center justify-between gap-5 text-left',
+  'min-h-[104px] p-6',
+  'bg-white/[0.20] border-white/32',
+  'shadow-[0_22px_56px_rgba(15,23,42,0.3),0_0_56px_rgba(255,255,255,0.14)]',
+  'ring-1 ring-white/28',
+].join(' ');
+
+/** 홈 — 서브 CTA (검사 상세 리포트 등) */
+export const glassHomeSecondaryCta = [
+  glassCardInteractive,
+  'relative flex w-full flex-row items-center justify-between gap-4 text-left',
+  'min-h-[92px] p-5',
+  'bg-white/[0.09] border-white/18',
+  'shadow-[0_14px_40px_rgba(15,23,42,0.2)]',
+].join(' ');
+
+export const glassHomePrimaryIconWell = [
+  'flex h-12 w-12 shrink-0 items-center justify-center rounded-full',
+  'border border-white/35 bg-white/22',
+  'shadow-[0_8px_24px_rgba(255,255,255,0.2),inset_0_1px_0_rgba(255,255,255,0.5)]',
+  'backdrop-blur-md',
 ].join(' ');
 
 export const glassIconWell =

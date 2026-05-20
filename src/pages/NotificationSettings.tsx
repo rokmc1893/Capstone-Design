@@ -1,12 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  BatteryFull,
-  Wifi,
-  Signal,
-  ChevronLeft,
-  Settings as SettingsIcon,
-} from 'lucide-react';
+import { ChevronLeft, Settings as SettingsIcon } from 'lucide-react';
+import { StatusBar } from '../components/StatusBar';
 
 type NotifKey = 'mission' | 'regular' | 'partner' | 'community';
 
@@ -88,16 +83,8 @@ const NotificationSettings = () => {
           <div className="absolute inset-0 bg-white/10 backdrop-blur-[2px]" />
         </div>
 
-        <header className="relative z-10 px-6 pt-3 pb-2">
-          <div className="flex items-center justify-between type-caption-xs text-white/90">
-            <span className="tracking-[-0.2px]">9:41</span>
-            <div className="flex items-center gap-1.5">
-              <Signal size={16} strokeWidth={1.5} className="text-white/90" />
-              <Wifi size={16} strokeWidth={1.5} className="text-white/90" />
-              <BatteryFull size={18} strokeWidth={1.5} className="text-white/90" />
-            </div>
-          </div>
-
+        <header className="relative z-10 px-6 pb-2">
+          <StatusBar />
           <div className="mt-3 flex items-center justify-between">
             <button
               type="button"
