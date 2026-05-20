@@ -1,5 +1,5 @@
 import { memo, useState } from 'react';
-import { Send, Trash2 } from 'lucide-react';
+import { Pin, Send, Trash2 } from 'lucide-react';
 import { formatCommunityDate } from '../../../lib/communityFormat';
 import type { CommunityComment } from '../../../types/community';
 import { glassCard } from '../../ui/glassStyles';
@@ -8,13 +8,17 @@ import { LikeButton } from '../shared/LikeButton';
 import { UserAvatar } from '../shared/UserAvatar';
 
 const SURFACE = `${glassCard} px-3 py-3`;
+const PINNED_SURFACE = `${glassCard} px-3 py-3 ring-1 ring-white/35`;
 
 type CommentProps = {
   comment: CommunityComment;
   depth?: number;
   liked: boolean;
-  isAuthor: boolean;
+  isCommentAuthor: boolean;
+  isPostAuthor: boolean;
+  isPinned?: boolean;
   onToggleLike: () => void;
+  onPin?: () => void;
   onReply: (parentId: string) => void;
   onUpdate: (commentId: string, body: string) => void;
   onDelete: (commentId: string) => void;
@@ -29,8 +33,11 @@ export const CommentItem = memo(function CommentItem({
   comment,
   depth = 0,
   liked,
-  isAuthor,
+  isCommentAuthor,
+  isPostAuthor,
+  isPinned = false,
   onToggleLike,
+  onPin,
   onReply,
   onUpdate,
   onDelete,
@@ -46,14 +53,22 @@ export const CommentItem = memo(function CommentItem({
 
   return (
     <li
-      className={depth > 0 ? 'ml-4 border-l-2 border-white/20 pl-3' : undefined}
+      className={depth > 0 ? 'border-l-2 border-white/20 pl-3' : undefined}
       style={depth > 0 ? { marginLeft: `${Math.min(depth, 3) * 12 + 8}px` } : undefined}
     >
-      <div className={SURFACE}>
+      <div className={isPinned ? PINNED_SURFACE : SURFACE}>
         <div className="flex gap-2">
           <UserAvatar name={comment.authorNickname} size="sm" />
           <div className="min-w-0 flex-1">
-            <p className={`${typeCaption} font-semibold text-white/85`}>{comment.authorNickname}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className={`${typeCaption} font-semibold text-white/85`}>{comment.authorNickname}</p>
+              {isPinned ? (
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold text-white/90">
+                  <Pin className="h-3 w-3" aria-hidden />
+                  고정
+                </span>
+              ) : null}
+            </div>
             {editing ? (
               <textarea
                 value={editText}
@@ -87,7 +102,20 @@ export const CommentItem = memo(function CommentItem({
               답글
             </button>
           ) : null}
-          {isAuthor ? (
+          {isPostAuthor && onPin ? (
+            <button
+              type="button"
+              onClick={onPin}
+              className={`inline-flex items-center gap-0.5 text-[12px] font-semibold ${
+                isPinned ? 'text-white' : 'text-white/65'
+              }`}
+              aria-pressed={isPinned}
+            >
+              <Pin className="h-3.5 w-3.5" aria-hidden />
+              {isPinned ? '고정 해제' : '고정'}
+            </button>
+          ) : null}
+          {isCommentAuthor ? (
             <>
               <button
                 type="button"

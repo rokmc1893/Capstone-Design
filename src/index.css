@@ -7,7 +7,7 @@
 
 :root {
   /* 데스크톱 목업 프레임 등 safe-area가 0일 때 최소 상단 여백(필요 시 페이지에서 덮어쓰기) */
-  --app-status-bar-min: 0px;
+  --app-status-bar-min: 12px;
 }
 
 html,
@@ -66,6 +66,44 @@ body,
 
 .animate-spin-slow {
   animation: spin-slow 14s linear infinite;
+}
+
+/* ── Onboarding — premium calm motion ── */
+@keyframes onboarding-float {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translateY(-10px);
+    opacity: 0.65;
+  }
+}
+
+@keyframes onboarding-glow-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translateX(-50%) scale(1.04);
+  }
+}
+
+.onboarding-glow-orb {
+  animation: onboarding-glow-breathe 6s ease-in-out infinite;
+}
+
+.onboarding-float-slow {
+  animation: onboarding-float 5.5s ease-in-out infinite;
+}
+
+.onboarding-float-delayed {
+  animation: onboarding-float 6.8s ease-in-out infinite;
+  animation-delay: 1.2s;
 }
 
 /* ── Toss / iOS 타이포그래피 (Pretendard) ── */
@@ -285,6 +323,106 @@ body,
     font-weight: 600;
     letter-spacing: -0.02em;
   }
+  /** 온보딩 — 토스·Apple Health 톤 헤드라인 */
+  .type-onboarding-headline {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.38;
+    letter-spacing: -0.038em;
+    color: rgba(22, 22, 26, 0.94);
+  }
+
+  .type-onboarding-body {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.72;
+    letter-spacing: -0.018em;
+    color: rgba(32, 32, 36, 0.72);
+  }
+
+  .type-onboarding-skip {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: -0.02em;
+    color: rgba(255, 255, 255, 0.68);
+  }
+
+  .onboarding-cta-secondary {
+    display: flex;
+    height: 60px;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    border-radius: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    background: rgba(255, 255, 255, 0.92);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: rgba(42, 42, 48, 0.9);
+    box-shadow:
+      0 10px 28px rgba(30, 24, 50, 0.12),
+      0 2px 8px rgba(255, 255, 255, 0.4) inset;
+    backdrop-filter: blur(12px);
+    transition:
+      box-shadow 0.25s ease,
+      transform 0.2s ease;
+  }
+
+  @keyframes onboarding-cta-glow {
+    0%,
+    100% {
+      box-shadow:
+        0 16px 40px rgba(12, 10, 24, 0.38),
+        0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+        0 0 40px rgba(155, 140, 248, 0.18);
+    }
+    50% {
+      box-shadow:
+        0 18px 44px rgba(12, 10, 24, 0.42),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+        0 0 56px rgba(232, 164, 200, 0.28);
+    }
+  }
+
+  .onboarding-cta-primary {
+    display: flex;
+    height: 64px;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    border-radius: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: linear-gradient(
+      180deg,
+      rgba(24, 24, 28, 0.96) 0%,
+      rgba(12, 12, 16, 0.98) 100%
+    );
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    color: rgba(255, 255, 255, 0.98);
+    animation: onboarding-cta-glow 4.5s ease-in-out infinite;
+    transition: transform 0.2s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .onboarding-cta-primary {
+      animation: none;
+      box-shadow:
+        0 16px 40px rgba(12, 10, 24, 0.38),
+        0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+        0 0 48px rgba(155, 140, 248, 0.22);
+    }
+  }
+
+  .onboarding-cta-primary:focus-visible,
+  .onboarding-cta-secondary:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 2px;
+  }
+
   .type-ink-button-lg {
     font-size: 17px;
     font-weight: 700;

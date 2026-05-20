@@ -21,6 +21,8 @@ export type CommunityPost = {
   imageDataUrl?: string;
   likeUserIds: string[];
   bookmarkUserIds: string[];
+  /** 글 작성자가 고정한 댓글 id (없으면 null) */
+  pinnedCommentId?: string | null;
   createdAt: string;
   updatedAt?: string;
 };

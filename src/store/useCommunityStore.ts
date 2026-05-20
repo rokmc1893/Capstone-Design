@@ -39,6 +39,7 @@ type CommunityState = PersistSlice & {
   updateComment: (commentId: string, editorId: string, body: string) => boolean;
   deleteComment: (commentId: string, editorId: string) => boolean;
   toggleCommentLike: (commentId: string, userId: string) => void;
+  pinComment: (postId: string, postAuthorNickname: string, commentId: string | null) => boolean;
   getPost: (id: string) => CommunityPost | undefined;
   isPostBookmarked: (postId: string, userId: string) => boolean;
 };
@@ -64,6 +65,12 @@ function normalizePost(raw: Partial<CommunityPost> & { id: string }): CommunityP
     imageDataUrl: typeof raw.imageDataUrl === 'string' ? raw.imageDataUrl : undefined,
     likeUserIds: Array.isArray(raw.likeUserIds) ? raw.likeUserIds.map(String) : [],
     bookmarkUserIds: Array.isArray(raw.bookmarkUserIds) ? raw.bookmarkUserIds.map(String) : [],
+    pinnedCommentId:
+      typeof raw.pinnedCommentId === 'string'
+        ? raw.pinnedCommentId
+        : raw.pinnedCommentId === null
+          ? null
+          : undefined,
     createdAt:
       typeof raw.createdAt === 'string' && !Number.isNaN(Date.parse(raw.createdAt))
         ? raw.createdAt
@@ -130,6 +137,22 @@ const SEED_COMMENTS: CommunityComment[] = [
     likeUserIds: ['seed-like-2'],
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 20).toISOString(),
   }),
+  normalizeComment({
+    id: 'seed-c2',
+    postId: 'seed-3',
+    authorNickname: '루틴멘토',
+    body: '초보에게 괜찮은 볼륨이에요. 무게는 천천히 올리는 걸 추천해요.',
+    likeUserIds: ['guest-익명'],
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
+  }),
+  normalizeComment({
+    id: 'seed-c3',
+    postId: 'seed-3',
+    authorNickname: '헬스메이트',
+    body: '코어 운동 한 세트만 더 넣어도 자세가 많이 좋아져요.',
+    likeUserIds: [],
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(),
+  }),
 ];
 
 /** 저장된 시드 글은 최신 데모 내용으로 갱신하되, 좋아요·북마크 등 사용자 상호작용은 유지 */
@@ -142,6 +165,7 @@ function applySeedOverrides(posts: CommunityPost[]): CommunityPost[] {
       ...seed,
       likeUserIds: p.likeUserIds,
       bookmarkUserIds: p.bookmarkUserIds,
+      pinnedCommentId: p.pinnedCommentId ?? seed.pinnedCommentId,
       updatedAt: p.updatedAt,
     };
   });
@@ -329,6 +353,24 @@ export const useCommunityStore = create<CommunityState>()(
             c.id === commentId ? { ...c, likeUserIds: toggleId(c.likeUserIds, userId) } : c,
           ),
         }));
+      },
+
+      pinComment: (postId, postAuthorNickname, commentId) => {
+        const posts = asPostList(get().posts);
+        const idx = posts.findIndex((p) => p.id === postId);
+        if (idx < 0 || posts[idx].authorNickname !== postAuthorNickname) return false;
+        if (commentId != null) {
+          const exists = asCommentList(get().comments).some(
+            (c) => c.id === commentId && c.postId === postId,
+          );
+          if (!exists) return false;
+        }
+        const nextPin =
+          commentId == null || posts[idx].pinnedCommentId === commentId ? null : commentId;
+        const copy = [...posts];
+        copy[idx] = { ...copy[idx], pinnedCommentId: nextPin };
+        set({ posts: copy });
+        return true;
       },
 
       getPost: (id) => asPostList(get().posts).find((p) => p.id === id),

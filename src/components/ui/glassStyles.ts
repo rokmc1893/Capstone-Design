@@ -5,7 +5,13 @@ export const MOBILE_SHELL =
   'flex min-h-screen items-center justify-center bg-[#f4f2fa] p-4 font-sans max-sm:min-h-[100dvh] max-sm:items-stretch max-sm:p-0';
 
 export const MOBILE_FRAME =
-  'relative flex h-[844px] w-[390px] flex-col min-h-0 overflow-hidden rounded-[28px] shadow-[0_24px_80px_rgba(15,23,42,0.35)] max-sm:h-[100dvh] max-sm:min-h-[100dvh] max-sm:w-full max-sm:max-w-none max-sm:rounded-none max-sm:shadow-none';
+  [
+    'relative flex h-[844px] w-[390px] flex-col min-h-0 overflow-hidden rounded-[28px]',
+    'shadow-[0_24px_80px_rgba(15,23,42,0.35)]',
+    /* 목업 프레임 상단 라운드 클리핑 방지 · 실기기는 StatusBar safe-area 사용 */
+    'pt-3 max-sm:pt-0',
+    'max-sm:h-[100dvh] max-sm:min-h-[100dvh] max-sm:w-full max-sm:max-w-none max-sm:rounded-none max-sm:shadow-none',
+  ].join(' ');
 
 export const GRADIENT_BG_STYLE = {
   background: 'linear-gradient(180deg, #9B8CF8 0%, #B794F4 42%, #E8A4C8 100%)',

@@ -12,10 +12,13 @@ type CommentSectionProps = {
   comments: CommunityComment[];
   userId: string;
   displayName: string;
+  isPostAuthor: boolean;
+  pinnedCommentId: string | null;
   onAddComment: (body: string, parentId?: string) => void;
   onUpdateComment: (commentId: string, body: string) => void;
   onDeleteComment: (commentId: string) => void;
   onToggleCommentLike: (commentId: string) => void;
+  onPinComment?: (commentId: string) => void;
 };
 
 type CommentNode = CommunityComment & { children: CommentNode[] };
@@ -56,17 +59,30 @@ export function CommentSection({
   comments,
   userId,
   displayName,
+  isPostAuthor,
+  pinnedCommentId,
   onAddComment,
   onUpdateComment,
   onDeleteComment,
   onToggleCommentLike,
+  onPinComment,
 }: CommentSectionProps) {
   const [text, setText] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [replyToId, setReplyToId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
 
-  const flat = useMemo(() => flattenTree(buildCommentTree(comments)), [comments]);
+  const pinnedComment = useMemo(
+    () => (pinnedCommentId ? comments.find((c) => c.id === pinnedCommentId) : undefined),
+    [comments, pinnedCommentId],
+  );
+
+  const restComments = useMemo(
+    () => (pinnedCommentId ? comments.filter((c) => c.id !== pinnedCommentId) : comments),
+    [comments, pinnedCommentId],
+  );
+
+  const flat = useMemo(() => flattenTree(buildCommentTree(restComments)), [restComments]);
 
   const submitTop = () => {
     const body = text.trim();
@@ -87,38 +103,50 @@ export function CommentSection({
     setReplyToId(null);
   };
 
+  const renderComment = (node: CommunityComment, depth: number, pinned = false) => (
+    <CommentItem
+      key={node.id}
+      comment={node}
+      depth={depth}
+      liked={node.likeUserIds.includes(userId)}
+      isCommentAuthor={node.authorNickname === displayName}
+      isPostAuthor={isPostAuthor}
+      isPinned={pinned}
+      onToggleLike={() => onToggleCommentLike(node.id)}
+      onPin={onPinComment ? () => onPinComment(node.id) : undefined}
+      onReply={(id) => {
+        setReplyToId(id);
+        setReplyText('');
+      }}
+      onUpdate={onUpdateComment}
+      onDelete={onDeleteComment}
+      replyToId={replyToId}
+      replyText={replyText}
+      onReplyTextChange={setReplyText}
+      onSubmitReply={submitReply}
+      onCancelReply={() => {
+        setReplyToId(null);
+        setReplyText('');
+      }}
+    />
+  );
+
   return (
     <section aria-label="댓글">
       <p className={`mb-3 ${typeCaption} font-semibold text-white/80`}>댓글 {comments.length}개</p>
 
       <ul className="space-y-3">
-        {flat.length === 0 ? (
+        {pinnedComment ? (
+          <li>
+            <p className="mb-1.5 pl-1 text-[11px] font-semibold text-white/55">고정된 댓글</p>
+            {renderComment(pinnedComment, 0, true)}
+          </li>
+        ) : null}
+
+        {flat.length === 0 && !pinnedComment ? (
           <li className={`${SURFACE} text-center ${typeBodySm} text-white/75`}>첫 댓글을 남겨 보세요.</li>
         ) : (
-          flat.map(({ node, depth }) => (
-            <CommentItem
-              key={node.id}
-              comment={node}
-              depth={depth}
-              liked={node.likeUserIds.includes(userId)}
-              isAuthor={node.authorNickname === displayName}
-              onToggleLike={() => onToggleCommentLike(node.id)}
-              onReply={(id) => {
-                setReplyToId(id);
-                setReplyText('');
-              }}
-              onUpdate={onUpdateComment}
-              onDelete={onDeleteComment}
-              replyToId={replyToId}
-              replyText={replyText}
-              onReplyTextChange={setReplyText}
-              onSubmitReply={submitReply}
-              onCancelReply={() => {
-                setReplyToId(null);
-                setReplyText('');
-              }}
-            />
-          ))
+          flat.map(({ node, depth }) => renderComment(node, depth))
         )}
       </ul>
 

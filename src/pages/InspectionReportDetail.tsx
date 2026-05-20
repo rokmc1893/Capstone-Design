@@ -124,9 +124,9 @@ const InspectionReportDetailPage = () => {
       <div className={MOBILE_FRAME} style={GRADIENT_BG_STYLE}>
         <MobileGlassBackdrop />
 
-        <header className="relative z-20 shrink-0 px-6 pb-2">
+        <header className="relative z-20 shrink-0 px-6 pb-3 max-sm:pb-2">
           <StatusBar />
-          <div className="flex items-center justify-between gap-2">
+          <div className="mt-2 flex items-center justify-between gap-2 max-sm:mt-1.5">
           <button
             type="button"
             onClick={() => navigate(backPath)}
