@@ -28,7 +28,7 @@ export function InspectionDateSwitcher({
   return (
     <div className={className} role="navigation" aria-label="검사일 선택">
       <p className="mb-2 text-[11px] font-semibold tracking-wide text-white/70">다른 검사일</p>
-      <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="premium-scroll-x flex gap-2 pb-1">
         {rounds.map((round) => {
           const active = round.resultId === activeResultId;
           const dayLabel = formatDayLabel(round.inspectedAt);

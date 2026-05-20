@@ -1,7 +1,12 @@
 import { memo } from 'react';
 import { Bookmark, Flame, MessageCircle } from 'lucide-react';
 import type { CommunityFeedTab, CommunityPost } from '../../types/community';
-import { typeCardDesc, typeCardTitle } from '../../lib/typography';
+import {
+  typeCommunityPostBody,
+  typeCommunityPostTitle,
+} from '../../lib/typography';
+import { glassCommunityPostCard } from '../ui/glassStyles';
+import { SkeletonShimmer } from '../ui/SkeletonShimmer';
 import { PostCard } from './PostCard';
 
 type PostListProps = {
@@ -11,8 +16,8 @@ type PostListProps = {
   userId: string;
   onOpenPost: (postId: string) => void;
   onToggleLike: (postId: string) => void;
-  onToggleBookmark: (postId: string) => void;
-  onCommentIntent?: (postId: string, openComposer: () => void) => void;
+  onToggleBookmark: (postId: string, anchor: HTMLElement) => void;
+  onCommentIntent?: (postId: string, openComposer: () => void, anchor: HTMLElement) => void;
   onAddComment: (postId: string, body: string) => void;
   loading?: boolean;
 };
@@ -20,10 +25,12 @@ type PostListProps = {
 function EmptyState({ feedTab }: { feedTab: CommunityFeedTab }) {
   if (feedTab === 'saved') {
     return (
-      <div className="mt-4 flex flex-col items-center justify-center rounded-[24px] border border-white/20 bg-white/[0.08] px-6 py-14 text-center backdrop-blur-xl">
+      <div
+        className={`${glassCommunityPostCard} mt-2 flex flex-col items-center justify-center px-6 py-16 text-center`}
+      >
         <Bookmark className="h-11 w-11 text-white/70" strokeWidth={1.5} aria-hidden />
-        <p className={`mt-5 ${typeCardTitle}`}>저장한 글이 없어요</p>
-        <p className={`mt-2 ${typeCardDesc}`}>
+        <p className={`mt-6 ${typeCommunityPostTitle}`}>저장한 글이 없어요</p>
+        <p className={`mt-3 ${typeCommunityPostBody}`}>
           마음에 드는 글을 저장하면
           <br />
           여기에서 다시 볼 수 있어요
@@ -33,18 +40,24 @@ function EmptyState({ feedTab }: { feedTab: CommunityFeedTab }) {
   }
   if (feedTab === 'popular') {
     return (
-      <div className="mt-4 flex flex-col items-center justify-center rounded-[24px] border border-white/20 bg-white/[0.08] px-6 py-14 text-center backdrop-blur-xl">
+      <div
+        className={`${glassCommunityPostCard} mt-2 flex flex-col items-center justify-center px-6 py-16 text-center`}
+      >
         <Flame className="h-11 w-11 text-white/70" strokeWidth={1.5} aria-hidden />
-        <p className={`mt-5 ${typeCardTitle}`}>인기 글이 없어요</p>
-        <p className={`mt-2 ${typeCardDesc}`}>첫 공감이 모이면 이곳에 표시돼요</p>
+        <p className={`mt-6 ${typeCommunityPostTitle}`}>인기 글이 없어요</p>
+        <p className={`mt-3 ${typeCommunityPostBody}`}>첫 공감이 모이면 이곳에 표시돼요</p>
       </div>
     );
   }
   return (
-    <div className="mt-4 flex flex-col items-center justify-center rounded-[24px] border border-white/20 bg-white/[0.08] px-6 py-14 text-center backdrop-blur-xl">
+    <div
+      className={`${glassCommunityPostCard} mt-2 flex flex-col items-center justify-center px-6 py-16 text-center`}
+    >
       <MessageCircle className="h-12 w-12 text-white/85" strokeWidth={1.5} aria-hidden />
-      <p className={`mt-5 ${typeCardTitle}`}>조건에 맞는 게시글이 없어요</p>
-      <p className={`mt-2 ${typeCardDesc}`}>다른 카테고리를 선택하거나 글을 작성해 보세요.</p>
+      <p className={`mt-6 ${typeCommunityPostTitle}`}>조건에 맞는 게시글이 없어요</p>
+      <p className={`mt-3 ${typeCommunityPostBody}`}>
+        다른 카테고리를 선택하거나 글을 작성해 보세요.
+      </p>
     </div>
   );
 }
@@ -65,11 +78,7 @@ export const PostList = memo(function PostList({
     return (
       <div className="mt-4 space-y-3">
         {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="h-40 animate-pulse rounded-[24px] border border-white/15 bg-white/[0.08]"
-            aria-hidden
-          />
+          <SkeletonShimmer key={i} className="h-44" />
         ))}
       </div>
     );
@@ -80,7 +89,7 @@ export const PostList = memo(function PostList({
   }
 
   return (
-    <ul className="mt-4 space-y-3" aria-label="게시글 목록">
+    <ul className="mt-4 space-y-5 pb-3" aria-label="게시글 목록">
       {posts.map((post) => (
         <li key={post.id}>
           <PostCard
@@ -90,10 +99,10 @@ export const PostList = memo(function PostList({
             bookmarked={post.bookmarkUserIds.includes(userId)}
             onOpen={() => onOpenPost(post.id)}
             onToggleLike={() => onToggleLike(post.id)}
-            onToggleBookmark={() => onToggleBookmark(post.id)}
+            onToggleBookmark={(anchor) => onToggleBookmark(post.id, anchor)}
             onCommentIntent={
               onCommentIntent
-                ? (open) => onCommentIntent(post.id, open)
+                ? (open, anchor) => onCommentIntent(post.id, open, anchor)
                 : undefined
             }
             onAddComment={(body) => onAddComment(post.id, body)}

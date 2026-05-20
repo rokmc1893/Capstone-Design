@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useGoBack } from '../hooks/useGoBack';
 import { Eye, EyeOff, ChevronLeft, Loader2 } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
 import { emailLogin, signUp } from '../lib/auth';
@@ -12,6 +13,7 @@ type Mode = 'login' | 'signup';
 
 const EmailAuth = () => {
   const navigate = useNavigate();
+  const goBack = useGoBack('/login');
   const setAuth = useAuthStore((s) => s.setAuth);
 
   const [mode, setMode] = useState<Mode>('login');
@@ -85,7 +87,7 @@ const EmailAuth = () => {
           <div className="px-5 pt-2">
             <button
               type="button"
-              onClick={() => navigate('/login')}
+              onClick={goBack}
               className="inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1.5 text-white/90 backdrop-blur-sm"
             >
               <ChevronLeft className="h-5 w-5" />

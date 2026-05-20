@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Activity, ChevronLeft } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useGoBack } from '../hooks/useGoBack';
+import { PremiumScrollArea } from '../components/ui/PremiumScrollArea';
 import { InspectionReportFullView } from '../components/InspectionReportFullView';
 import { MobileGlassBackdrop } from '../components/ui/MobileGlassBackdrop';
 import { StatusBar } from '../components/StatusBar';
@@ -46,6 +48,8 @@ const InspectionReportDetailPage = () => {
     if (resultIdParam || roundId) return '/inspection-reports/archive';
     return '/home';
   }, [resultIdParam, roundId]);
+
+  const goBack = useGoBack(backPath);
 
   useEffect(() => {
     let mounted = true;
@@ -129,7 +133,7 @@ const InspectionReportDetailPage = () => {
           <div className="mt-2 flex items-center justify-between gap-2 max-sm:mt-1.5">
           <button
             type="button"
-            onClick={() => navigate(backPath)}
+            onClick={goBack}
             className="inline-flex h-10 w-10 shrink-0 items-center justify-center text-white transition active:opacity-70"
             aria-label="이전 화면으로 이동"
           >
@@ -151,7 +155,7 @@ const InspectionReportDetailPage = () => {
           </div>
         </header>
 
-        <main className="relative z-10 min-h-0 flex-1 overflow-y-auto overscroll-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <PremiumScrollArea showTopChrome className="relative z-10">
           {loading ? (
             <div
               className={`mx-6 flex h-44 items-center justify-center rounded-[24px] bg-white/15 ${typeBodySm} text-white/88`}
@@ -167,7 +171,7 @@ const InspectionReportDetailPage = () => {
           ) : record ? (
             <InspectionReportFullView record={record} inspectionRounds={inspectionRounds} />
           ) : null}
-        </main>
+        </PremiumScrollArea>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useGoBack } from '../hooks/useGoBack';
 import { ChevronLeft, Settings } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
 import { syncFemaleInspectionStep } from '../lib/testsSessionSync';
@@ -23,6 +24,7 @@ function parsePositiveNumber(s: string): number | null {
  */
 const InspectionFemaleStep1 = () => {
   const navigate = useNavigate();
+  const goBack = useGoBack('/home');
   const gender = useSimulatorStore((s) => s.gender);
   const applyInspectionStep1 = useSimulatorStore((s) => s.applyInspectionStep1);
 
@@ -105,7 +107,7 @@ const InspectionFemaleStep1 = () => {
         <div className="relative z-10 flex shrink-0 items-center justify-between px-5 pb-2 pt-1 sm:px-6">
           <button
             type="button"
-            onClick={() => navigate('/home')}
+            onClick={goBack}
             className="flex min-w-0 items-center gap-0.5 type-inspect-back active:opacity-80"
           >
             <ChevronLeft className="h-6 w-6 shrink-0" strokeWidth={2.25} aria-hidden />
@@ -121,7 +123,7 @@ const InspectionFemaleStep1 = () => {
           </button>
         </div>
 
-        <main className="relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto px-5 pb-6 pt-2 sm:px-6">
+        <main className="premium-scroll relative z-10 flex min-h-0 flex-1 flex-col px-5 pb-6 pt-2 sm:px-6">
           <h1 className="type-inspect-title">
             간단한 질문 몇 가지로
             <br />

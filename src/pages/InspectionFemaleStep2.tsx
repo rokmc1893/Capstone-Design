@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useGoBack } from '../hooks/useGoBack';
 import { ChevronLeft, Settings } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
 import { syncFemaleInspectionStep } from '../lib/testsSessionSync';
@@ -38,6 +39,7 @@ const emptyConditions = (): FemaleConditions => ({
  */
 const InspectionFemaleStep2 = () => {
   const navigate = useNavigate();
+  const goBack = useGoBack('/inspection/female/1');
   const gender = useSimulatorStore((s) => s.gender);
   const applyInspectionStep2 = useSimulatorStore((s) => s.applyInspectionStep2);
 
@@ -148,7 +150,7 @@ const InspectionFemaleStep2 = () => {
         <div className="relative z-10 flex shrink-0 items-center justify-between px-5 pb-2 pt-1 sm:px-6">
           <button
             type="button"
-            onClick={() => navigate('/home')}
+            onClick={goBack}
             className="flex min-w-0 items-center gap-0.5 type-inspect-back active:opacity-80"
           >
             <ChevronLeft className="h-6 w-6 shrink-0" strokeWidth={2.25} aria-hidden />
@@ -165,7 +167,7 @@ const InspectionFemaleStep2 = () => {
         </div>
 
         <main className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden px-5 pb-6 pt-1 sm:px-6">
-          <div className="min-h-0 flex-1 overflow-y-auto [-webkit-overflow-scrolling:touch]">
+          <div className="premium-scroll min-h-0 flex-1">
             <div className="mx-auto w-full max-w-[350px] rounded-[22px] bg-white/95 p-5 shadow-[0_16px_48px_rgba(24,24,48,0.12)] ring-1 ring-white/70 backdrop-blur-sm sm:rounded-[24px] sm:p-6">
               <div className="space-y-6">
                 <div>

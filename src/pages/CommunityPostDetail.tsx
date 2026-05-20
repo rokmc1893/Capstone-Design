@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useGoBack } from '../hooks/useGoBack';
 import { CommunityCoachMark } from '../components/community/CommunityCoachMark';
 import { CommunityLayout } from '../components/community/CommunityLayout';
-import { CommunityToast } from '../components/community/CommunityToast';
+import { CommunityToast, type CommunityToastTone } from '../components/community/CommunityToast';
 import { ReportBottomSheet } from '../components/community/ReportBottomSheet';
 import { CommentSection } from '../components/community/PostDetail/CommentSection';
 import { PostContent } from '../components/community/PostDetail/PostContent';
+import { PremiumScrollArea } from '../components/ui/PremiumScrollArea';
 import { useCommunityFeatureHint } from '../hooks/useCommunityFeatureHint';
 import { useCommunityAuthor } from '../lib/community/useCommunityAuthor';
 import { useCommunityStore } from '../store/useCommunityStore';
@@ -17,7 +19,9 @@ const CommunityPostDetail = () => {
   const navigate = useNavigate();
   const { postId } = useParams<{ postId: string }>();
   const { displayName, userId } = useCommunityAuthor();
-  const { activeHint, runWithHint, closeHint, completeHint } = useCommunityFeatureHint();
+  const goBack = useGoBack('/community');
+  const { activeHint, anchorRect, runWithHint, closeHint, completeHint } =
+    useCommunityFeatureHint();
 
   const posts = useCommunityStore((s) => s.posts);
   const rawComments = useCommunityStore((s) => s.comments);
@@ -36,6 +40,8 @@ const CommunityPostDetail = () => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [toastTone, setToastTone] = useState<CommunityToastTone>('default');
+  const [headerScrolled, setHeaderScrolled] = useState(false);
 
   useEffect(() => {
     if (hydrated) return;
@@ -61,7 +67,8 @@ const CommunityPostDetail = () => {
   const showBookmarkToast = useCallback(() => {
     if (!postId) return;
     const saved = togglePostBookmark(postId, userId);
-    setToast(saved ? '저장되었습니다' : '저장을 해제했어요');
+    setToastTone(saved ? 'saved' : 'default');
+    setToast(saved ? '저장한 글에 추가됐어요' : '저장을 해제했어요');
   }, [postId, togglePostBookmark, userId]);
 
   const handleReportSubmit = useCallback(
@@ -69,7 +76,8 @@ const CommunityPostDetail = () => {
       if (!postId) return;
       reportPost(postId, reason);
       setReportOpen(false);
-      setToast('신고가 접수되었어요. 더 나은 커뮤니티를 위해 검토할게요');
+      setToastTone('success');
+      setToast('신고가 접수됐어요');
       window.setTimeout(() => navigate('/community'), 1200);
     },
     [postId, reportPost, navigate],
@@ -92,7 +100,7 @@ const CommunityPostDetail = () => {
         headerExtra={
           <button
             type="button"
-            onClick={() => navigate('/community')}
+            onClick={goBack}
             className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white"
             aria-label="목록으로"
           >
@@ -129,8 +137,8 @@ const CommunityPostDetail = () => {
     pinComment(postId, displayName, currently ? null : commentId);
   };
 
-  const openReportSheet = () => {
-    runWithHint('report', () => setReportOpen(true));
+  const openReportSheet = (anchor: HTMLElement) => {
+    runWithHint('report', () => setReportOpen(true), anchor);
   };
 
   return (
@@ -138,10 +146,11 @@ const CommunityPostDetail = () => {
       title="게시글"
       subtitle={post.title}
       showFab={false}
+      headerScrolled={headerScrolled}
       headerExtra={
         <button
           type="button"
-          onClick={() => navigate('/community')}
+          onClick={goBack}
           className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm active:scale-[0.97]"
           aria-label="목록으로"
         >
@@ -149,9 +158,10 @@ const CommunityPostDetail = () => {
         </button>
       }
     >
-      <CommunityToast message={toast} />
+      <CommunityToast message={toast} tone={toastTone} />
       <CommunityCoachMark
         hintKey={activeHint}
+        anchorRect={anchorRect}
         onClose={closeHint}
         onComplete={completeHint}
       />
@@ -161,14 +171,18 @@ const CommunityPostDetail = () => {
         onSubmit={handleReportSubmit}
       />
 
-      <div className="mt-2 min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <PremiumScrollArea
+        showTopChrome
+        className="mt-2 space-y-4 pb-2"
+        onScrollState={(s) => setHeaderScrolled(s.isScrolled)}
+      >
         <PostContent
           post={post}
           liked={post.likeUserIds.includes(userId)}
           bookmarked={post.bookmarkUserIds.includes(userId)}
           isAuthor={isPostAuthor}
           onToggleLike={() => runWithHint('like', () => togglePostLike(postId, userId))}
-          onToggleBookmark={() => runWithHint('bookmark', showBookmarkToast)}
+          onToggleBookmark={(anchor) => runWithHint('bookmark', showBookmarkToast, anchor)}
           onEdit={isPostAuthor ? () => navigate(`/community/${postId}/edit`) : undefined}
           onDelete={isPostAuthor ? handleDelete : undefined}
           onReportClick={!isPostAuthor ? openReportSheet : undefined}
@@ -176,6 +190,7 @@ const CommunityPostDetail = () => {
             !isPostAuthor
               ? () => {
                   blockUser(post.authorNickname);
+                  setToastTone('success');
                   setToast('작성자를 차단했어요');
                   window.setTimeout(() => navigate('/community'), 1000);
                 }
@@ -193,7 +208,7 @@ const CommunityPostDetail = () => {
           displayName={displayName}
           isPostAuthor={isPostAuthor}
           pinnedCommentId={post.pinnedCommentId ?? null}
-          onCommentFocus={() => runWithHint('comment', () => {})}
+          onCommentFocus={(anchor) => runWithHint('comment', () => {}, anchor)}
           onAddComment={(body, parentId) =>
             addComment({ postId, authorNickname: displayName, body, parentId })
           }
@@ -202,7 +217,7 @@ const CommunityPostDetail = () => {
           onToggleCommentLike={(id) => toggleCommentLike(id, userId)}
           onPinComment={isPostAuthor ? handlePin : undefined}
         />
-      </div>
+      </PremiumScrollArea>
     </CommunityLayout>
   );
 };

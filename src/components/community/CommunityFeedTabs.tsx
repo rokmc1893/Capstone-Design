@@ -38,12 +38,12 @@ export const CommunityFeedTabs = memo(function CommunityFeedTabs({
             role="tab"
             aria-selected={active}
             onClick={() => onChange(tab.id)}
-            className="relative flex flex-1 flex-col items-center gap-0.5 rounded-[14px] py-2.5 transition active:scale-[0.98]"
+            className="relative flex flex-1 flex-col items-center gap-0.5 rounded-[14px] py-3 transition active:scale-[0.98]"
           >
             {active ? (
               <motion.span
                 layoutId="community-feed-tab"
-                className="absolute inset-0 rounded-[14px] bg-white shadow-[0_4px_16px_rgba(123,110,232,0.25)]"
+                className="absolute inset-0 rounded-[14px] bg-white shadow-[0_4px_14px_rgba(123,110,232,0.18)]"
                 transition={{ type: 'spring', stiffness: 420, damping: 32 }}
               />
             ) : null}

@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useGoBack } from '../hooks/useGoBack';
 import { ChevronLeft, Settings } from 'lucide-react';
 import { GenderCharacterArt } from '../components/illustrations/GenderCharacterArt';
 import { StatusBar } from '../components/StatusBar';
@@ -34,10 +35,7 @@ const InspectionGender = () => {
     });
   }, []);
 
-  const goBack = useCallback(() => {
-    if (window.history.length > 1) navigate(-1);
-    else navigate('/home');
-  }, [navigate]);
+  const goBack = useGoBack('/home');
 
   const handleSelect = async (g: 'male' | 'female') => {
     if (navigateLock.current) return;

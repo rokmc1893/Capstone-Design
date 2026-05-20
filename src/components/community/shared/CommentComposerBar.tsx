@@ -1,4 +1,6 @@
 import { memo, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
+import { communityEaseSoft } from '../../../lib/community/interactionMotion';
 
 type CommentComposerBarProps = {
   value: string;
@@ -27,31 +29,47 @@ export const CommentComposerBar = memo(function CommentComposerBar({
   };
 
   return (
-    <form
+    <motion.form
       className="flex items-center gap-2 border-t border-white/15 pt-3"
+      initial={{ opacity: 0.85 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.28, ease: communityEaseSoft }}
       onSubmit={(e) => {
         e.preventDefault();
         handleSubmit();
       }}
       onClick={(e) => e.stopPropagation()}
     >
-      <input
+      <motion.input
         ref={inputRef}
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         maxLength={800}
-        className="min-w-0 flex-1 rounded-full border border-white/25 bg-white/10 px-4 py-2.5 text-[14px] text-white placeholder:text-white/45 focus:border-white/40 focus:outline-none"
+        className="min-w-0 flex-1 rounded-full border border-white/25 bg-white/10 px-4 py-2.5 text-[14px] text-white placeholder:text-white/45 focus:border-white/45 focus:outline-none focus:ring-2 focus:ring-white/20"
         aria-label="댓글 입력"
+        animate={
+          autoFocus
+            ? {
+                boxShadow: [
+                  '0 0 0 0 rgba(255,255,255,0)',
+                  '0 0 0 3px rgba(255,255,255,0.12)',
+                  '0 0 0 2px rgba(255,255,255,0.08)',
+                ],
+              }
+            : undefined
+        }
+        transition={{ duration: 0.45, ease: communityEaseSoft }}
       />
-      <button
+      <motion.button
         type="submit"
         disabled={!value.trim()}
-        className="shrink-0 text-[14px] font-semibold text-white/90 transition disabled:cursor-not-allowed disabled:text-white/35 active:opacity-80"
+        className="shrink-0 text-[14px] font-semibold text-white/90 transition disabled:cursor-not-allowed disabled:text-white/35"
+        whileTap={value.trim() ? { scale: 0.94 } : undefined}
       >
         게시
-      </button>
-    </form>
+      </motion.button>
+    </motion.form>
   );
 });

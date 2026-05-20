@@ -16,6 +16,21 @@ body,
   height: 100%;
 }
 
+/* ── Premium scroll UX (iOS-like, calm) ── */
+@layer base {
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
 @layer base {
   html {
     font-family:
@@ -196,6 +211,47 @@ body,
     line-height: 1.55;
     letter-spacing: -0.01em;
     color: rgba(255, 255, 255, 0.65);
+  }
+
+  /** 커뮤니티 — 게시글 typography hierarchy (Toss · Apple Health 톤) */
+  .type-community-post-title {
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.28;
+    letter-spacing: -0.032em;
+    color: rgba(255, 255, 255, 0.98);
+  }
+
+  .type-community-post-body {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.82;
+    letter-spacing: -0.014em;
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  .type-community-post-author {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
+    letter-spacing: -0.02em;
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  .type-community-post-meta {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  .type-community-post-tag {
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+    color: rgba(255, 255, 255, 0.52);
   }
   .type-stat-label {
     font-size: 12px;
@@ -577,5 +633,201 @@ body,
     line-height: 1.45;
     letter-spacing: -0.01em;
     color: #72726f;
+  }
+
+  /** 세로 스크롤 — iOS inertia · smooth · subtle elastic */
+  .premium-scroll {
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+
+  .premium-scroll.is-scrolling {
+    scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+  }
+
+  .premium-scroll::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .premium-scroll::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 8px 0;
+  }
+
+  .premium-scroll::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0);
+    box-shadow: none;
+    transition:
+      background 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+      opacity 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+    opacity: 0;
+  }
+
+  .premium-scroll.is-scrolling::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow:
+      0 0 12px rgba(255, 255, 255, 0.1),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+    opacity: 1;
+  }
+
+  /** JS 커스텀 레일 사용 시 네이티브 스크롤바 숨김 */
+  .premium-scroll.premium-scroll--custom-rail {
+    scrollbar-width: none;
+  }
+
+  .premium-scroll.premium-scroll--custom-rail::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  /** 가로 스크롤 (탭·칩) */
+  .premium-scroll-x {
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+
+  .premium-scroll-x.is-scrolling {
+    scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+  }
+
+  .premium-scroll-x::-webkit-scrollbar {
+    height: 3px;
+  }
+
+  .premium-scroll-x::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    transition: background 0.4s ease;
+  }
+
+  .premium-scroll-x.is-scrolling::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.22);
+  }
+
+  /** 스크롤 시 상단 헤더 glass 강화 */
+  .scroll-chrome-header {
+    transition:
+      background 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+      backdrop-filter 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .scroll-chrome-header.is-scrolled,
+  body.app-is-scrolled .scroll-chrome-header {
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.12),
+      0 8px 24px rgba(15, 23, 42, 0.08);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .scroll-chrome-title {
+    transition:
+      opacity 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+      transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .scroll-chrome-header.is-scrolled .scroll-chrome-title,
+  body.app-is-scrolled .scroll-chrome-title {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+
+  /** 하단 탭 — 스크롤 중 미세한 glass (콘텐츠보다 덜 튀게) */
+  .scroll-chrome-nav {
+    transition:
+      box-shadow 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+      background 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+      backdrop-filter 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  body.app-is-scrolling .scroll-chrome-nav {
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow:
+      0 10px 32px rgba(15, 23, 42, 0.16),
+      0 0 0 1px rgba(255, 255, 255, 0.42);
+  }
+
+  /** glass 카드 — 호버 breathing (pointer fine) */
+  .premium-card {
+    transition:
+      transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+      border-color 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+      background 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .premium-card:hover {
+      animation: premium-card-breathe 2.8s ease-in-out infinite;
+    }
+  }
+
+  @keyframes premium-card-breathe {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-2px);
+    }
+  }
+
+  /** skeleton shimmer */
+  .skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .skeleton-shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.06) 42%,
+      rgba(255, 255, 255, 0.14) 50%,
+      rgba(255, 255, 255, 0.06) 58%,
+      transparent 100%
+    );
+    transform: translateX(-100%);
+    animation: skeleton-shimmer-sweep 1.6s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  }
+
+  @keyframes skeleton-shimmer-sweep {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .premium-scroll,
+  .premium-scroll-x {
+    scroll-behavior: auto;
+  }
+
+  .premium-card:hover {
+    animation: none;
+  }
+
+  .skeleton-shimmer::after {
+    animation: none;
   }
 }

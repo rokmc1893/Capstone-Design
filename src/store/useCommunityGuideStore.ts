@@ -12,11 +12,11 @@ const HINT_COPY: Record<
   },
   comment: {
     title: '댓글',
-    body: '다른 사용자와\n경험을 나눠 보세요',
+    body: '다른 사용자와\n경험을 공유해 보세요',
   },
   report: {
     title: '신고',
-    body: '커뮤니티를 건강하게\n유지하기 위한 기능이에요',
+    body: '건강한 커뮤니티를\n위한 기능이에요',
   },
   like: {
     title: '좋아요',
@@ -29,25 +29,26 @@ export function getCommunityHintCopy(key: CommunityHintKey) {
 }
 
 type GuideState = {
-  permanentlyDismissed: CommunityHintKey[];
+  /** localStorage — 다시 보지 않기 · 다음(완료) */
+  dismissedHints: CommunityHintKey[];
+  /** 세션 — 건너뛰기 */
   sessionDismissed: CommunityHintKey[];
   shouldShowHint: (key: CommunityHintKey) => boolean;
   dismissForSession: (key: CommunityHintKey) => void;
   dismissPermanently: (key: CommunityHintKey) => void;
-  acknowledgeHint: (key: CommunityHintKey) => void;
+  /** 다음 — 안내 확인 후 해당 기능 계속 */
+  completeHint: (key: CommunityHintKey) => void;
 };
 
 export const useCommunityGuideStore = create<GuideState>()(
   persist(
     (set, get) => ({
-      permanentlyDismissed: [],
+      dismissedHints: [],
       sessionDismissed: [],
 
       shouldShowHint: (key) => {
-        const { permanentlyDismissed, sessionDismissed } = get();
-        return (
-          !permanentlyDismissed.includes(key) && !sessionDismissed.includes(key)
-        );
+        const { dismissedHints, sessionDismissed } = get();
+        return !dismissedHints.includes(key) && !sessionDismissed.includes(key);
       },
 
       dismissForSession: (key) => {
@@ -60,31 +61,38 @@ export const useCommunityGuideStore = create<GuideState>()(
 
       dismissPermanently: (key) => {
         set((s) => ({
-          permanentlyDismissed: s.permanentlyDismissed.includes(key)
-            ? s.permanentlyDismissed
-            : [...s.permanentlyDismissed, key],
+          dismissedHints: s.dismissedHints.includes(key)
+            ? s.dismissedHints
+            : [...s.dismissedHints, key],
           sessionDismissed: [...s.sessionDismissed, key],
         }));
       },
 
-      acknowledgeHint: (key) => {
-        get().dismissPermanently(key);
+      completeHint: (key) => {
+        set((s) => ({
+          dismissedHints: s.dismissedHints.includes(key)
+            ? s.dismissedHints
+            : [...s.dismissedHints, key],
+        }));
       },
     }),
     {
-      name: 'community-guide-v1',
-      partialize: (s) => ({ permanentlyDismissed: s.permanentlyDismissed }),
-      merge: (persisted, current) => ({
-        ...current,
-        permanentlyDismissed: Array.isArray(
-          (persisted as { permanentlyDismissed?: CommunityHintKey[] })
-            ?.permanentlyDismissed,
-        )
-          ? (persisted as { permanentlyDismissed: CommunityHintKey[] })
-              .permanentlyDismissed
-          : current.permanentlyDismissed,
-        sessionDismissed: [],
-      }),
+      name: 'community-guide-v2',
+      partialize: (s) => ({ dismissedHints: s.dismissedHints }),
+      merge: (persisted, current) => {
+        const saved = persisted as { dismissedHints?: CommunityHintKey[] } | undefined;
+        const legacy = persisted as { permanentlyDismissed?: CommunityHintKey[] } | undefined;
+        const merged = Array.isArray(saved?.dismissedHints)
+          ? saved.dismissedHints
+          : Array.isArray(legacy?.permanentlyDismissed)
+            ? legacy.permanentlyDismissed
+            : current.dismissedHints;
+        return {
+          ...current,
+          dismissedHints: merged,
+          sessionDismissed: [],
+        };
+      },
     },
   ),
 );

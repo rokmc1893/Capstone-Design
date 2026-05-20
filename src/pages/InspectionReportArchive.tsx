@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronLeft, Settings as SettingsIcon } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useGoBack } from '../hooks/useGoBack';
+import { PremiumScrollArea } from '../components/ui/PremiumScrollArea';
 import { InspectionArchiveRoundCard } from '../components/inspection/InspectionArchiveRoundCard';
 import { MobileGlassBackdrop } from '../components/ui/MobileGlassBackdrop';
 import { StatusBar } from '../components/StatusBar';
@@ -20,6 +22,7 @@ import { typeScreenTitle } from '../lib/typography';
 
 const InspectionReportArchive = () => {
   const navigate = useNavigate();
+  const goBack = useGoBack('/home');
   const [searchParams] = useSearchParams();
   const autoOpenedDayRef = useRef<string | null>(null);
   const [archive, setArchive] = useState<InspectionArchiveResponse | null>(null);
@@ -27,6 +30,7 @@ const InspectionReportArchive = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedYear, setSelectedYear] = useState(() => new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(() => new Date().getMonth() + 1);
+  const [headerScrolled, setHeaderScrolled] = useState(false);
 
   const openDetail = useCallback(
     (resultId: number) => {
@@ -131,12 +135,17 @@ const InspectionReportArchive = () => {
       <div className={MOBILE_FRAME} style={GRADIENT_BG_STYLE}>
         <MobileGlassBackdrop />
 
-        <header className="relative z-10 shrink-0 px-6 pb-3 max-sm:pb-2">
+        <header
+          className={[
+            'scroll-chrome-header relative z-10 shrink-0 px-6 pb-3 max-sm:pb-2',
+            headerScrolled ? 'is-scrolled' : '',
+          ].join(' ')}
+        >
           <StatusBar />
           <div className="mt-2 flex items-center justify-between gap-3 max-sm:mt-1.5">
           <button
             type="button"
-            onClick={() => navigate('/home')}
+            onClick={goBack}
             className="inline-flex h-10 w-10 shrink-0 items-center justify-center text-white active:opacity-70"
             aria-label="홈으로 이동"
           >
@@ -158,10 +167,14 @@ const InspectionReportArchive = () => {
           </div>
         </header>
 
-        <div className="relative z-10 min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-6 pb-8 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <PremiumScrollArea
+          showTopChrome
+          className="relative z-10 space-y-5 px-6 pb-8"
+          onScrollState={(s) => setHeaderScrolled(s.isScrolled)}
+        >
           <section>
           <p className="text-[13px] font-semibold text-white/88">연도 선택</p>
-          <div className="mt-2 flex gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="premium-scroll-x mt-2 flex gap-2 pb-0.5">
             {yearOptions.map((entry) => {
               const active = entry.year === selectedYear;
               return (
@@ -236,7 +249,7 @@ const InspectionReportArchive = () => {
             </ul>
           )}
           </section>
-        </div>
+        </PremiumScrollArea>
       </div>
     </div>
   );

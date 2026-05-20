@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useGoBack } from '../hooks/useGoBack';
+import { PremiumScrollArea } from '../components/ui/PremiumScrollArea';
 import { StatusBar } from '../components/StatusBar';
 import { BottomTabNav } from '../components/BottomTabNav';
 import { getMissionFlower, getMissionFlowerStageImageSrc } from '../data/missionFlowers';
@@ -71,6 +73,7 @@ function BloomGrid({ records }: { records: BloomRecordEntry[] }) {
 
 const MissionsArchive = () => {
   const navigate = useNavigate();
+  const goBack = useGoBack('/missions');
   const hasApiBase = Boolean(import.meta.env.VITE_API_BASE_URL);
   const accessToken = useAuthStore((s) => s.accessToken);
   const localBloomRecords = useBloomMissionsStore((s) => s.bloomRecords);
@@ -138,11 +141,11 @@ const MissionsArchive = () => {
           <StatusBar />
         </header>
 
-        <main className="relative z-10 flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain px-5 pb-28 pt-3">
+        <PremiumScrollArea showTopChrome className="relative z-10 flex flex-col px-5 pb-28 pt-3">
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => navigate('/missions')}
+              onClick={goBack}
               className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm active:scale-[0.97]"
               aria-label="미션 화면으로 이동"
             >
@@ -198,7 +201,7 @@ const MissionsArchive = () => {
               <BloomGrid records={records} />
             )}
           </section>
-        </main>
+        </PremiumScrollArea>
 
         <BottomTabNav />
       </div>

@@ -2,13 +2,17 @@ import { memo, useState } from 'react';
 import { Pin, Send, Trash2 } from 'lucide-react';
 import { formatCommunityDate } from '../../../lib/communityFormat';
 import type { CommunityComment } from '../../../types/community';
-import { glassCard } from '../../ui/glassStyles';
-import { typeCaption, typeCardDesc } from '../../../lib/typography';
+import { glassCommunityPostCard } from '../../ui/glassStyles';
+import {
+  typeCommunityPostAuthor,
+  typeCommunityPostBody,
+  typeCommunityPostMeta,
+} from '../../../lib/typography';
 import { LikeButton } from '../shared/LikeButton';
 import { UserAvatar } from '../shared/UserAvatar';
 
-const SURFACE = `${glassCard} px-3 py-3`;
-const PINNED_SURFACE = `${glassCard} px-3 py-3 ring-1 ring-white/35`;
+const SURFACE = `${glassCommunityPostCard} px-4 py-3.5`;
+const PINNED_SURFACE = `${glassCommunityPostCard} px-4 py-3.5 ring-1 ring-white/20`;
 
 type CommentProps = {
   comment: CommunityComment;
@@ -61,7 +65,7 @@ export const CommentItem = memo(function CommentItem({
           <UserAvatar name={comment.authorNickname} size="sm" />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <p className={`${typeCaption} font-semibold text-white/85`}>{comment.authorNickname}</p>
+              <p className={typeCommunityPostAuthor}>{comment.authorNickname}</p>
               {isPinned ? (
                 <span className="inline-flex items-center gap-0.5 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold text-white/90">
                   <Pin className="h-3 w-3" aria-hidden />
@@ -77,9 +81,9 @@ export const CommentItem = memo(function CommentItem({
                 className="mt-2 w-full rounded-[12px] border border-white/25 bg-white/10 px-3 py-2 text-[13px] text-white"
               />
             ) : (
-              <p className={`mt-1 whitespace-pre-wrap ${typeCardDesc}`}>{comment.body}</p>
+              <p className={`mt-2 whitespace-pre-wrap ${typeCommunityPostBody}`}>{comment.body}</p>
             )}
-            <p className={`mt-2 tabular-nums ${typeCaption} text-white/45`}>
+            <p className={`mt-1.5 tabular-nums ${typeCommunityPostMeta}`}>
               {formatCommunityDate(comment.createdAt)}
               {comment.updatedAt ? ' · 수정됨' : ''}
             </p>

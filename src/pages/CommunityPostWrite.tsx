@@ -1,11 +1,14 @@
 import { useNavigate } from 'react-router-dom';
+import { useGoBack } from '../hooks/useGoBack';
 import { ChevronLeft } from 'lucide-react';
 import { CommunityLayout } from '../components/community/CommunityLayout';
 import { PostEditor } from '../components/community/PostEditor/PostEditor';
 import { useCommunityAuthor } from '../lib/community/useCommunityAuthor';
+import { PremiumScrollArea } from '../components/ui/PremiumScrollArea';
 import { useCommunityStore } from '../store/useCommunityStore';
 const CommunityPostWrite = () => {
   const navigate = useNavigate();
+  const goBack = useGoBack('/community');
   const { displayName } = useCommunityAuthor();
   const addPost = useCommunityStore((s) => s.addPost);
 
@@ -17,7 +20,7 @@ const CommunityPostWrite = () => {
       headerExtra={
         <button
           type="button"
-          onClick={() => navigate('/community')}
+          onClick={goBack}
           className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white"
           aria-label="목록으로"
         >
@@ -25,15 +28,15 @@ const CommunityPostWrite = () => {
         </button>
       }
     >
-      <div className="mt-2 min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <PremiumScrollArea showTopChrome className="mt-2 pb-4">
         <PostEditor
-          onCancel={() => navigate('/community')}
+          onCancel={goBack}
           onSubmit={(payload) => {
             const id = addPost({ ...payload, authorNickname: displayName });
             navigate(`/community/${id}`);
           }}
         />
-      </div>
+      </PremiumScrollArea>
     </CommunityLayout>
   );
 };

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useGoBack } from '../hooks/useGoBack';
 import { ChevronLeft, Settings as SettingsIcon } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
 
@@ -48,6 +49,7 @@ function IosSwitch({ checked, onChange, disabled, id }: IosSwitchProps) {
 
 const NotificationSettings = () => {
   const navigate = useNavigate();
+  const goBack = useGoBack('/settings');
 
   const [individual, setIndividual] = useState<Record<NotifKey, boolean>>({
     mission: true,
@@ -88,7 +90,7 @@ const NotificationSettings = () => {
           <div className="mt-3 flex items-center justify-between">
             <button
               type="button"
-              onClick={() => navigate('/settings')}
+              onClick={goBack}
               className="flex items-center gap-2 rounded-full px-2 py-1"
               aria-label="설정(마이페이지)으로 돌아가기"
             >
@@ -109,7 +111,7 @@ const NotificationSettings = () => {
           </div>
         </header>
 
-        <main className="relative z-10 flex-1 overflow-y-auto px-6 pb-10">
+        <main className="premium-scroll relative z-10 flex-1 px-6 pb-10">
           <section className="pt-2">
             <div className="rounded-[20px] bg-white/65 backdrop-blur-md border border-white/45 px-4 py-4 shadow-[0px_10px_24px_rgba(16,24,40,0.10)] flex items-center justify-between min-h-[56px]">
               <span className="type-ink-button-lg text-blackBg">전체 알림</span>

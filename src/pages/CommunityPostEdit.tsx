@@ -1,18 +1,27 @@
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useGoBack } from '../hooks/useGoBack';
 import { ChevronLeft } from 'lucide-react';
 import { CommunityLayout } from '../components/community/CommunityLayout';
 import { PostEditor } from '../components/community/PostEditor/PostEditor';
 import { useCommunityAuthor } from '../lib/community/useCommunityAuthor';
+import { PremiumScrollArea } from '../components/ui/PremiumScrollArea';
 import { useCommunityStore } from '../store/useCommunityStore';
 import { typeBodySm } from '../lib/typography';
 
 const CommunityPostEdit = () => {
   const navigate = useNavigate();
   const { postId } = useParams();
+  const goBack = useGoBack(postId ? `/community/${postId}` : '/community');
   const { displayName } = useCommunityAuthor();
   const post = useCommunityStore((s) => (postId ? s.getPost(postId) : undefined));
   const updatePost = useCommunityStore((s) => s.updatePost);
+
+  useEffect(() => {
+    if (post && postId && post.authorNickname !== displayName) {
+      navigate(`/community/${postId}`, { replace: true });
+    }
+  }, [post, displayName, navigate, postId]);
 
   if (!post || !postId) {
     return (
@@ -21,12 +30,6 @@ const CommunityPostEdit = () => {
       </div>
     );
   }
-
-  useEffect(() => {
-    if (post && post.authorNickname !== displayName) {
-      navigate(`/community/${postId}`, { replace: true });
-    }
-  }, [post, displayName, navigate, postId]);
 
   if (post.authorNickname !== displayName) {
     return null;
@@ -40,7 +43,7 @@ const CommunityPostEdit = () => {
       headerExtra={
         <button
           type="button"
-          onClick={() => navigate(`/community/${postId}`)}
+          onClick={goBack}
           className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white"
           aria-label="뒤로"
         >
@@ -48,16 +51,16 @@ const CommunityPostEdit = () => {
         </button>
       }
     >
-      <div className="mt-2 min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <PremiumScrollArea showTopChrome className="mt-2 pb-4">
         <PostEditor
           initial={post}
-          onCancel={() => navigate(`/community/${postId}`)}
+          onCancel={goBack}
           onSubmit={(payload) => {
             updatePost(postId, displayName, payload);
             navigate(`/community/${postId}`);
           }}
         />
-      </div>
+      </PremiumScrollArea>
     </CommunityLayout>
   );
 };

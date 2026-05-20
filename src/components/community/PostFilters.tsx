@@ -23,7 +23,7 @@ export const PostFilters = memo(function PostFilters({
   onSortChange,
 }: PostFiltersProps) {
   return (
-    <div className="mt-3 space-y-2">
+    <div className="mt-4 space-y-3">
       <label className="relative block">
         <span className="sr-only">게시글 검색</span>
         <Search

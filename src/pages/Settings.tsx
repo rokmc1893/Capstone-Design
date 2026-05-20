@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useGoBack } from '../hooks/useGoBack';
 import {
   ChevronLeft,
   Settings as SettingsIcon,
@@ -25,6 +26,7 @@ import { useAuthStore } from '../store/useAuthStore';
 
 const Settings = () => {
   const navigate = useNavigate();
+  const goBack = useGoBack('/home');
   const [termsModalOpen, setTermsModalOpen] = useState(false);
   const [usageNoticeModalOpen, setUsageNoticeModalOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
@@ -265,7 +267,7 @@ const Settings = () => {
           <div className="mt-3 flex items-center justify-between">
             <button
               type="button"
-              onClick={() => navigate('/home')}
+              onClick={goBack}
               className="flex items-center gap-2 rounded-full px-2 py-1"
               aria-label="홈으로 돌아가기"
             >
@@ -287,7 +289,7 @@ const Settings = () => {
         </header>
 
         {/* Content */}
-        <main className="relative z-10 flex-1 overflow-y-auto px-6 pb-10">
+        <main className="premium-scroll relative z-10 flex-1 px-6 pb-10">
           {/* Profile */}
           <section className="pt-3">
             <div className="flex items-center gap-4">

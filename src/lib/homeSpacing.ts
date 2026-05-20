@@ -4,7 +4,8 @@
  */
 
 /** 페이지 — 좌우 24px, 상단 40px, 하단 탭 여유 128px */
-export const homePage = 'flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain px-6 pt-10 pb-32';
+export const homePage =
+  'premium-scroll premium-scroll--custom-rail relative flex min-h-0 flex-1 flex-col overflow-x-hidden px-6 pt-10 pb-32';
 
 /** 주요 섹션 사이 (인사 ↔ 통계 ↔ CTA) */
 export const homeSectionGap = 'mt-8';

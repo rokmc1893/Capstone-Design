@@ -14,9 +14,11 @@ export const CategoryBadge = memo(function CategoryBadge({
   const meta = getCategoryMeta(category);
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${meta.chipClass} ${
-        compact ? 'py-0.5' : ''
-      }`}
+      className={
+        compact
+          ? 'inline-flex items-center gap-1 rounded-full border border-white/12 bg-white/[0.08] px-2 py-0.5 text-[10px] font-medium text-white/65'
+          : `inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${meta.chipClass}`
+      }
     >
       <span aria-hidden>{meta.emoji}</span>
       {meta.label}

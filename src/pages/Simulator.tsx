@@ -112,7 +112,7 @@ const Simulator = () => {
         </header>
 
         <div className="relative z-10 flex min-h-0 flex-1 flex-col">
-          <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-3 pb-24 pt-2 sm:px-4 sm:pb-28 sm:pt-3">
+          <div className="premium-scroll min-h-0 flex-1 overflow-x-hidden px-3 pb-24 pt-2 sm:px-4 sm:pb-28 sm:pt-3">
             <div className="flex flex-col gap-2.5 sm:gap-3">
               {/* 헤더 — 한 덩어리로 압축 */}
               <GlassCard className="!p-3">

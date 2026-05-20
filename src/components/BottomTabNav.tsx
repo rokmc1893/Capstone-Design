@@ -48,7 +48,7 @@ export function BottomTabNav() {
 
   return (
     <nav className="absolute inset-x-6 bottom-10 z-20" aria-label="하단 메뉴">
-      <TapCounsel className={glassNavPill}>
+      <TapCounsel className={`scroll-chrome-nav ${glassNavPill}`}>
         <div className="relative grid h-full grid-cols-3 items-center">
           {tabs.map((t) => {
             const active = t.key === selectedTab;
@@ -70,7 +70,7 @@ export function BottomTabNav() {
                 {active ? (
                   <motion.span
                     layoutId="bottom-tab-pill"
-                    className="pointer-events-none absolute inset-x-2.5 top-1.5 bottom-1.5 rounded-[20px] bg-[#FF3AA7]/12 shadow-[0_0_28px_rgba(255,58,167,0.4)]"
+                    className="pointer-events-none absolute inset-x-2.5 top-1.5 bottom-1.5 rounded-[20px] bg-[#FF3AA7]/6 shadow-[0_0_6px_rgba(255,58,167,0.1)]"
                     transition={springTab}
                     aria-hidden
                   />
@@ -78,14 +78,14 @@ export function BottomTabNav() {
                 <motion.span
                   className="relative z-[1] flex flex-col items-center gap-0.5"
                   animate={{
-                    scale: active ? 1.05 : 1,
-                    opacity: active ? 1 : 0.65,
+                    scale: active ? 1.02 : 1,
+                    opacity: active ? 1 : 0.62,
                   }}
                   transition={springTab}
                 >
                   <Icon
                     className={`h-5 w-5 shrink-0 ${
-                      active ? 'drop-shadow-[0_0_10px_rgba(255,58,167,0.7)]' : ''
+                      active ? 'drop-shadow-[0_0_4px_rgba(255,58,167,0.2)]' : ''
                     }`}
                     strokeWidth={active ? 2.25 : 1.85}
                   />
@@ -103,7 +103,7 @@ export function BottomTabNav() {
                       opacity: active ? 1 : 0,
                     }}
                     transition={springTab}
-                    style={{ boxShadow: active ? '0 0 8px #FF3AA7' : 'none' }}
+                    style={{ boxShadow: active ? '0 0 3px rgba(255,58,167,0.28)' : 'none' }}
                   />
                 </motion.span>
               </button>

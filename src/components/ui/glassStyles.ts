@@ -22,6 +22,7 @@ export const glassCard =
 
 export const glassCardInteractive = [
   glassCard,
+  'premium-card',
   'transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]',
   'hover:-translate-y-1 hover:border-white/30 hover:bg-white/[0.12]',
   'hover:shadow-[0_28px_64px_rgba(15,23,42,0.3)]',
@@ -83,3 +84,24 @@ export const glassSettingsButton =
 
 export const glassNavPill =
   'h-[64px] w-full rounded-[32px] border border-white/35 bg-white/[0.72] shadow-[0_16px_48px_rgba(15,23,42,0.18),0_4px_12px_rgba(255,255,255,0.5)] backdrop-blur-xl';
+
+/** 커뮤니티 — 게시글·빈 상태 카드 (soft glass depth) */
+export const glassCommunityPostCard = [
+  'rounded-[24px]',
+  'border border-white/[0.12]',
+  'bg-white/[0.11]',
+  'shadow-[0_20px_52px_rgba(15,23,42,0.26),0_6px_20px_rgba(15,23,42,0.14),inset_0_1px_0_rgba(255,255,255,0.18)]',
+  'backdrop-blur-2xl',
+].join(' ');
+
+/** 커뮤니티 — 카드 내부 여백 (피드·상세 공통) */
+export const glassCommunityPostCardPadding = 'px-6 py-6';
+
+/** 커뮤니티 — 신고 등 바텀시트 */
+export const glassCommunityBottomSheet = [
+  'overflow-hidden rounded-[28px]',
+  'border border-white/28',
+  'bg-white/[0.14]',
+  'shadow-[0_-12px_56px_rgba(15,23,42,0.32),inset_0_1px_0_rgba(255,255,255,0.2)]',
+  'backdrop-blur-2xl',
+].join(' ');

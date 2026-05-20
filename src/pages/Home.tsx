@@ -46,6 +46,8 @@ import {
   homeStatsGrid,
 } from '../lib/homeSpacing';
 import { usePremiumMotion } from '../lib/motionPresets';
+import { usePremiumScrollState } from '../hooks/usePremiumScrollState';
+import { PremiumScrollRail } from '../components/ui/PremiumScrollRail';
 import {
   typeBadge,
   typeCaption,
@@ -69,6 +71,8 @@ function isPrimaryHomeAction(type: string | undefined): boolean {
 const Home = () => {
   const navigate = useNavigate();
   const { variants, stagger, spring, cardHover, cardTap } = usePremiumMotion();
+  const { ref: scrollRef, onScroll, state: scrollState } = usePremiumScrollState();
+
   const accessToken = useAuthStore((s) => s.accessToken);
   const authNickname = useAuthStore((s) => s.user?.nickname);
   const profileName = useUserProfileStore((s) => s.name);
@@ -238,9 +242,23 @@ const Home = () => {
   };
 
   return (
-    <motion.div className={homePage}>
+    <motion.div
+      ref={scrollRef}
+      onScroll={onScroll}
+      className={[
+        homePage,
+        scrollState.isScrolling && 'is-scrolling',
+        scrollState.isScrolled && 'is-scrolled',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      <PremiumScrollRail containerRef={scrollRef} isScrolling={scrollState.isScrolling} />
       <motion.header
-        className="flex items-start justify-between gap-5"
+        className={[
+          'scroll-chrome-header scroll-chrome-title -mx-6 flex items-start justify-between gap-5 px-6 pb-2',
+          scrollState.isScrolled ? 'is-scrolled' : '',
+        ].join(' ')}
         initial="hidden"
         animate="visible"
         variants={variants}

@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Check, Archive, ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { usePremiumScrollState } from '../hooks/usePremiumScrollState';
+import { PremiumScrollRail } from '../components/ui/PremiumScrollRail';
+import { useGoBack } from '../hooks/useGoBack';
 import { StatusBar } from '../components/StatusBar';
 import { FlowerBloomCelebrationModal } from '../components/FlowerBloomCelebrationModal';
 import {
@@ -40,6 +43,8 @@ const MISSION_SURFACE =
 
 const Missions = () => {
   const navigate = useNavigate();
+  const goBack = useGoBack('/home');
+  const { ref: scrollRef, onScroll, state: scrollState } = usePremiumScrollState();
   const nickname = useUserProfileStore((s) => s.nickname || s.name);
   const hasApiBase = Boolean(import.meta.env.VITE_API_BASE_URL);
 
@@ -225,11 +230,27 @@ const Missions = () => {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <header className="relative z-10 shrink-0 pt-2">
+      <header
+        className={[
+          'scroll-chrome-header relative z-10 shrink-0 pt-2',
+          scrollState.isScrolled ? 'is-scrolled' : '',
+        ].join(' ')}
+      >
         <StatusBar />
       </header>
 
-      <main className="relative z-10 flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain px-6 pb-[104px] pt-3">
+      <main
+        ref={scrollRef}
+        onScroll={onScroll}
+        className={[
+          'premium-scroll premium-scroll--custom-rail relative z-10 flex min-h-0 flex-1 flex-col overflow-x-hidden px-6 pb-[104px] pt-3',
+          scrollState.isScrolling && 'is-scrolling',
+          scrollState.isScrolled && 'is-scrolled',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        <PremiumScrollRail containerRef={scrollRef} isScrolling={scrollState.isScrolling} />
         <div className="pointer-events-none sticky top-0 z-30 -mx-6 mb-1 shrink-0 px-6">
           <DailyRewardCapToast show={capToastOpen} />
         </div>
@@ -237,7 +258,7 @@ const Missions = () => {
           <div className="flex items-center gap-1">
             <button
               type="button"
-              onClick={() => navigate('/home')}
+              onClick={goBack}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm active:scale-[0.97]"
                 aria-label="뒤로 이동"
               >

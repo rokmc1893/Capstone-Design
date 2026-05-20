@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
 import { Send } from 'lucide-react';
 import type { CommunityComment } from '../../../types/community';
-import { glassCard } from '../../ui/glassStyles';
+import { glassCommunityPostCard } from '../../ui/glassStyles';
 import { typeBodySm, typeCaption } from '../../../lib/typography';
 import { CommentItem } from './Comment';
 
-const SURFACE = `${glassCard} px-4 py-4`;
+const SURFACE = `${glassCommunityPostCard} px-5 py-4`;
 
 type CommentSectionProps = {
   postId: string;
@@ -19,7 +19,7 @@ type CommentSectionProps = {
   onDeleteComment: (commentId: string) => void;
   onToggleCommentLike: (commentId: string) => void;
   onPinComment?: (commentId: string) => void;
-  onCommentFocus?: () => void;
+  onCommentFocus?: (anchor: HTMLElement) => void;
 };
 
 type CommentNode = CommunityComment & { children: CommentNode[] };
@@ -137,7 +137,7 @@ export function CommentSection({
     <section aria-label="댓글">
       <p className={`mb-3 ${typeCaption} font-semibold text-white/80`}>댓글 {comments.length}개</p>
 
-      <ul className="space-y-3">
+      <ul className="space-y-3.5">
         {pinnedComment ? (
           <li>
             <p className="mb-1.5 pl-1 text-[11px] font-semibold text-white/55">고정된 댓글</p>
@@ -160,7 +160,8 @@ export function CommentSection({
           id={`comment-${postId}`}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          onFocus={onCommentFocus}
+          onFocus={(e) => onCommentFocus?.(e.currentTarget)}
+          data-community-hint="comment"
           rows={2}
           placeholder="댓글을 입력해 주세요"
           className="mt-2 w-full resize-none rounded-[14px] border border-white/25 bg-white/10 px-3.5 py-3 text-[14px] text-white placeholder:text-white/45 focus:border-white/40 focus:outline-none"

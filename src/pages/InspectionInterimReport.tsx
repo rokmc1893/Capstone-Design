@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useGoBack } from '../hooks/useGoBack';
 import { ChevronLeft, Loader2, Moon, Scale, Settings } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
 import { ApiError } from '../lib/api';
@@ -42,6 +43,8 @@ const InspectionInterimReport = () => {
       subtitle: '또래 평균과 비교한 참고 정보입니다. 이어서 스트레스 설문을 진행해 주세요.',
     };
   }, [gender]);
+
+  const goBack = useGoBack(paths.back);
 
   const loadReport = useCallback(async () => {
     setLoading(true);
@@ -99,7 +102,7 @@ const InspectionInterimReport = () => {
         <div className="relative z-10 flex shrink-0 items-center justify-between px-5 pb-2 pt-1 sm:px-6">
           <button
             type="button"
-            onClick={() => navigate(paths.back)}
+            onClick={goBack}
             className="flex min-w-0 items-center gap-0.5 type-inspect-back active:opacity-80"
           >
             <ChevronLeft className="h-6 w-6 shrink-0" strokeWidth={2.25} aria-hidden />
@@ -126,7 +129,7 @@ const InspectionInterimReport = () => {
         </div>
 
         <main className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden px-5 pb-6 sm:px-6">
-          <div className="min-h-0 flex-1 overflow-y-auto [-webkit-overflow-scrolling:touch]">
+          <div className="premium-scroll min-h-0 flex-1">
             {loading ? (
               <div className="flex h-full min-h-[200px] flex-col items-center justify-center gap-3 text-white/90">
                 <Loader2 className="h-8 w-8 animate-spin" aria-hidden />
