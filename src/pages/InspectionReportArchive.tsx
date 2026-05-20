@@ -130,7 +130,7 @@ const InspectionReportArchive = () => {
       <div className={MOBILE_FRAME} style={GRADIENT_BG_STYLE}>
         <MobileGlassBackdrop />
 
-        <header className="relative z-10 flex shrink-0 items-center justify-between gap-3 px-6 pt-12 pb-3">
+        <header className="relative z-10 flex shrink-0 items-center justify-between gap-3 px-6 pt-11 pb-2">
           <button
             type="button"
             onClick={() => navigate('/home')}
@@ -154,9 +154,10 @@ const InspectionReportArchive = () => {
           </button>
         </header>
 
-        <div className="relative z-10 min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-10 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="relative z-10 min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-6 pb-8 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <section>
           <p className="text-[13px] font-semibold text-white/88">연도 선택</p>
-          <div className="mt-2 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="mt-2 flex gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {yearOptions.map((entry) => {
               const active = entry.year === selectedYear;
               return (
@@ -177,8 +178,10 @@ const InspectionReportArchive = () => {
               );
             })}
           </div>
+          </section>
 
-          <p className="mt-5 text-[13px] font-semibold text-white/88">월 선택</p>
+          <section>
+          <p className="text-[13px] font-semibold text-white/88">월 선택</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => {
               const hasData = monthHasInspection(month);
@@ -204,28 +207,31 @@ const InspectionReportArchive = () => {
               );
             })}
           </div>
+          </section>
 
-          <p className="mt-6 text-[13px] font-semibold text-white/88">검사 기록</p>
+          <section>
+          <p className="text-[13px] font-semibold text-white/88">검사 기록</p>
 
           {loading ? (
-            <div className="mt-3 flex min-h-[120px] items-center justify-center rounded-[20px] bg-white/15 text-[13px] text-white/88">
+            <div className="mt-2.5 flex min-h-[120px] items-center justify-center rounded-[20px] bg-white/15 text-[13px] text-white/88">
               기록을 불러오는 중이에요...
             </div>
           ) : error ? (
-            <div className="mt-3 rounded-[20px] bg-white/15 px-4 py-6 text-center text-[13px] leading-relaxed text-white/92">
+            <div className="mt-2.5 rounded-[20px] bg-white/15 px-4 py-6 text-center text-[13px] leading-relaxed text-white/92">
               {error}
             </div>
           ) : rounds.length === 0 ? (
-            <div className="mt-3 flex min-h-[100px] items-center justify-center rounded-[20px] bg-white/10 px-5 text-center text-[14px] text-white/80">
+            <div className="mt-2.5 flex min-h-[100px] items-center justify-center rounded-[20px] bg-white/10 px-5 text-center text-[14px] text-white/80">
               해당 기간에 검사 기록이 없습니다
             </div>
           ) : (
-            <ul className="mt-3 space-y-3">
+            <ul className="mt-2.5 space-y-2.5">
               {rounds.map((round) => (
                 <InspectionArchiveRoundCard key={round.id} round={round} onOpen={openDetail} />
               ))}
             </ul>
           )}
+          </section>
         </div>
       </div>
     </div>

@@ -61,9 +61,9 @@ const InspectionFemaleStep3 = () => {
     if (initRef.current) return;
     initRef.current = true;
     const s = useSimulatorStore.getState();
-    setSmokeStr(String(s.smokeLevel));
-    setBingeStr(String(s.binge12));
-    setSleepStr(String(s.sleepHours));
+    if (s.smokeLevel > 0) setSmokeStr(String(s.smokeLevel));
+    if (s.binge12 > 0) setBingeStr(String(s.binge12));
+    if (s.sleepHours > 0) setSleepStr(String(s.sleepHours));
   }, []);
 
   const validation = useMemo(() => {

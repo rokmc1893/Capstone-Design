@@ -10,7 +10,8 @@ type InspectionReportFullViewProps = {
   inspectionRounds?: InspectionRound[];
 };
 
-const whiteCard = 'rounded-[20px] bg-white px-4 py-4 shadow-[0_4px_20px_rgba(15,23,42,0.06)] ring-1 ring-black/[0.04]';
+const whiteCard =
+  'rounded-[20px] bg-white px-4 py-3.5 shadow-[0_4px_20px_rgba(15,23,42,0.06)] ring-1 ring-black/[0.04]';
 
 function SectionIconBadge({ letter }: { letter: string }) {
   return (
@@ -96,7 +97,7 @@ export function InspectionReportFullView({
   return (
     <div className="-mx-6">
       {activeResultId != null && inspectionRounds.length > 1 ? (
-        <div className="px-6 pb-3">
+        <div className="px-6 pb-2">
           <InspectionDateSwitcher
             rounds={inspectionRounds}
             activeResultId={activeResultId}
@@ -107,7 +108,7 @@ export function InspectionReportFullView({
 
       {/* 목업: 보라 히어로 + HEALTH SCORE */}
       <section
-        className="px-6 pb-10 pt-2 text-center text-white"
+        className="px-6 pb-8 pt-1 text-center text-white"
         aria-label="종합 건강 점수"
         style={{
           background:
@@ -115,14 +116,14 @@ export function InspectionReportFullView({
         }}
       >
         <p className="text-[11px] font-semibold tracking-[0.2em] text-white/85">HEALTH SCORE</p>
-        <p className="mt-3 text-[40px] font-bold leading-none tracking-tight">
+        <p className="mt-2 text-[40px] font-bold leading-none tracking-tight">
           {record.score}
           <span className="ml-1 text-[22px] font-semibold text-white/75">점</span>
           <span className="mx-2 text-[20px] font-medium text-white/50">/</span>
           <span className="text-[22px] font-semibold text-white/75">100점</span>
         </p>
         <div
-          className="mx-auto mt-5 h-2.5 w-full max-w-[280px] overflow-hidden rounded-full bg-black/15"
+          className="mx-auto mt-4 h-2.5 w-full max-w-[280px] overflow-hidden rounded-full bg-black/15"
           role="progressbar"
           aria-valuenow={scorePercent}
           aria-valuemin={0}
@@ -133,49 +134,49 @@ export function InspectionReportFullView({
             style={{ width: `${scorePercent}%` }}
           />
         </div>
-        <p className="mt-5 text-[13px] leading-relaxed text-white/88">
+        <p className="mt-4 text-[13px] leading-relaxed text-white/88">
           현재 건강 상태를 종합적으로 분석한 결과입니다
         </p>
         <button
           type="button"
           onClick={openArchiveForDate}
-          className="mt-5 inline-flex rounded-full bg-white/20 px-5 py-2 text-[13px] font-semibold text-white ring-1 ring-white/30 backdrop-blur-sm transition active:scale-[0.98]"
+          className="mt-4 inline-flex rounded-full bg-white/20 px-5 py-2 text-[13px] font-semibold text-white ring-1 ring-white/30 backdrop-blur-sm transition active:scale-[0.98]"
         >
           {dateLabel}
         </button>
       </section>
 
       {/* 목업: 흰 시트 본문 */}
-      <div className="rounded-t-[28px] bg-[#F5F5F7] px-5 pb-10 pt-6">
+      <div className="space-y-3.5 rounded-t-[28px] bg-[#F5F5F7] px-5 pb-8 pt-5">
         {/* 설문 요약 */}
         <section className={whiteCard}>
-          <div className="mb-4 flex items-center gap-2">
+          <div className="mb-3 flex items-center gap-2">
             <SectionIconBadge letter="A" />
             <h2 className="text-[16px] font-bold text-[#1a1a1f]">검사 설문지 답변 요약</h2>
           </div>
           <ul className="divide-y divide-[#EFEFEF]">
             {summaryRows.map((row) => (
-              <li key={row.label} className="flex items-center justify-between gap-4 py-3.5 first:pt-0 last:pb-0">
+              <li key={row.label} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
                 <span className="text-[14px] text-[#8E8E93]">{row.label}</span>
                 <span className="text-right text-[14px] font-semibold text-[#1a1a1f]">{row.value}</span>
               </li>
             ))}
           </ul>
-          <div className="mt-3 flex items-center justify-between border-t border-[#EFEFEF] pt-3">
+          <div className="mt-2.5 flex items-center justify-between border-t border-[#EFEFEF] pt-2.5">
             <span className="text-[14px] text-[#8E8E93]">스트레스 점수 (PSS)</span>
             <span className="text-[14px] font-semibold text-[#1a1a1f]">{record.pssScore}점</span>
           </div>
         </section>
 
         {/* 지표 비교 */}
-        <section className={`mt-4 ${whiteCard}`}>
+        <section className={whiteCard}>
           <h2 className="text-[16px] font-bold text-[#1a1a1f]">지표 비교 분석</h2>
           {record.comparisonTable.length === 0 ? (
-            <p className="mt-4 text-center text-[13px] text-[#8E8E93]">
+            <p className="mt-3 text-center text-[13px] text-[#8E8E93]">
               비교 데이터가 없습니다.
             </p>
           ) : (
-            <div className="mt-4 overflow-hidden rounded-[14px] ring-1 ring-[#EFEFEF]">
+            <div className="mt-3 overflow-hidden rounded-[14px] ring-1 ring-[#EFEFEF]">
               <table className="w-full table-fixed text-left text-[13px]">
                 <colgroup>
                   <col className="w-[22%]" />
@@ -219,17 +220,17 @@ export function InspectionReportFullView({
         {/* 행동 가이드 */}
         {guideLines.length > 0 ? (
           <section
-            className="mt-4 rounded-[20px] px-4 py-5 text-white shadow-[0_8px_28px_rgba(123,110,232,0.25)]"
+            className="rounded-[20px] px-4 py-4 text-white shadow-[0_8px_28px_rgba(123,110,232,0.25)]"
             style={{
               background: 'linear-gradient(135deg, #9B8CF8 0%, #B794F4 50%, #C4A8F0 100%)',
             }}
           >
             <h2 className="text-[16px] font-bold">행동 가이드</h2>
-            <div className="mt-4 space-y-3">
+            <div className="mt-3 space-y-2.5">
               {guideLines.map((line, i) => (
                 <p
                   key={i}
-                  className="rounded-[14px] bg-white/15 px-3.5 py-3 text-[13px] leading-relaxed text-white/95 ring-1 ring-white/20"
+                  className="rounded-[14px] bg-white/15 px-3.5 py-2.5 text-[13px] leading-relaxed text-white/95 ring-1 ring-white/20"
                 >
                   {line}
                 </p>
@@ -240,8 +241,8 @@ export function InspectionReportFullView({
 
         {/* AI 분석 */}
         {record.aiNarrative?.trim() ? (
-          <section className={`mt-4 ${whiteCard}`}>
-            <div className="mb-3 flex items-center gap-2">
+          <section className={whiteCard}>
+            <div className="mb-2.5 flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-[#7B6EE8]" aria-hidden />
               <h2 className="text-[16px] font-bold text-[#1a1a1f]">AI 맞춤형 분석</h2>
             </div>
@@ -253,12 +254,12 @@ export function InspectionReportFullView({
 
         {/* 핵심 리스크 */}
         {keyFactors.length > 0 ? (
-          <section className={`mt-4 ${whiteCard}`}>
-            <div className="mb-4 flex items-center gap-2">
+          <section className={whiteCard}>
+            <div className="mb-3 flex items-center gap-2">
               <Info className="h-5 w-5 text-[#7B6EE8]" aria-hidden />
               <h2 className="text-[16px] font-bold text-[#1a1a1f]">핵심 리스크 요인</h2>
             </div>
-            <ul className="space-y-3">
+            <ul className="space-y-2.5">
               {keyFactors.map((line, i) => (
                 <li key={i} className="flex gap-3">
                   <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#DBEAFE] text-[#2563EB]">
@@ -274,13 +275,13 @@ export function InspectionReportFullView({
         <button
           type="button"
           onClick={() => navigate('/missions')}
-          className="mt-5 flex w-full items-center justify-center gap-2 rounded-[16px] bg-[#7B6EE8] py-3.5 text-[15px] font-semibold text-white shadow-[0_8px_24px_rgba(123,110,232,0.35)] active:scale-[0.99]"
+          className="flex w-full items-center justify-center gap-2 rounded-[16px] bg-[#7B6EE8] py-3.5 text-[15px] font-semibold text-white shadow-[0_8px_24px_rgba(123,110,232,0.35)] active:scale-[0.99]"
         >
           <Zap className="h-4 w-4" aria-hidden />
           미션에서 실천하기
         </button>
 
-        <p className="mt-4 text-center text-[11px] leading-relaxed text-[#9CA3AF]">
+        <p className="pt-0.5 text-center text-[11px] leading-relaxed text-[#9CA3AF]">
           본 결과는 참고용이며, 정확한 진단은 의료 전문가와 상담해 주세요.
         </p>
       </div>

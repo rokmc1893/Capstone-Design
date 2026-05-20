@@ -23,7 +23,7 @@ export function InspectionArchiveRoundCard({ round, onOpen }: InspectionArchiveR
       <button
         type="button"
         onClick={() => onOpen(round.resultId)}
-        className="group flex w-full items-center gap-3 rounded-[20px] bg-white px-4 py-4 text-left shadow-[0_8px_24px_rgba(15,23,42,0.08)] ring-1 ring-black/[0.04] transition active:scale-[0.99]"
+        className="group flex w-full items-center gap-3 rounded-[20px] bg-white px-4 py-3.5 text-left shadow-[0_8px_24px_rgba(15,23,42,0.08)] ring-1 ring-black/[0.04] transition active:scale-[0.99]"
       >
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px] bg-[#EDE9FE]">
           <Activity className="h-6 w-6 text-[#7C6EE8]" strokeWidth={2} aria-hidden />

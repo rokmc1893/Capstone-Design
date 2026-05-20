@@ -97,7 +97,9 @@ const InspectionMaleStep7 = () => {
           sessionId,
           useSimulatorStore.getState().pssAnswers,
         );
+        const gender = useSimulatorStore.getState().gender;
         useTestSessionStore.getState().clearSession();
+        useSimulatorStore.getState().resetInspectionDraft(gender);
         navigateAfterTestSubmit(navigate, submitResult);
         return;
       } catch {

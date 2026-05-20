@@ -126,10 +126,73 @@ export interface SimulatorState {
     q9: PssScore;
     q10: PssScore;
   }) => void;
+  /** 새 검사 시작·제출 완료 후 설문 초안 초기화 */
+  resetInspectionDraft: (gender: Gender) => void;
 }
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
+
+const EMPTY_FEMALE_CONDITIONS: FemaleConditions = {
+  pcos: false,
+  endo: false,
+  uf: false,
+  pid: false,
+  chlam: false,
+  gon: false,
+  none: false,
+};
+
+const EMPTY_MALE_CONDITIONS: MaleConditions = {
+  chlam: false,
+  gon: false,
+  none: false,
+};
+
+const EMPTY_PSS_ANSWERS: Array<PssScore | null> = [
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+];
+
+/** 검사 설문에만 쓰는 필드 — 시뮬레이터 기본값과 분리해 빈 폼으로 시작 */
+function emptyInspectionDraft(gender: Gender) {
+  const draft = {
+    gender,
+    age: 0,
+    heightCm: 0,
+    weightKg: 0,
+    bmi: 0,
+    sleepHours: 0,
+    smoking: 'none' as Frequency,
+    alcohol: 'none' as Frequency,
+    stressLevel: 0,
+    menarcheAge: 0,
+    parity: 0,
+    femaleConditions: { ...EMPTY_FEMALE_CONDITIONS },
+    smokeLevel: 0,
+    binge12: 0,
+    numBioKid: 0,
+    sexFreq: 0,
+    hasSex12Mo: null as boolean | null,
+    maleConditions: { ...EMPTY_MALE_CONDITIONS },
+    smokeStatus: null as SmokeStatus | null,
+    drinkStatus: null as DrinkStatus | null,
+    bingeStatus: null as BingeStatus | null,
+    sleepQuality: null as number | null,
+    pssAnswers: [...EMPTY_PSS_ANSWERS],
+    pssSum: 0,
+  };
+  const { risk, topFactors } = calculateRisk(draft);
+  return { ...draft, risk, topFactors };
+}
 
 const calculateRisk = (
   state: Omit<
@@ -152,6 +215,7 @@ const calculateRisk = (
     | 'applyInspectionMaleStep5'
     | 'applyInspectionMaleStep6'
     | 'applyInspectionMaleStep7'
+    | 'resetInspectionDraft'
   >,
 ) => {
   let score = 0;
@@ -345,6 +409,7 @@ export const useSimulatorStore = create<SimulatorState>((set) => ({
       const pssSum = pssAnswers.reduce<number>((acc, v) => acc + (v ?? 0), 0);
       return { pssAnswers, pssSum };
     }),
+  resetInspectionDraft: (gender) => set(emptyInspectionDraft(gender)),
 }));
 
 // 초기 상태에서 risk/topFactors 계산

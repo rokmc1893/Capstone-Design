@@ -45,7 +45,7 @@ const InspectionMaleStep4 = () => {
     initRef.current = true;
     const s = useSimulatorStore.getState();
     setBingeStatus(s.bingeStatus);
-    setSleepStr(String(s.sleepHours));
+    if (s.sleepHours > 0) setSleepStr(String(s.sleepHours));
     setSleepQuality(s.sleepQuality);
   }, []);
 

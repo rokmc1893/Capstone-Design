@@ -27,7 +27,7 @@ export async function startTestSessionAfterGenderPick(
   const profileGender = uiToProfileGender(uiGender);
 
   useUserProfileStore.getState().setGender(profileGender);
-  useSimulatorStore.getState().setGender(uiGender);
+  useSimulatorStore.getState().resetInspectionDraft(uiGender);
 
   if (!base) return null;
 

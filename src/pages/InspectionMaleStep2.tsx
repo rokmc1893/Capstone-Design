@@ -38,9 +38,11 @@ const InspectionMaleStep2 = () => {
     if (initRef.current) return;
     initRef.current = true;
     const s = useSimulatorStore.getState();
-    setNumBioKidStr(String(s.numBioKid));
-    setSexFreqStr(String(s.sexFreq));
-    setHasSex12Mo(s.hasSex12Mo);
+    if (s.hasSex12Mo !== null) {
+      setNumBioKidStr(String(s.numBioKid));
+      setSexFreqStr(String(s.sexFreq));
+      setHasSex12Mo(s.hasSex12Mo);
+    }
   }, []);
 
   const validation = useMemo(() => {

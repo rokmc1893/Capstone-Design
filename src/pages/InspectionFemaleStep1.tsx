@@ -40,9 +40,11 @@ const InspectionFemaleStep1 = () => {
     if (initRef.current) return;
     initRef.current = true;
     const s = useSimulatorStore.getState();
-    if (s.age >= 15 && s.age <= 44) setAgeStr(String(s.age));
-    if (s.heightCm > 0) setHeightStr(String(s.heightCm));
-    if (s.weightKg > 0) setWeightStr(String(s.weightKg));
+    if (s.heightCm > 0 || s.weightKg > 0) {
+      if (s.age >= 15 && s.age <= 44) setAgeStr(String(s.age));
+      if (s.heightCm > 0) setHeightStr(String(s.heightCm));
+      if (s.weightKg > 0) setWeightStr(String(s.weightKg));
+    }
   }, []);
 
   const validation = useMemo(() => {

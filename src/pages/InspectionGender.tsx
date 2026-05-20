@@ -18,11 +18,9 @@ import { refreshUserProfileFromServer } from '../lib/userProfileApi';
 import { profileGenderToSimulator } from '../lib/userProfileGender';
 import { useUserProfileStore } from '../store/useUserProfileStore';
 import { useTestSessionStore } from '../store/useTestSessionStore';
-import { useSimulatorStore } from '../store/useSimulatorStore';
 
 const InspectionGender = () => {
   const navigate = useNavigate();
-  const setGender = useSimulatorStore((s) => s.setGender);
   const profileGender = useUserProfileStore((s) => s.gender);
   const [selected, setSelected] = useState<'male' | 'female' | null>(() =>
     profileGenderToSimulator(profileGender),
@@ -46,7 +44,6 @@ const InspectionGender = () => {
     setSelected(g);
     navigateLock.current = true;
     window.setTimeout(async () => {
-      setGender(g);
       const sessionId = await startTestSessionAfterGenderPick(g);
       if (sessionId) {
         useTestSessionStore.getState().setSessionId(sessionId);
