@@ -273,12 +273,12 @@ export function OnboardingVisual({ variant, className = '' }: OnboardingVisualPr
 
   return (
     <div
-      className={`relative mx-auto w-full max-w-[300px] ${className}`}
+      className={`relative mx-auto w-full max-w-[280px] overflow-hidden ${className}`}
       aria-hidden
     >
       <svg
         viewBox="0 0 280 280"
-        className="h-auto w-full drop-shadow-[0_24px_48px_rgba(88,72,160,0.18)]"
+        className="mx-auto h-auto max-h-full w-full drop-shadow-[0_24px_48px_rgba(88,72,160,0.18)]"
         role="presentation"
       >
         <defs>

@@ -381,9 +381,9 @@ body,
   }
   /** 온보딩 — 토스·Apple Health 톤 헤드라인 */
   .type-onboarding-headline {
-    font-size: 32px;
+    font-size: clamp(28px, 8vw, 32px);
     font-weight: 700;
-    line-height: 1.38;
+    line-height: 1.42;
     letter-spacing: -0.038em;
     color: rgba(22, 22, 26, 0.94);
   }
@@ -391,9 +391,13 @@ body,
   .type-onboarding-body {
     font-size: 16px;
     font-weight: 500;
-    line-height: 1.72;
+    line-height: 1.85;
     letter-spacing: -0.018em;
     color: rgba(32, 32, 36, 0.72);
+  }
+
+  .type-onboarding-body p {
+    margin: 0;
   }
 
   .type-onboarding-skip {

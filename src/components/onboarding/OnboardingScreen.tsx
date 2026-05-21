@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { StatusBar } from '../StatusBar';
 import { GRADIENT_BG_STYLE } from '../ui/glassStyles';
-import { usePremiumMotion } from '../../lib/motionPresets';
+import { premiumEase, usePremiumMotion } from '../../lib/motionPresets';
 import {
   ONBOARDING_SKIP_PATH,
   type OnboardingVisualVariant,
@@ -34,6 +34,12 @@ export function OnboardingScreen({
 }: OnboardingScreenProps) {
   const navigate = useNavigate();
   const { variants, stagger, reduce } = usePremiumMotion();
+  const textVariants = reduce
+    ? { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { duration: 0.15 } } }
+    : {
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { duration: 0.45, ease: premiumEase } },
+      };
 
   const goNext = () => {
     if (isFinal) {
@@ -72,32 +78,39 @@ export function OnboardingScreen({
         </header>
 
         <motion.main
-          className="relative z-10 flex min-h-0 flex-1 flex-col px-8 pb-10 pt-2 text-center"
+          className="relative z-10 flex min-h-0 flex-1 flex-col justify-between gap-6 px-8 pb-10 pt-2 text-center"
           initial="hidden"
           animate="visible"
           variants={stagger}
         >
-          <div className="flex min-h-0 flex-1 flex-col items-center">
-            <motion.div variants={variants} className="w-full pt-6 sm:pt-8">
-              <OnboardingVisual variant={variant} />
-            </motion.div>
+          <motion.div
+            variants={variants}
+            className="flex w-full shrink-0 justify-center overflow-hidden pt-4 sm:pt-6"
+          >
+            <OnboardingVisual variant={variant} className="max-h-[min(240px,32dvh)]" />
+          </motion.div>
 
-            <motion.h1
-              variants={variants}
-              className="type-onboarding-headline mt-12 whitespace-pre-line sm:mt-14"
+          <motion.section
+            variants={textVariants}
+            className="flex w-full shrink-0 flex-col items-center gap-5 px-1 sm:gap-6"
+            aria-labelledby="onboarding-title"
+          >
+            <h1
+              id="onboarding-title"
+              className="type-onboarding-headline max-w-[320px] whitespace-pre-line"
             >
               {title}
-            </motion.h1>
+            </h1>
+            <div className="type-onboarding-body flex max-w-[300px] flex-col gap-3 sm:gap-3.5">
+              {description.split('\n').map((line) => (
+                <p key={line} className="block leading-[1.85]">
+                  {line}
+                </p>
+              ))}
+            </div>
+          </motion.section>
 
-            <motion.p
-              variants={variants}
-              className="type-onboarding-body mt-5 max-w-[300px] whitespace-pre-line sm:mt-6"
-            >
-              {description}
-            </motion.p>
-          </div>
-
-          <motion.div variants={variants} className="shrink-0 pt-8">
+          <motion.div variants={variants} className="shrink-0 pt-2">
             <OnboardingIndicators active={step} total={TOTAL_STEPS} />
 
             <motion.button
