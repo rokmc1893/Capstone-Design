@@ -278,22 +278,17 @@ export async function fetchLatestResultReportForHome(): Promise<ResultReport | n
 
 export async function fetchResultReport(resultId: number): Promise<ResultReport> {
   const baseUrl = import.meta.env.VITE_API_BASE_URL as string | undefined;
-  const snapshot = useSimulatorStore.getState();
 
   if (!baseUrl) {
+    const snapshot = useSimulatorStore.getState();
     if (resultId === 123) return buildSampleReport();
     return buildMockReport(resultId, '담나', snapshot);
   }
 
-  try {
-    const raw = await api.get<unknown>(`${RESULT_PATH}/${resultId}`);
-    const normalized = normalizeDetailReport(raw);
-    if (normalized) return normalized;
-    throw new Error('Invalid detail report payload');
-  } catch {
-    if (resultId === 123) return buildSampleReport();
-    return buildMockReport(resultId, '담나', snapshot);
-  }
+  const raw = await api.get<unknown>(`${RESULT_PATH}/${resultId}`);
+  const normalized = normalizeDetailReport(raw);
+  if (normalized) return normalized;
+  throw new Error('Invalid detail report payload');
 }
 
 export async function fetchLatestResultReport(

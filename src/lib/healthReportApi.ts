@@ -8,9 +8,18 @@ function trendToStatus(t: ResultComparisonRow['trend']): HealthComparisonStatus 
   return 'High';
 }
 
-function parsePssFromReport(report: ResultReport): number {
-  const m = report.condition.stressLabel.match(/PSS\s*(\d+)/i);
-  return m ? parseInt(m[1], 10) : 0;
+function parsePssFromReport(report: ResultReport): number | null {
+  const fromCondition = report.condition.stressLabel.match(/PSS\s*(\d+)/i);
+  if (fromCondition) return parseInt(fromCondition[1], 10);
+
+  for (const group of report.questionnaireGroups ?? []) {
+    for (const row of group.rows) {
+      if (!/(PSS|스트레스)/i.test(row.label)) continue;
+      const hit = row.value.match(/(\d+)/);
+      if (hit) return parseInt(hit[1], 10);
+    }
+  }
+  return null;
 }
 
 function parseMetricMap(groups: ResultQuestionnaireGroup[]): Map<string, string> {
@@ -23,10 +32,10 @@ function parseMetricMap(groups: ResultQuestionnaireGroup[]): Map<string, string>
   return m;
 }
 
-function parseNumberFromLabel(v: string | undefined): number {
-  if (!v) return 0;
+function parseNumberFromLabel(v: string | undefined): number | null {
+  if (!v) return null;
   const n = parseInt(String(v).replace(/[^\d]/g, ''), 10);
-  return Number.isFinite(n) ? n : 0;
+  return Number.isFinite(n) ? n : null;
 }
 
 /** `ResultReport`(백엔드 `GET /api/results/{id}` + 클라이언트 enrich) → 화면용 `HealthRecord` */
@@ -39,20 +48,30 @@ export function healthRecordFromResultReport(
 
   const gender: HealthRecord['gender'] = report.gender === '남성' ? 'male' : 'female';
 
+  /**
+   * 백엔드 `questionnaireGroups` 고정 라벨 (운영 계약):
+   *   - 신체: 나이 / 키 / 몸무게
+   *   - 생활습관: 흡연 / 음주 / 폭음 / 수면
+   * 그 외 라벨(초경 나이, 임신/출산, 성관계 여부 등)은 클라이언트가
+   * `enrichReportFromSimulator`로 보강한 경우에만 존재합니다.
+   */
   const inputData: HealthRecord['inputData'] = {
-    age: map.get('나이') ? parseNumberFromLabel(map.get('나이')) : report.age,
+    age: map.get('나이') ? parseNumberFromLabel(map.get('나이')) : report.age > 0 ? report.age : null,
     height: parseNumberFromLabel(map.get('키')),
     weight: parseNumberFromLabel(map.get('몸무게')),
     smoking: map.get('흡연') ?? '—',
     drinking:
       map.get('음주') ??
+      map.get('음주 빈도') ??
       map.get('음주(폭음 일수)') ??
+      map.get('폭음') ??
       map.get('폭음 빈도') ??
       '—',
     sleep: map.get('수면') ?? map.get('수면 시간') ?? report.condition.sleepLabel,
     sexualActivity: map.get('성관계 여부(12개월)') ?? map.get('성관계 여부'),
-    firstPeriodAge: map.get('초경 나이') ? parseNumberFromLabel(map.get('초경 나이')) : undefined,
-    pregnancyExperience: map.get('임신/출산'),
+    firstPeriodAge:
+      map.get('초경 나이') ? (parseNumberFromLabel(map.get('초경 나이')) ?? undefined) : undefined,
+    pregnancyExperience: map.get('임신/출산 경험') ?? map.get('임신/출산'),
   };
 
   const comparisonTable: HealthComparisonRow[] = (report.comparisonTable ?? []).map((row) => ({
@@ -74,6 +93,7 @@ export function healthRecordFromResultReport(
     pssScore: parsePssFromReport(report),
     gender,
     inputData,
+    questionnaireGroups: groups,
     comparisonTable,
     risks: report.coreRiskBullets ?? [],
     aiNarrative: report.personalizedAnalysis ?? '',

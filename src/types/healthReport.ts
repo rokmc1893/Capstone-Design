@@ -2,14 +2,16 @@
  * 검사 상세 리포트 화면 모델 — `GET /api/results/{resultId}` 정규화 후 `healthRecordFromResultReport`로 변환
  * (필드명은 백엔드와 camelCase로 맞춤; snake_case 응답이면 normalize 단계에서 변환)
  */
+import type { ResultQuestionnaireGroup } from './resultReport';
+
 export type HealthRecordGender = 'male' | 'female';
 
 export type HealthComparisonStatus = 'High' | 'Low' | 'Normal';
 
 export type HealthRecordInputData = {
-  age: number;
-  height: number;
-  weight: number;
+  age: number | null;
+  height: number | null;
+  weight: number | null;
   smoking: string;
   drinking: string;
   sleep: string;
@@ -49,9 +51,10 @@ export type HealthRecord = {
   week: number;
   /** 화면 총점 (0~100, 서버 산정) */
   score: number;
-  pssScore: number;
+  pssScore: number | null;
   gender: HealthRecordGender;
   inputData: HealthRecordInputData;
+  questionnaireGroups: ResultQuestionnaireGroup[];
   comparisonTable: HealthComparisonRow[];
   risks: string[];
   aiNarrative: string;

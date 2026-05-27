@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGoBack } from '../hooks/useGoBack';
+import { useRestoreInspectionSession } from '../hooks/useRestoreInspectionSession';
 import { ChevronLeft, Settings } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
 import { syncFemaleInspectionStep } from '../lib/testsSessionSync';
@@ -42,6 +43,7 @@ const InspectionFemaleStep2 = () => {
   const goBack = useGoBack('/inspection/female/1');
   const gender = useSimulatorStore((s) => s.gender);
   const applyInspectionStep2 = useSimulatorStore((s) => s.applyInspectionStep2);
+  const restoreReady = useRestoreInspectionSession('female');
 
   const [menarcheStr, setMenarcheStr] = useState('');
   const [parityStr, setParityStr] = useState('');
@@ -52,10 +54,8 @@ const InspectionFemaleStep2 = () => {
     if (gender !== 'female') navigate('/inspection', { replace: true });
   }, [gender, navigate]);
 
-  const initRef = useRef(false);
   useEffect(() => {
-    if (initRef.current) return;
-    initRef.current = true;
+    if (!restoreReady) return;
     const s = useSimulatorStore.getState();
     if (s.menarcheAge >= 8 && s.menarcheAge <= 18) {
       setMenarcheStr(String(s.menarcheAge));
@@ -64,7 +64,7 @@ const InspectionFemaleStep2 = () => {
     if (s.femaleConditions && Object.values(s.femaleConditions).some(Boolean)) {
       setConditions({ ...emptyConditions(), ...s.femaleConditions });
     }
-  }, []);
+  }, [restoreReady]);
 
   const validation = useMemo(() => {
     const md = digitsOnly(menarcheStr);

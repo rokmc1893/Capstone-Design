@@ -61,6 +61,21 @@ export type ResultQuestionnaireGroup = {
   rows: { label: string; value: string }[];
 };
 
+/**
+ * `GET /api/results/{resultId}` `questionnaireGroups` 라벨 고정 계약 (운영 변경 없음).
+ *
+ * - "신체"   : 나이 / 키 / 몸무게
+ * - "생활습관": 흡연 / 음주 / 폭음 / 수면
+ *
+ * 값이 없는 행은 응답에서 행 자체가 생략됩니다.
+ * 초경 나이·임신/출산·스트레스 점수(PSS)는 현재 백엔드 응답에 포함되지 않으며,
+ * 필요 시 클라이언트(`enrichReportFromSimulator`)에서 시뮬레이터 스냅샷으로 보강합니다.
+ */
+export const SERVER_QUESTIONNAIRE_LABELS = {
+  body: { title: '신체', rows: ['나이', '키', '몸무게'] as const },
+  lifestyle: { title: '생활습관', rows: ['흡연', '음주', '폭음', '수면'] as const },
+} as const;
+
 /** 지표 비교 표 한 행 */
 export type ResultComparisonTrend = 'higher' | 'lower' | 'neutral';
 

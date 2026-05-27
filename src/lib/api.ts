@@ -54,6 +54,17 @@ function flushQueue(token: string | null, error: unknown) {
   pendingQueue = [];
 }
 
+/**
+ * `POST /auth/refresh` 응답.
+ * - 운영 초기에는 `{ accessToken }`만 내려옴.
+ * - 백엔드 후속 작업으로 `userId`·`email`이 추가될 예정 (있을 때만 user 동기화).
+ */
+interface RefreshTokenResult {
+  accessToken: string;
+  userId?: number;
+  email?: string | null;
+}
+
 async function refreshAccessToken(): Promise<string> {
   const raw = localStorage.getItem('auth-state');
   const refreshToken: string | null = raw
@@ -70,15 +81,36 @@ async function refreshAccessToken(): Promise<string> {
     },
     body: JSON.stringify({ refreshToken }),
   });
-  const json: ApiResponse<{ accessToken: string }> = await res.json();
+  const json: ApiResponse<RefreshTokenResult> = await res.json();
 
   if (!json.isSuccess || !json.result?.accessToken) {
     throw new ApiError(json.code, json.message, res.status);
   }
 
-  // zustand persist 스토어에 새 토큰 반영
+  /**
+   * zustand persist 스토어에 새 토큰 반영.
+   * 응답에 userId/email이 포함되면 user 정보도 함께 동기화합니다.
+   */
   const stored = JSON.parse(localStorage.getItem('auth-state') ?? '{}');
-  stored.state = { ...(stored.state ?? {}), accessToken: json.result.accessToken };
+  const prevState = (stored.state ?? {}) as {
+    accessToken?: string;
+    email?: string | null;
+    user?: AuthUser | null;
+  };
+  const nextState: Record<string, unknown> = {
+    ...prevState,
+    accessToken: json.result.accessToken,
+  };
+  if (typeof json.result.email === 'string') {
+    nextState.email = json.result.email;
+  }
+  if (typeof json.result.userId === 'number') {
+    nextState.user = {
+      ...(prevState.user ?? { nickname: '', profileImageUrl: null, isTermsAgreed: true }),
+      userId: json.result.userId,
+    };
+  }
+  stored.state = nextState;
   localStorage.setItem('auth-state', JSON.stringify(stored));
 
   return json.result.accessToken;

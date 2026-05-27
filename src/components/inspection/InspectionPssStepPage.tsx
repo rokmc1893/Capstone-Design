@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGoBack } from '../../hooks/useGoBack';
+import { useRestoreInspectionSession } from '../../hooks/useRestoreInspectionSession';
 import { ChevronLeft, Settings } from 'lucide-react';
 import { StatusBar } from '../StatusBar';
 import { PssScaleRow } from './PssScaleRow';
@@ -41,6 +42,7 @@ export function InspectionPssStepPage({
   const navigate = useNavigate();
   const goBack = useGoBack(backPath);
   const gender = useSimulatorStore((s) => s.gender);
+  const restoreReady = useRestoreInspectionSession(expectedGender);
 
   const [values, setValues] = useState<Array<PssScore | null>>(() =>
     questions.map(() => null),
@@ -51,13 +53,11 @@ export function InspectionPssStepPage({
     if (gender !== expectedGender) navigate('/inspection', { replace: true });
   }, [expectedGender, gender, navigate]);
 
-  const initRef = useRef(false);
   useEffect(() => {
-    if (initRef.current) return;
-    initRef.current = true;
+    if (!restoreReady) return;
     const answers = useSimulatorStore.getState().pssAnswers;
     setValues(questions.map((q) => answers[q.index] ?? null));
-  }, [questions]);
+  }, [questions, restoreReady]);
 
   const isValid = useMemo(() => values.every((v) => v !== null), [values]);
 

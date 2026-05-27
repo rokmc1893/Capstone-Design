@@ -5,6 +5,7 @@ import {
   femaleConditionFlags,
   maleConditionFlags,
   splitSleepHours,
+  toApiDrinkLevel,
   toApiBingeStatus,
   toApiDrinkStatus,
   toApiSmokeStatus,
@@ -91,10 +92,18 @@ export async function syncFemaleInspectionStep(uiStep: 1 | 2 | 3): Promise<void>
       };
       break;
     case 3:
+      if (s.drinkStatus == null) return;
       body = {
         step: 3,
+        age: s.age,
+        height: s.heightCm,
+        weight: s.weightKg,
+        cigarettesPerDay: s.smokeLevel,
         smokeLevel: s.smokeLevel,
-        binge12: s.binge12 > 0 ? 1 : 0,
+        drinkStatus: toApiDrinkStatus(s.drinkStatus),
+        drinkLevel: toApiDrinkLevel(s.drinkStatus),
+        bingeDaysPerYear: s.binge12,
+        binge12: s.binge12,
         ...splitSleepHours(s.sleepHours),
       };
       break;

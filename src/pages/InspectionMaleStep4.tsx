@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGoBack } from '../hooks/useGoBack';
+import { useRestoreInspectionSession } from '../hooks/useRestoreInspectionSession';
 import { ChevronLeft, Settings } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
 import { syncMaleInspectionStep } from '../lib/testsSessionSync';
@@ -31,6 +32,7 @@ const InspectionMaleStep4 = () => {
   const goBack = useGoBack('/inspection/male/3');
   const gender = useSimulatorStore((s) => s.gender);
   const applyInspectionMaleStep4 = useSimulatorStore((s) => s.applyInspectionMaleStep4);
+  const restoreReady = useRestoreInspectionSession('male');
 
   const [bingeStatus, setBingeStatus] = useState<BingeStatus | null>(null);
   const [sleepStr, setSleepStr] = useState('');
@@ -41,15 +43,13 @@ const InspectionMaleStep4 = () => {
     if (gender !== 'male') navigate('/inspection', { replace: true });
   }, [gender, navigate]);
 
-  const initRef = useRef(false);
   useEffect(() => {
-    if (initRef.current) return;
-    initRef.current = true;
+    if (!restoreReady) return;
     const s = useSimulatorStore.getState();
     setBingeStatus(s.bingeStatus);
     if (s.sleepHours > 0) setSleepStr(String(s.sleepHours));
     setSleepQuality(s.sleepQuality);
-  }, []);
+  }, [restoreReady]);
 
   const validation = useMemo(() => {
     const sleepHours = parseSleepHours(sleepStr);

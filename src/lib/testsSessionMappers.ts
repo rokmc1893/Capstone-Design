@@ -69,6 +69,13 @@ export function toApiDrinkStatus(status: DrinkStatus): string {
   return API_DRINK_LABELS[status];
 }
 
+/** 여성 PATCH 보조값 — 0: 비음주, 1: 월 1~3회, 2: 주 1회 이상 */
+export function toApiDrinkLevel(status: DrinkStatus): 0 | 1 | 2 {
+  if (status === 'none') return 0;
+  if (status === 'monthly1to3') return 1;
+  return 2;
+}
+
 export function toApiBingeStatus(status: BingeStatus): string {
   return API_BINGE_LABELS[status];
 }
@@ -80,7 +87,16 @@ export function fromApiSmokeStatus(value: string | null | undefined): SmokeStatu
     ([, label]) => label === v,
   );
   if (hit) return hit[0];
-  return LEGACY_SMOKE[v.toUpperCase()] ?? null;
+  const legacy = LEGACY_SMOKE[v.toUpperCase()];
+  if (legacy) return legacy;
+  /**
+   * 백엔드 GET /tests/{sessionId} `smokeLabel`은 "하루 10개비" 같은 자유 라벨로 올 수 있음.
+   * 남성은 status enum이 정식, 라벨은 표시용 fallback으로만 사용합니다.
+   */
+  if (v.includes('매일') || /하루\s*\d+\s*개비/.test(v)) return 'daily';
+  if (v.includes('가끔')) return 'sometimes';
+  if (v.includes('안 피움') || v.includes('비흡연') || v.includes('없음')) return 'none';
+  return null;
 }
 
 export function fromApiDrinkStatus(value: string | null | undefined): DrinkStatus | null {
@@ -90,7 +106,16 @@ export function fromApiDrinkStatus(value: string | null | undefined): DrinkStatu
     ([, label]) => label === v,
   );
   if (hit) return hit[0];
-  return LEGACY_DRINK[v.toUpperCase()] ?? null;
+  const legacy = LEGACY_DRINK[v.toUpperCase()];
+  if (legacy) return legacy;
+  /**
+   * 백엔드 GET 응답 `drinkLabel`은 "주 1회 이상 음주" 등 어미가 붙은 형태가 올 수 있음.
+   * status enum이 정식이고 라벨은 표시용이지만 안전망으로 substring 매칭도 시도합니다.
+   */
+  if (v.includes('주 1회 이상') || v.includes('주1회')) return 'weeklyOrMore';
+  if (v.includes('월 1') || v.includes('월1')) return 'monthly1to3';
+  if (v.includes('안 마심') || v.includes('비음주')) return 'none';
+  return null;
 }
 
 export function fromApiBingeStatus(value: string | null | undefined): BingeStatus | null {
@@ -100,7 +125,16 @@ export function fromApiBingeStatus(value: string | null | undefined): BingeStatu
     ([, label]) => label === v,
   );
   if (hit) return hit[0];
-  return LEGACY_BINGE[v.toUpperCase()] ?? null;
+  const legacy = LEGACY_BINGE[v.toUpperCase()];
+  if (legacy) return legacy;
+  /**
+   * 백엔드 GET 응답 `bingeLabel`은 "최근 1년 폭음(5잔+) 100일" 같은 자유 라벨로 올 수 있음.
+   * 여성은 `bingeDaysPerYear` 원시값이 정식이고 status enum은 남성 전용입니다.
+   */
+  if (v.includes('주 1회 이상')) return 'weeklyOrMore';
+  if (v.includes('월 1')) return 'monthly1';
+  if (v.includes('없음') || v.includes('해당 없음')) return 'none';
+  return null;
 }
 
 /** 수면 시간(소수 시간) → API sleepHours + sleepMinutes */

@@ -5,6 +5,7 @@ import { InspectionDateSwitcher } from './inspection/InspectionDateSwitcher';
 import type { InspectionRound } from '../lib/inspectionArchive';
 import { formatReportDateLong } from '../lib/reportFormat';
 import type { HealthComparisonRow, HealthFactorCard, HealthRecord } from '../types/healthReport';
+import type { ResultQuestionnaireGroup } from '../types/resultReport';
 
 type InspectionReportFullViewProps = {
   record: HealthRecord;
@@ -15,6 +16,7 @@ const reportCard =
   'rounded-[18px] bg-white px-5 py-5 shadow-[0_2px_16px_rgba(2,32,71,0.06)]';
 
 const sheetShell = 'rounded-t-[24px] bg-[#F2F4F6] px-5 pb-10 pt-6';
+const questionnaireGroupCard = 'rounded-[14px] bg-[#F9FAFB] px-4 py-4';
 
 function SectionIconBadge({ letter }: { letter: string }) {
   return (
@@ -119,8 +121,6 @@ export function InspectionReportFullView({
   inspectionRounds = [],
 }: InspectionReportFullViewProps) {
   const navigate = useNavigate();
-  const { inputData } = record;
-  const genderLabel = record.gender === 'male' ? '남성' : '여성';
   const activeResultId = record.resultId ?? null;
   const dateLabel = formatReportDateLong(record.date, record.week);
   const scorePercent = Math.min(100, Math.max(0, record.score));
@@ -138,30 +138,7 @@ export function InspectionReportFullView({
     );
   };
 
-  const summaryRows: { label: string; value: string }[] = [
-    { label: '나이', value: `${inputData.age}세` },
-    { label: '성별', value: genderLabel },
-    { label: '키 / 몸무게', value: `${inputData.height}cm / ${inputData.weight}kg` },
-  ];
-
-  if (record.gender === 'female') {
-    if (inputData.pregnancyExperience != null) {
-      summaryRows.push({ label: '임신/출산 경험', value: inputData.pregnancyExperience });
-    }
-    if (inputData.firstPeriodAge != null) {
-      summaryRows.push({ label: '초경 나이', value: `${inputData.firstPeriodAge}세` });
-    }
-  }
-
-  if (inputData.sexualActivity != null) {
-    summaryRows.push({ label: '성관계 여부', value: inputData.sexualActivity });
-  }
-
-  summaryRows.push(
-    { label: '흡연 빈도', value: inputData.smoking },
-    { label: '음주 빈도', value: inputData.drinking },
-    { label: '수면 시간', value: inputData.sleep },
-  );
+  const questionnaireGroups: ResultQuestionnaireGroup[] = record.questionnaireGroups;
 
   const keyFactors =
     record.risks.length > 0
@@ -229,23 +206,36 @@ export function InspectionReportFullView({
           <ReportSectionTitle icon={<SectionIconBadge letter="A" />}>
             검사 설문지 답변 요약
           </ReportSectionTitle>
-          <ul className="divide-y divide-[#E5E8EB]">
-            {summaryRows.map((row) => (
-              <li
-                key={row.label}
-                className="flex items-start justify-between gap-6 py-4 first:pt-0 last:pb-0"
-              >
-                <span className="shrink-0 text-[15px] leading-snug text-[#8B95A1]">{row.label}</span>
-                <span className="text-right text-[15px] font-medium leading-snug text-[#191F28]">
-                  {row.value}
-                </span>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-1 flex items-center justify-between gap-6 border-t border-[#E5E8EB] pt-4">
-            <span className="text-[15px] text-[#8B95A1]">스트레스 점수 (PSS)</span>
-            <span className="text-[15px] font-medium text-[#191F28]">{record.pssScore}점</span>
-          </div>
+          {questionnaireGroups.length === 0 ? (
+            <p className="py-2 text-center text-[14px] text-[#8B95A1]">
+              설문 요약 데이터가 없습니다.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {questionnaireGroups.map((group) => (
+                <div key={group.title} className={questionnaireGroupCard}>
+                  <h3 className="text-[13px] font-semibold tracking-[-0.02em] text-[#6B7684]">
+                    {group.title}
+                  </h3>
+                  <ul className="mt-3 divide-y divide-[#E5E8EB]">
+                    {group.rows.map((row) => (
+                      <li
+                        key={`${group.title}-${row.label}`}
+                        className="flex items-start justify-between gap-6 py-3 first:pt-0 last:pb-0"
+                      >
+                        <span className="shrink-0 text-[15px] leading-snug text-[#8B95A1]">
+                          {row.label}
+                        </span>
+                        <span className="text-right text-[15px] font-medium leading-snug text-[#191F28]">
+                          {row.value || '—'}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         <section className={reportCard}>

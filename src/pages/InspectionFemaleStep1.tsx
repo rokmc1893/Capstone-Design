@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGoBack } from '../hooks/useGoBack';
+import { useRestoreInspectionSession } from '../hooks/useRestoreInspectionSession';
 import { ChevronLeft, Settings } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
 import { syncFemaleInspectionStep } from '../lib/testsSessionSync';
@@ -27,6 +28,7 @@ const InspectionFemaleStep1 = () => {
   const goBack = useGoBack('/home');
   const gender = useSimulatorStore((s) => s.gender);
   const applyInspectionStep1 = useSimulatorStore((s) => s.applyInspectionStep1);
+  const restoreReady = useRestoreInspectionSession('female');
 
   const [ageStr, setAgeStr] = useState('');
   const [heightStr, setHeightStr] = useState('');
@@ -37,17 +39,15 @@ const InspectionFemaleStep1 = () => {
     if (gender !== 'female') navigate('/inspection', { replace: true });
   }, [gender, navigate]);
 
-  const initRef = useRef(false);
   useEffect(() => {
-    if (initRef.current) return;
-    initRef.current = true;
+    if (!restoreReady) return;
     const s = useSimulatorStore.getState();
     if (s.heightCm > 0 || s.weightKg > 0) {
       if (s.age >= 15 && s.age <= 44) setAgeStr(String(s.age));
       if (s.heightCm > 0) setHeightStr(String(s.heightCm));
       if (s.weightKg > 0) setWeightStr(String(s.weightKg));
     }
-  }, []);
+  }, [restoreReady]);
 
   const validation = useMemo(() => {
     const ageDigits = digitsOnly(ageStr);

@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGoBack } from '../hooks/useGoBack';
+import { useRestoreInspectionSession } from '../hooks/useRestoreInspectionSession';
 import { ChevronLeft, Settings } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
 import { syncFemaleInspectionStep } from '../lib/testsSessionSync';
 import { inspectionInputClassName as inputClassName } from '../lib/inspectionFormStyles';
+import type { DrinkStatus } from '../store/useSimulatorStore';
 import { useSimulatorStore } from '../store/useSimulatorStore';
 
 function digitsOnly(s: string): string {
@@ -48,25 +50,27 @@ const InspectionFemaleStep3 = () => {
   const goBack = useGoBack('/inspection/female/2');
   const gender = useSimulatorStore((s) => s.gender);
   const applyInspectionStep3 = useSimulatorStore((s) => s.applyInspectionStep3);
+  const restoreReady = useRestoreInspectionSession('female');
 
   const [smokeStr, setSmokeStr] = useState('');
+  const [drinkStatus, setDrinkStatus] = useState<DrinkStatus | null>(null);
   const [bingeStr, setBingeStr] = useState('');
   const [sleepStr, setSleepStr] = useState('');
   const [touched, setTouched] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (gender !== 'female') navigate('/inspection', { replace: true });
   }, [gender, navigate]);
 
-  const initRef = useRef(false);
   useEffect(() => {
-    if (initRef.current) return;
-    initRef.current = true;
+    if (!restoreReady) return;
     const s = useSimulatorStore.getState();
     if (s.smokeLevel > 0) setSmokeStr(String(s.smokeLevel));
+    if (s.drinkStatus) setDrinkStatus(s.drinkStatus);
     if (s.binge12 > 0) setBingeStr(String(s.binge12));
     if (s.sleepHours > 0) setSleepStr(String(s.sleepHours));
-  }, []);
+  }, [restoreReady]);
 
   const validation = useMemo(() => {
     const smokeNum = parseNonNegInt(smokeStr);
@@ -80,36 +84,45 @@ const InspectionFemaleStep3 = () => {
 
     return {
       smokeOk,
+      drinkOk: drinkStatus !== null,
       bingeOk,
       sleepOk,
       smokeNum: smokeOk ? smokeNum! : null,
       bingeNum: bingeOk ? bingeNum! : null,
       sleepNum: sleepOk ? sleepNum! : null,
-      isValid: smokeOk && bingeOk && sleepOk,
+      isValid: smokeOk && drinkStatus !== null && bingeOk && sleepOk,
     };
-  }, [smokeStr, bingeStr, sleepStr]);
+  }, [bingeStr, drinkStatus, sleepStr, smokeStr]);
 
   const showSmokeError = touched && smokeStr.trim() !== '' && !validation.smokeOk;
+  const showDrinkError = touched && drinkStatus === null;
   const showBingeError = touched && bingeStr.trim() !== '' && !validation.bingeOk;
   const showSleepError = touched && sleepStr.trim() !== '' && !validation.sleepOk;
 
-  const onNext = useCallback(() => {
+  const onNext = useCallback(async () => {
     setTouched(true);
     if (
       !validation.isValid ||
       validation.smokeNum == null ||
+      drinkStatus == null ||
       validation.bingeNum == null ||
       validation.sleepNum == null
     )
       return;
     applyInspectionStep3({
       smokeLevel: validation.smokeNum,
+      drinkStatus,
       binge12: validation.bingeNum,
       sleepHours: validation.sleepNum,
     });
-    void syncFemaleInspectionStep(3);
-    navigate('/inspection/interim-report');
-  }, [applyInspectionStep3, navigate, validation]);
+    setSaving(true);
+    try {
+      await syncFemaleInspectionStep(3);
+      navigate('/inspection/interim-report');
+    } finally {
+      setSaving(false);
+    }
+  }, [applyInspectionStep3, drinkStatus, navigate, validation]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-white p-3 sm:p-4">
@@ -180,8 +193,37 @@ const InspectionFemaleStep3 = () => {
                 </div>
 
                 <div>
+                  <p className="type-form-label mb-3">
+                    8. 최근 1년간 음주 빈도는 어떻게 되시나요?
+                  </p>
+                  <div className="space-y-2.5">
+                    {[
+                      { value: 'none', label: '안 마심' },
+                      { value: 'monthly1to3', label: '월 1~3회' },
+                      { value: 'weeklyOrMore', label: '주 1회 이상' },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setDrinkStatus(opt.value as DrinkStatus)}
+                        className={`w-full rounded-[12px] border px-3 py-3 text-left text-[14px] font-semibold transition ${
+                          drinkStatus === opt.value
+                            ? 'border-[#9388FA] bg-[#9388FA] text-white shadow-[0_8px_20px_rgba(147,136,250,0.25)]'
+                            : 'border-[#D6D6DE] bg-white text-[#3a3a42] active:bg-[#F7F7FB]'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                  {showDrinkError && (
+                    <p className="mt-2 text-[12px] text-red-600">음주 빈도를 하나 선택해 주세요.</p>
+                  )}
+                </div>
+
+                <div>
                   <label htmlFor="inspection-binge" className="type-form-label mb-2 block">
-                    8. 최근 1년간 한 번에 5잔 이상 마신 날이 며칠인가요?
+                    9. 최근 1년간 한 번에 5잔 이상 마신 날이 며칠인가요?
                   </label>
                   <input
                     id="inspection-binge"
@@ -201,7 +243,7 @@ const InspectionFemaleStep3 = () => {
 
                 <div>
                   <label htmlFor="inspection-sleep" className="type-form-label mb-2 block">
-                    9. 평균 수면 시간을 입력해주세요
+                    10. 평균 수면 시간을 입력해주세요
                   </label>
                   <input
                     id="inspection-sleep"
@@ -229,11 +271,11 @@ const InspectionFemaleStep3 = () => {
             <p className="type-inspect-progress mb-3 text-center">3 / 6</p>
             <button
               type="button"
-              disabled={!validation.isValid}
-              onClick={onNext}
+              disabled={!validation.isValid || saving}
+              onClick={() => void onNext()}
               className="w-full rounded-[16px] py-4 type-inspect-cta text-white/95 shadow-[0_10px_28px_rgba(32,24,64,0.2)] transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-white/35 disabled:text-white/70 disabled:shadow-none enabled:bg-[#9388FA] enabled:active:opacity-95"
             >
-              다음으로
+              {saving ? '저장 중...' : '다음으로'}
             </button>
           </div>
         </main>

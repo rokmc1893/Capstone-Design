@@ -14,22 +14,32 @@ type CommunityCoachMarkProps = {
   onComplete?: () => void;
 };
 
-function tooltipPosition(rect: DOMRect | null): { top?: number; bottom?: number; left: number } {
-  const cardW = 320;
+type TooltipStyle = {
+  top?: number;
+  bottom?: number;
+  left: number;
+  width: number;
+};
+
+function tooltipPosition(rect: DOMRect | null): TooltipStyle {
   const margin = 20;
+  const viewportWidth = window.visualViewport?.width ?? window.innerWidth;
+  const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+  const cardWidth = Math.min(320, Math.max(0, viewportWidth - margin * 2));
+  const maxLeft = Math.max(margin, viewportWidth - cardWidth - margin);
   const left = rect
-    ? Math.max(margin, Math.min(rect.left + rect.width / 2 - cardW / 2, window.innerWidth - cardW - margin))
+    ? Math.max(margin, Math.min(rect.left + rect.width / 2 - cardWidth / 2, maxLeft))
     : margin;
 
   if (!rect) {
-    return { bottom: 120, left };
+    return { bottom: 120, left, width: cardWidth };
   }
 
-  const spaceBelow = window.innerHeight - rect.bottom;
+  const spaceBelow = viewportHeight - rect.bottom;
   if (spaceBelow > 200) {
-    return { top: rect.bottom + 14, left };
+    return { top: rect.bottom + 14, left, width: cardWidth };
   }
-  return { bottom: window.innerHeight - rect.top + 14, left };
+  return { bottom: viewportHeight - rect.top + 14, left, width: cardWidth };
 }
 
 export function CommunityCoachMark({
@@ -145,7 +155,7 @@ export function CommunityCoachMark({
             role="dialog"
             aria-labelledby="coach-mark-title"
             aria-modal="true"
-            className="fixed z-[76] w-[min(320px,calc(100vw-40px))] rounded-[22px] border border-white/28 bg-white/[0.15] px-5 py-5 shadow-[0_20px_52px_rgba(15,23,42,0.3)] backdrop-blur-xl"
+            className="fixed z-[76] rounded-[22px] border border-white/28 bg-white/[0.15] px-5 py-5 shadow-[0_20px_52px_rgba(15,23,42,0.3)] backdrop-blur-xl"
             style={tooltipStyle}
             initial={{ opacity: 0, y: 8, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}

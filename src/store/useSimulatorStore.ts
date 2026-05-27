@@ -90,8 +90,13 @@ export interface SimulatorState {
     parity: number;
     femaleConditions: FemaleConditions;
   }) => void;
-  /** 여성 검사 Step 3: 담배·폭음 일수·수면 (수면은 안내 문구용, 흡연·음주는 위험도 보조 매핑) */
-  applyInspectionStep3: (payload: { smokeLevel: number; binge12: number; sleepHours: number }) => void;
+  /** 여성 검사 Step 3: 담배·음주·폭음 일수·수면 */
+  applyInspectionStep3: (payload: {
+    smokeLevel: number;
+    drinkStatus: DrinkStatus;
+    binge12: number;
+    sleepHours: number;
+  }) => void;
   /** 남성 검사 Step 2: 자녀·성관계 정보 저장 (AI 점수 계산과 분리) */
   applyInspectionMaleStep2: (payload: {
     numBioKid: number;
@@ -350,15 +355,15 @@ export const useSimulatorStore = create<SimulatorState>((set) => ({
     }),
   applyInspectionStep2: ({ menarcheAge, parity, femaleConditions }) =>
     set({ menarcheAge, parity, femaleConditions }),
-  applyInspectionStep3: ({ smokeLevel, binge12, sleepHours }) =>
+  applyInspectionStep3: ({ smokeLevel, drinkStatus, binge12, sleepHours }) =>
     set((state) => {
       const smoking: Frequency =
         smokeLevel === 0 ? 'none' : smokeLevel <= 10 ? 'sometimes' : 'often';
       const alcohol: Frequency =
-        binge12 === 0 ? 'none' : binge12 <= 11 ? 'sometimes' : 'often';
-      const next = { ...state, smokeLevel, binge12, sleepHours, smoking, alcohol };
+        drinkStatus === 'none' ? 'none' : drinkStatus === 'monthly1to3' ? 'sometimes' : 'often';
+      const next = { ...state, smokeLevel, drinkStatus, binge12, sleepHours, smoking, alcohol };
       const { risk, topFactors } = calculateRisk(next);
-      return { smokeLevel, binge12, sleepHours, smoking, alcohol, risk, topFactors };
+      return { smokeLevel, drinkStatus, binge12, sleepHours, smoking, alcohol, risk, topFactors };
     }),
   applyInspectionMaleStep2: ({ numBioKid, sexFreq, hasSex12Mo }) =>
     set({ numBioKid, sexFreq, hasSex12Mo }),

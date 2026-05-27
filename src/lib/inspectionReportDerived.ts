@@ -78,7 +78,8 @@ function femaleSmokeLabel(level: number): string {
   return '매일';
 }
 
-function femaleDrinkLabel(binge12: number): string {
+function femaleDrinkLabel(status: SimulatorState['drinkStatus'], binge12: number): string {
+  if (status) return maleDrinkLabel(status);
   if (binge12 <= 0) return '없음';
   if (binge12 <= 11) return '월 1~3회';
   return '주 1회 이상';
@@ -157,7 +158,8 @@ export function buildQuestionnaireGroups(report: ResultReport, s: SimulatorState
   const life: { label: string; value: string }[] = [];
   if (s.gender === 'female') {
     life.push({ label: '흡연', value: femaleSmokeLabel(s.smokeLevel) });
-    life.push({ label: '음주(폭음 일수)', value: femaleDrinkLabel(s.binge12) });
+    life.push({ label: '음주', value: femaleDrinkLabel(s.drinkStatus, s.binge12) });
+    life.push({ label: '폭음', value: `${s.binge12}일` });
   } else {
     life.push({ label: '흡연', value: maleSmokeLabel(s.smokeStatus) });
     life.push({ label: '음주', value: maleDrinkLabel(s.drinkStatus) });
@@ -196,6 +198,9 @@ function smokingRiskIndex(s: SimulatorState): number {
 
 function alcoholRiskIndex(s: SimulatorState): number {
   if (s.gender === 'female') {
+    if (s.drinkStatus === 'weeklyOrMore') return 78;
+    if (s.drinkStatus === 'monthly1to3') return 40;
+    if (s.drinkStatus === 'none') return 15;
     if (s.binge12 <= 0) return 15;
     if (s.binge12 <= 11) return 40;
     return 78;
@@ -280,7 +285,10 @@ export function buildComparisonTable(_report: ResultReport, s: SimulatorState): 
   const al = pctDiffPhrase(alMy, POP_AVG.alcoholRisk, true);
   rows.push({
     item: '음주',
-    myValue: s.gender === 'female' ? femaleDrinkLabel(s.binge12) : maleDrinkLabel(s.drinkStatus),
+    myValue:
+      s.gender === 'female'
+        ? femaleDrinkLabel(s.drinkStatus, s.binge12)
+        : maleDrinkLabel(s.drinkStatus),
     averageValue: '보통',
     comparisonResult: al.text,
     trend: al.trend,

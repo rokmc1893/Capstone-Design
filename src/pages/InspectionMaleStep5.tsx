@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGoBack } from '../hooks/useGoBack';
+import { useRestoreInspectionSession } from '../hooks/useRestoreInspectionSession';
 import { ChevronLeft, Settings } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
 import type { PssScore } from '../store/useSimulatorStore';
@@ -56,6 +57,7 @@ const InspectionMaleStep5 = () => {
   const goBack = useGoBack('/inspection/interim-report');
   const gender = useSimulatorStore((s) => s.gender);
   const applyInspectionMaleStep5 = useSimulatorStore((s) => s.applyInspectionMaleStep5);
+  const restoreReady = useRestoreInspectionSession('male');
 
   const [q1, setQ1] = useState<PssScore | null>(null);
   const [q2, setQ2] = useState<PssScore | null>(null);
@@ -65,14 +67,12 @@ const InspectionMaleStep5 = () => {
     if (gender !== 'male') navigate('/inspection', { replace: true });
   }, [gender, navigate]);
 
-  const initRef = useRef(false);
   useEffect(() => {
-    if (initRef.current) return;
-    initRef.current = true;
+    if (!restoreReady) return;
     const s = useSimulatorStore.getState();
     setQ1(s.pssAnswers[0]);
     setQ2(s.pssAnswers[1]);
-  }, []);
+  }, [restoreReady]);
 
   const isValid = useMemo(() => q1 !== null && q2 !== null, [q1, q2]);
 

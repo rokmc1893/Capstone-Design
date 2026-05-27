@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGoBack } from '../hooks/useGoBack';
+import { useRestoreInspectionSession } from '../hooks/useRestoreInspectionSession';
 import { ChevronLeft, Settings } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
 import { syncMaleInspectionStep } from '../lib/testsSessionSync';
@@ -25,6 +26,7 @@ const InspectionMaleStep2 = () => {
   const goBack = useGoBack('/inspection/male/1');
   const gender = useSimulatorStore((s) => s.gender);
   const applyInspectionMaleStep2 = useSimulatorStore((s) => s.applyInspectionMaleStep2);
+  const restoreReady = useRestoreInspectionSession('male');
 
   const [numBioKidStr, setNumBioKidStr] = useState('');
   const [sexFreqStr, setSexFreqStr] = useState('');
@@ -35,17 +37,15 @@ const InspectionMaleStep2 = () => {
     if (gender !== 'male') navigate('/inspection', { replace: true });
   }, [gender, navigate]);
 
-  const initRef = useRef(false);
   useEffect(() => {
-    if (initRef.current) return;
-    initRef.current = true;
+    if (!restoreReady) return;
     const s = useSimulatorStore.getState();
     if (s.hasSex12Mo !== null) {
       setNumBioKidStr(String(s.numBioKid));
       setSexFreqStr(String(s.sexFreq));
       setHasSex12Mo(s.hasSex12Mo);
     }
-  }, []);
+  }, [restoreReady]);
 
   const validation = useMemo(() => {
     const numBioKid = parseNonNegInt(numBioKidStr);

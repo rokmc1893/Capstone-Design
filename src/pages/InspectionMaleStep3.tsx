@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGoBack } from '../hooks/useGoBack';
+import { useRestoreInspectionSession } from '../hooks/useRestoreInspectionSession';
 import { ChevronLeft, Settings } from 'lucide-react';
 import { StatusBar } from '../components/StatusBar';
 import { syncMaleInspectionStep } from '../lib/testsSessionSync';
@@ -19,6 +20,7 @@ const InspectionMaleStep3 = () => {
   const goBack = useGoBack('/inspection/male/2');
   const gender = useSimulatorStore((s) => s.gender);
   const applyInspectionMaleStep3 = useSimulatorStore((s) => s.applyInspectionMaleStep3);
+  const restoreReady = useRestoreInspectionSession('male');
 
   const [conditions, setConditions] = useState<MaleConditions>(emptyMaleConditions);
   const [smokeStatus, setSmokeStatus] = useState<SmokeStatus | null>(null);
@@ -29,17 +31,15 @@ const InspectionMaleStep3 = () => {
     if (gender !== 'male') navigate('/inspection', { replace: true });
   }, [gender, navigate]);
 
-  const initRef = useRef(false);
   useEffect(() => {
-    if (initRef.current) return;
-    initRef.current = true;
+    if (!restoreReady) return;
     const s = useSimulatorStore.getState();
     if (s.maleConditions && Object.values(s.maleConditions).some(Boolean)) {
       setConditions({ ...emptyMaleConditions(), ...s.maleConditions });
     }
     setSmokeStatus(s.smokeStatus);
     setDrinkStatus(s.drinkStatus);
-  }, []);
+  }, [restoreReady]);
 
   const validation = useMemo(() => {
     const anyDisease = conditions.chlam || conditions.gon;
