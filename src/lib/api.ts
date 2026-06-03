@@ -5,6 +5,8 @@
  * - 401 응답 시 refreshToken으로 자동 재발급 후 재시도 (1회)
  */
 
+import { forceLogoutToLogin } from './authSession';
+
 const BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 /** 공통 응답 envelope */
@@ -163,10 +165,14 @@ async function request<T>(
     } catch (err) {
       isRefreshing = false;
       flushQueue(null, err);
-      // 재발급 실패 → 로그인 화면으로
-      window.location.href = '/login';
+      forceLogoutToLogin();
       throw err;
     }
+  }
+
+  if (res.status === 401) {
+    forceLogoutToLogin();
+    throw new ApiError('UNAUTHORIZED', '인증이 필요합니다.', 401);
   }
 
   const json: ApiResponse<T> = await res.json();

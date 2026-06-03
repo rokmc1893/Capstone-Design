@@ -9,11 +9,22 @@ import { redirectToKakaoLogin } from '../lib/auth';
 const Login = () => {
   const navigate = useNavigate();
   const [termsModalOpen, setTermsModalOpen] = useState(false);
-  // 이미 로그인된 경우 홈으로 이동
+  const [hydrated, setHydrated] = useState(() => useAuthStore.persist.hasHydrated());
   const accessToken = useAuthStore((s) => s.accessToken);
+  const refreshToken = useAuthStore((s) => s.refreshToken);
+
   useEffect(() => {
-    if (accessToken) navigate('/app', { replace: true });
-  }, [accessToken, navigate]);
+    const unsub = useAuthStore.persist.onFinishHydration(() => setHydrated(true));
+    return unsub;
+  }, []);
+
+  // 저장된 세션이 유효할 때만 홈으로 (만료 토큰만 남은 경우 깜빡임 방지)
+  useEffect(() => {
+    if (!hydrated) return;
+    if (accessToken && refreshToken) {
+      navigate('/app', { replace: true });
+    }
+  }, [hydrated, accessToken, refreshToken, navigate]);
 
   useEffect(() => {
     if (!termsModalOpen) return;
