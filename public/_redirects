@@ -1,1 +1,15 @@
-/*    /index.html   200
+# API·OAuth → 백엔드 (netlify.toml과 동일, dist에 포함)
+/auth/*  http://3.27.238.246:8080/auth/:splat  200!
+/oauth/kakao/login  http://3.27.238.246:8080/oauth/kakao/login  200!
+/api/*  http://3.27.238.246:8080/api/:splat  200!
+/users/*  http://3.27.238.246:8080/users/:splat  200!
+/tests/*  http://3.27.238.246:8080/tests/:splat  200!
+/results/*  http://3.27.238.246:8080/results/:splat  200!
+/missions/sprout/*  http://3.27.238.246:8080/missions/sprout/:splat  200!
+/home  http://3.27.238.246:8080/home  200!
+  Accept: application/json
+/inspection-reports/*  http://3.27.238.246:8080/inspection-reports/:splat  200!
+  Accept: application/json
+
+# React Router SPA
+/*  /index.html  200

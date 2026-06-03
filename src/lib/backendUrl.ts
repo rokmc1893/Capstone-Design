@@ -5,19 +5,17 @@ export function getBackendBaseUrl(): string {
   return raw.replace(/\/$/, '');
 }
 
-/** 카카오 로그인 시작 — 반드시 백엔드 호스트로 이동 */
+/** 카카오 로그인 시작 URL */
 export function getKakaoOAuthLoginUrl(): string {
   const base = getBackendBaseUrl();
+  if (typeof window !== 'undefined') {
+    const origin = window.location.origin;
+    if (!base || base === origin) {
+      return `${origin}/oauth/kakao/login`;
+    }
+  }
   if (!base) {
     throw new Error('VITE_API_BASE_URL is not set');
-  }
-  if (
-    typeof window !== 'undefined' &&
-    base.replace(/\/$/, '') === window.location.origin
-  ) {
-    throw new Error(
-      'VITE_API_BASE_URL must be the backend HTTPS URL (e.g. trycloudflare.com), not the Netlify site URL.',
-    );
   }
   return `${base}/oauth/kakao/login`;
 }
