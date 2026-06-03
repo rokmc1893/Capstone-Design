@@ -30,12 +30,13 @@ export function MainTabLayout() {
 
   return (
     <div className={MOBILE_SHELL}>
-      <div className={MOBILE_FRAME} style={GRADIENT_BG_STYLE}>
+      <div className={MOBILE_FRAME} style={GRADIENT_BG_STYLE} data-mobile-frame>
         <MobileGlassBackdrop />
-        <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
           <Outlet />
         </div>
         <BottomTabNav />
+        <div data-overlay-root className="pointer-events-none absolute inset-0 z-[90]" aria-hidden />
       </div>
     </div>
   );

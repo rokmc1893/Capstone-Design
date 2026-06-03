@@ -26,6 +26,7 @@ import { missionErrorMessage } from '../lib/missionApiMessages';
 import { fetchLatestResultReport, fetchLatestResultReportForHome } from '../lib/resultReport';
 import { useAuthStore } from '../store/useAuthStore';
 import { DailyRewardCapToast } from '../components/missions/DailyRewardCapToast';
+import { MissionFlowerStageImage } from '../components/missions/MissionFlowerStageImage';
 import { isDailyRewardCapActive, useBloomMissionsStore } from '../store/useBloomMissionsStore';
 import { useSimulatorStore } from '../store/useSimulatorStore';
 import { useUserProfileStore } from '../store/useUserProfileStore';
@@ -40,6 +41,10 @@ import {
 
 const MISSION_SURFACE =
   'rounded-[24px] bg-white/20 shadow-[0_16px_40px_rgba(15,23,42,0.25)] ring-1 ring-white/35 backdrop-blur-md';
+
+/** 꽃 PNG — backdrop-blur와 반투명 프린지가 겹치면 사각형 아티팩트가 남 */
+const MISSION_PLANT_SURFACE =
+  'rounded-[24px] bg-white/20 shadow-[0_16px_40px_rgba(15,23,42,0.25)] ring-1 ring-white/35';
 
 const Missions = () => {
   const navigate = useNavigate();
@@ -243,7 +248,7 @@ const Missions = () => {
         ref={scrollRef}
         onScroll={onScroll}
         className={[
-          'premium-scroll premium-scroll--custom-rail relative z-10 flex min-h-0 flex-1 flex-col overflow-x-hidden px-6 pb-[104px] pt-3',
+          'premium-scroll premium-scroll--custom-rail main-tab-scroll-pad relative z-10 flex min-h-0 flex-1 flex-col overflow-x-hidden px-6 pt-3',
           scrollState.isScrolling && 'is-scrolling',
           scrollState.isScrolled && 'is-scrolled',
         ]
@@ -384,21 +389,23 @@ const Missions = () => {
 
           <section className="mt-6 flex shrink-0 flex-col">
             <div
-              className={`flex w-full flex-col items-center justify-center px-4 py-5 ${MISSION_SURFACE}`}
+              className={`flex w-full flex-col items-center justify-center px-4 py-5 ${MISSION_PLANT_SURFACE}`}
             >
               <p className={`mb-3 ${typeCaption} text-white/82`}>
                 {selectedFlower.nameKo} · {GROWTH_STAGE_LABELS[level]}
               </p>
-              <div className="relative flex min-h-[140px] w-full max-w-[240px] items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]">
+              <div
+                key={plantImageKey}
+                className="transition-all duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
+              >
                 {stageImageSrc ? (
-                  <img
-                    key={plantImageKey}
+                  <MissionFlowerStageImage
                     src={stageImageSrc}
                     alt={`${selectedFlower.nameKo} ${GROWTH_STAGE_LABELS[level]}`}
-                    className="max-h-[200px] w-auto max-w-full object-contain object-bottom drop-shadow-[0_12px_28px_rgba(15,23,42,0.45)] transition-opacity duration-500"
+                    variant="hero"
                   />
                 ) : (
-                  <>
+                  <div className="relative flex min-h-[140px] w-full max-w-[240px] items-center justify-center">
                     {level === 1 && (
                       <div className="h-8 w-8 rounded-full bg-amber-700 shadow-[0_0_0_6px_rgba(245,158,11,0.35)]" />
                     )}
@@ -444,7 +451,7 @@ const Missions = () => {
                         <div className="mt-3 h-8 w-8 rounded-full bg-pink-400 shadow-[0_0_20px_rgba(244,114,182,0.9)]" />
                       </div>
                     )}
-                  </>
+                  </div>
                 )}
               </div>
             </div>

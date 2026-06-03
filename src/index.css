@@ -821,6 +821,12 @@ body,
   }
 }
 
+/** MainTabLayout — 홈·미션 등 하단 플로팅 탭(bottom 40px + pill 64px + 여유)과 콘텐츠 분리 */
+.main-tab-scroll-pad {
+  padding-bottom: calc(128px + env(safe-area-inset-bottom, 0px) + 32px);
+  scroll-padding-bottom: calc(128px + env(safe-area-inset-bottom, 0px) + 32px);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .premium-scroll,
   .premium-scroll-x {

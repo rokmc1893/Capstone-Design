@@ -28,7 +28,7 @@ type PostContentProps = {
   liked: boolean;
   bookmarked: boolean;
   isAuthor: boolean;
-  onToggleLike: () => void;
+  onToggleLike: (anchor: HTMLElement) => void;
   onToggleBookmark: (anchor: HTMLElement) => void;
   onEdit?: () => void;
   onDelete?: () => void;

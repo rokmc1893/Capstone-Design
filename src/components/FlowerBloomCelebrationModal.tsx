@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import type { MissionFlower } from '../data/missionFlowers';
 import { getMissionFlowerStageImageSrc } from '../data/missionFlowers';
+import { MissionFlowerStageImage } from './missions/MissionFlowerStageImage';
 import { springPremium } from '../lib/motionPresets';
 
 type FlowerBloomCelebrationModalProps = {
@@ -49,10 +50,11 @@ export function FlowerBloomCelebrationModal({ flower, open, onClose }: FlowerBlo
               transition={{ ...springPremium, delay: 0.06 }}
             >
               {bloomImageSrc ? (
-                <img
+                <MissionFlowerStageImage
                   src={bloomImageSrc}
                   alt={`${flower.nameKo} 개화`}
-                  className="max-h-[140px] w-auto max-w-full object-contain drop-shadow-[0_12px_28px_rgba(15,23,42,0.2)]"
+                  variant="hero"
+                  className="max-h-[140px] drop-shadow-[0_12px_28px_rgba(15,23,42,0.2)]"
                 />
               ) : (
                 <span className="text-[52px] leading-none" aria-hidden>

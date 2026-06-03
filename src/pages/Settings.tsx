@@ -327,6 +327,7 @@ const Settings = () => {
               {[
                 { title: '알림 설정', key: 'notify' },
                 { title: '내 정보 수정', key: 'profile' },
+                { title: '커뮤니티 숨김 · 차단 관리', key: 'community_moderation' },
               ].map((item) => (
                 <button
                   key={item.key}
@@ -334,6 +335,7 @@ const Settings = () => {
                   onClick={() => {
                     if (item.key === 'notify') navigate('/settings/notifications');
                     if (item.key === 'profile') setProfileEditModalOpen(true);
+                    if (item.key === 'community_moderation') navigate('/community/moderation');
                   }}
                   className="w-full rounded-[20px] bg-white/65 backdrop-blur-md border border-white/45 px-4 py-4 flex items-center justify-between shadow-[0px_10px_24px_rgba(16,24,40,0.10)]"
                 >

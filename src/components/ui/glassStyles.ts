@@ -66,7 +66,7 @@ export const glassHomeSecondaryCta = [
   'relative flex w-full flex-row items-center justify-between gap-4 text-left',
   'min-h-[92px] p-5',
   'bg-white/[0.09] border-white/18',
-  'shadow-[0_14px_40px_rgba(15,23,42,0.2)]',
+  'shadow-[0_8px_28px_rgba(15,23,42,0.18)]',
 ].join(' ');
 
 export const glassHomePrimaryIconWell = [

@@ -7,7 +7,7 @@ import { communityEaseSoft, communitySpringPop, communitySpringTap } from '../..
 type LikeButtonProps = {
   count: number;
   active: boolean;
-  onToggle: () => void;
+  onToggle: (anchor: HTMLElement) => void;
   label?: string;
   size?: 'sm' | 'md';
 };
@@ -24,10 +24,11 @@ export const LikeButton = memo(function LikeButton({
   return (
     <motion.button
       type="button"
+      data-community-hint="like"
       onClick={(e) => {
         e.stopPropagation();
         communityHapticLight();
-        onToggle();
+        onToggle(e.currentTarget);
       }}
       className={`inline-flex items-center gap-1 rounded-full px-2 py-1 transition-colors duration-200 ${
         active ? 'text-[#FF3AA7]' : 'text-white/70'

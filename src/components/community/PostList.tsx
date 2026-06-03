@@ -15,7 +15,7 @@ type PostListProps = {
   commentCountByPost: (postId: string) => number;
   userId: string;
   onOpenPost: (postId: string) => void;
-  onToggleLike: (postId: string) => void;
+  onToggleLike: (postId: string, anchor: HTMLElement) => void;
   onToggleBookmark: (postId: string, anchor: HTMLElement) => void;
   onCommentIntent?: (postId: string, openComposer: () => void, anchor: HTMLElement) => void;
   onAddComment: (postId: string, body: string) => void;
@@ -98,7 +98,7 @@ export const PostList = memo(function PostList({
             liked={post.likeUserIds.includes(userId)}
             bookmarked={post.bookmarkUserIds.includes(userId)}
             onOpen={() => onOpenPost(post.id)}
-            onToggleLike={() => onToggleLike(post.id)}
+            onToggleLike={(anchor) => onToggleLike(post.id, anchor)}
             onToggleBookmark={(anchor) => onToggleBookmark(post.id, anchor)}
             onCommentIntent={
               onCommentIntent

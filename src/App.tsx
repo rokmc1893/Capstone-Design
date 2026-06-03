@@ -16,6 +16,7 @@ import Community from './pages/Community';
 import CommunityPostDetail from './pages/CommunityPostDetail';
 import CommunityPostEdit from './pages/CommunityPostEdit';
 import CommunityPostWrite from './pages/CommunityPostWrite';
+import CommunityModeration from './pages/CommunityModeration';
 import Missions from './pages/Missions';
 import MissionsArchive from './pages/MissionsArchive';
 import InspectionGender from './pages/InspectionGender';
@@ -53,6 +54,7 @@ function App() {
           <Route path="/home" element={<Navigate to="/app" replace />} />
           <Route path="/missions" element={<Missions />} />
           <Route path="/community" element={<Community />} />
+          <Route path="/community/moderation" element={<CommunityModeration />} />
           <Route path="/community/write" element={<CommunityPostWrite />} />
           <Route path="/community/:postId/edit" element={<CommunityPostEdit />} />
           <Route path="/community/:postId" element={<CommunityPostDetail />} />

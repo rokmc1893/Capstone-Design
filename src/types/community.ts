@@ -20,6 +20,19 @@ export type CommunityReportReason =
   | 'spam'
   | 'other';
 
+/** 신고한 글 기록 (localStorage) */
+export type CommunityReportRecord = {
+  postId: string;
+  reason: CommunityReportReason;
+  reportedAt: string;
+};
+
+/** 차단한 작성자 기록 (localStorage) */
+export type CommunityBlockedUser = {
+  authorNickname: string;
+  blockedAt: string;
+};
+
 export type CommunityHintKey = 'bookmark' | 'comment' | 'report' | 'like';
 
 export type CommunityPost = {

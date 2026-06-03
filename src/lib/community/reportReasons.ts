@@ -10,3 +10,11 @@ export const COMMUNITY_REPORT_REASONS: {
   { id: 'misinformation', label: '허위 정보' },
   { id: 'other', label: '기타' },
 ];
+
+const REASON_LABEL = Object.fromEntries(
+  COMMUNITY_REPORT_REASONS.map((r) => [r.id, r.label]),
+) as Record<string, string>;
+
+export function getReportReasonLabel(reason: CommunityReportReason): string {
+  return REASON_LABEL[reason] ?? '기타';
+}

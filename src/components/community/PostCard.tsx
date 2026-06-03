@@ -28,7 +28,7 @@ type PostCardProps = {
   liked: boolean;
   bookmarked: boolean;
   onOpen: () => void;
-  onToggleLike: () => void;
+  onToggleLike: (anchor: HTMLElement) => void;
   onToggleBookmark: (anchor: HTMLElement) => void;
   onCommentIntent?: (openComposer: () => void, anchor: HTMLElement) => void;
   onAddComment: (body: string) => void;

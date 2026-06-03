@@ -6,6 +6,7 @@ import { PremiumScrollArea } from '../components/ui/PremiumScrollArea';
 import { StatusBar } from '../components/StatusBar';
 import { BottomTabNav } from '../components/BottomTabNav';
 import { getMissionFlower, getMissionFlowerStageImageSrc } from '../data/missionFlowers';
+import { MissionFlowerStageImage } from '../components/missions/MissionFlowerStageImage';
 import { fetchFlowerCollections } from '../lib/homeMissionsApi';
 import {
   mapFlowerCollectionsToBloomRecords,
@@ -44,10 +45,11 @@ function BloomGrid({ records }: { records: BloomRecordEntry[] }) {
             <div className="relative mb-2 flex h-[72px] w-[72px] items-center justify-center overflow-hidden rounded-2xl bg-white/10 ring-1 ring-white/20">
               <div className="absolute inset-0 rounded-2xl bg-amber-200/15 blur-md" aria-hidden />
               {bloomThumb ? (
-                <img
+                <MissionFlowerStageImage
                   src={bloomThumb}
                   alt={`${flower.nameKo} 개화`}
-                  className="relative z-[1] h-full w-full object-contain p-1"
+                  variant="thumb"
+                  className="relative z-[1]"
                 />
               ) : (
                 <span className="relative z-[1] text-[40px] leading-none" aria-hidden>

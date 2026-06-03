@@ -8,9 +8,11 @@ import {
   sanitizePlainText,
 } from '../lib/community/sanitize';
 import type {
+  CommunityBlockedUser,
   CommunityCategory,
   CommunityComment,
   CommunityPost,
+  CommunityReportRecord,
   CommunityReportReason,
   CreatePostPayload,
   UpdatePostPayload,
@@ -19,8 +21,13 @@ import type {
 type PersistSlice = {
   posts: CommunityPost[];
   comments: CommunityComment[];
-  reportedPostIds: string[];
-  blockedUserIds: string[];
+  reportedPosts: CommunityReportRecord[];
+  blockedUsers: CommunityBlockedUser[];
+};
+
+type LegacyPersistSlice = {
+  reportedPostIds?: string[];
+  blockedUserIds?: string[];
 };
 
 type CommunityState = PersistSlice & {
@@ -31,7 +38,13 @@ type CommunityState = PersistSlice & {
   /** @returns 저장 후 북마크 활성 여부 */
   togglePostBookmark: (postId: string, userId: string) => boolean;
   reportPost: (postId: string, reason: CommunityReportReason) => void;
-  blockUser: (userId: string) => void;
+  unreportPost: (postId: string) => boolean;
+  clearReportedPosts: () => void;
+  blockUser: (authorNickname: string) => void;
+  unblockUser: (authorNickname: string) => boolean;
+  clearBlockedUsers: () => void;
+  isPostReported: (postId: string) => boolean;
+  isAuthorBlocked: (authorNickname: string) => boolean;
   addComment: (payload: {
     postId: string;
     authorNickname: string;
@@ -48,6 +61,58 @@ type CommunityState = PersistSlice & {
 
 function newId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+function normalizeNickname(nickname: string): string {
+  return nickname.trim();
+}
+
+function migrateReportedPosts(
+  saved: Partial<PersistSlice & LegacyPersistSlice> | undefined,
+  fallback: CommunityReportRecord[],
+): CommunityReportRecord[] {
+  if (Array.isArray(saved?.reportedPosts) && saved.reportedPosts.length > 0) {
+    const seen = new Set<string>();
+    return saved.reportedPosts.filter((r) => {
+      if (!r?.postId || seen.has(r.postId)) return false;
+      seen.add(r.postId);
+      return true;
+    });
+  }
+  const legacy = saved?.reportedPostIds;
+  if (Array.isArray(legacy) && legacy.length > 0) {
+    const now = new Date().toISOString();
+    return legacy.map((postId) => ({
+      postId,
+      reason: 'other' as CommunityReportReason,
+      reportedAt: now,
+    }));
+  }
+  return fallback;
+}
+
+function migrateBlockedUsers(
+  saved: Partial<PersistSlice & LegacyPersistSlice> | undefined,
+  fallback: CommunityBlockedUser[],
+): CommunityBlockedUser[] {
+  if (Array.isArray(saved?.blockedUsers) && saved.blockedUsers.length > 0) {
+    const seen = new Set<string>();
+    return saved.blockedUsers.filter((b) => {
+      const nick = normalizeNickname(b?.authorNickname ?? '');
+      if (!nick || seen.has(nick)) return false;
+      seen.add(nick);
+      return true;
+    });
+  }
+  const legacy = saved?.blockedUserIds;
+  if (Array.isArray(legacy) && legacy.length > 0) {
+    const now = new Date().toISOString();
+    return legacy.map((authorNickname) => ({
+      authorNickname: normalizeNickname(authorNickname),
+      blockedAt: now,
+    }));
+  }
+  return fallback;
 }
 
 function normalizeCategory(value: unknown): CommunityCategory {
@@ -217,8 +282,8 @@ export const useCommunityStore = create<CommunityState>()(
     (set, get) => ({
       posts: SEED_POSTS,
       comments: asCommentList(undefined),
-      reportedPostIds: [],
-      blockedUserIds: [],
+      reportedPosts: [],
+      blockedUsers: [],
 
       addPost: (payload) => {
         const id = newId();
@@ -298,20 +363,60 @@ export const useCommunityStore = create<CommunityState>()(
         return bookmarked;
       },
 
-      reportPost: (postId, _reason) => {
-        set((s) => ({
-          reportedPostIds: s.reportedPostIds.includes(postId)
-            ? s.reportedPostIds
-            : [...s.reportedPostIds, postId],
-        }));
+      reportPost: (postId, reason) => {
+        const reportedAt = new Date().toISOString();
+        set((s) => {
+          const rest = s.reportedPosts.filter((r) => r.postId !== postId);
+          return {
+            reportedPosts: [...rest, { postId, reason, reportedAt }],
+          };
+        });
       },
 
-      blockUser: (userId) => {
+      unreportPost: (postId) => {
+        const before = get().reportedPosts.length;
         set((s) => ({
-          blockedUserIds: s.blockedUserIds.includes(userId)
-            ? s.blockedUserIds
-            : [...s.blockedUserIds, userId],
+          reportedPosts: s.reportedPosts.filter((r) => r.postId !== postId),
         }));
+        return get().reportedPosts.length < before;
+      },
+
+      clearReportedPosts: () => {
+        set({ reportedPosts: [] });
+      },
+
+      blockUser: (authorNickname) => {
+        const nick = normalizeNickname(authorNickname);
+        if (!nick) return;
+        set((s) => {
+          if (s.blockedUsers.some((b) => b.authorNickname === nick)) return s;
+          return {
+            blockedUsers: [
+              ...s.blockedUsers,
+              { authorNickname: nick, blockedAt: new Date().toISOString() },
+            ],
+          };
+        });
+      },
+
+      unblockUser: (authorNickname) => {
+        const nick = normalizeNickname(authorNickname);
+        const before = get().blockedUsers.length;
+        set((s) => ({
+          blockedUsers: s.blockedUsers.filter((b) => b.authorNickname !== nick),
+        }));
+        return get().blockedUsers.length < before;
+      },
+
+      clearBlockedUsers: () => {
+        set({ blockedUsers: [] });
+      },
+
+      isPostReported: (postId) => get().reportedPosts.some((r) => r.postId === postId),
+
+      isAuthorBlocked: (authorNickname) => {
+        const nick = normalizeNickname(authorNickname);
+        return get().blockedUsers.some((b) => b.authorNickname === nick);
       },
 
       addComment: ({ postId, authorNickname, body, parentId }) => {
@@ -394,17 +499,17 @@ export const useCommunityStore = create<CommunityState>()(
       partialize: (state) => ({
         posts: state.posts,
         comments: state.comments,
-        reportedPostIds: state.reportedPostIds,
-        blockedUserIds: state.blockedUserIds,
+        reportedPosts: state.reportedPosts,
+        blockedUsers: state.blockedUsers,
       }),
       merge: (persisted, current) => {
-        const saved = persisted as Partial<PersistSlice> | undefined;
+        const saved = persisted as Partial<PersistSlice & LegacyPersistSlice> | undefined;
         return {
           ...current,
           posts: applySeedOverrides(asPostList(saved?.posts ?? current.posts)),
           comments: applySeedCommentOverrides(asCommentList(saved?.comments ?? current.comments)),
-          reportedPostIds: Array.isArray(saved?.reportedPostIds) ? saved.reportedPostIds : [],
-          blockedUserIds: Array.isArray(saved?.blockedUserIds) ? saved.blockedUserIds : [],
+          reportedPosts: migrateReportedPosts(saved, current.reportedPosts),
+          blockedUsers: migrateBlockedUsers(saved, current.blockedUsers),
         };
       },
     },

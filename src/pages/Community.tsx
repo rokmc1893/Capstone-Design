@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { CommunityCoachMark } from '../components/community/CommunityCoachMark';
 import { CommunityFeedTabs } from '../components/community/CommunityFeedTabs';
@@ -26,8 +27,8 @@ const Community = () => {
 
   const rawPosts = useCommunityStore((s) => s.posts);
   const rawComments = useCommunityStore((s) => s.comments);
-  const reportedPostIds = useCommunityStore((s) => s.reportedPostIds);
-  const blockedUserIds = useCommunityStore((s) => s.blockedUserIds);
+  const reportedPosts = useCommunityStore((s) => s.reportedPosts);
+  const blockedUsers = useCommunityStore((s) => s.blockedUsers);
   const addComment = useCommunityStore((s) => s.addComment);
   const togglePostLike = useCommunityStore((s) => s.togglePostLike);
   const togglePostBookmark = useCommunityStore((s) => s.togglePostBookmark);
@@ -47,12 +48,13 @@ const Community = () => {
   }, [toast]);
 
   const hiddenPostIds = useMemo(() => {
-    const hidden = new Set<string>(reportedPostIds);
+    const hidden = new Set(reportedPosts.map((r) => r.postId));
+    const blocked = new Set(blockedUsers.map((b) => b.authorNickname));
     for (const p of rawPosts) {
-      if (blockedUserIds.includes(p.authorNickname)) hidden.add(p.id);
+      if (blocked.has(p.authorNickname)) hidden.add(p.id);
     }
     return hidden;
-  }, [rawPosts, reportedPostIds, blockedUserIds]);
+  }, [rawPosts, reportedPosts, blockedUsers]);
 
   const posts = useMemo(
     () =>
@@ -91,8 +93,8 @@ const Community = () => {
   );
 
   const handleToggleLike = useCallback(
-    (postId: string) => {
-      runWithHint('like', () => togglePostLike(postId, userId));
+    (postId: string, anchor: HTMLElement) => {
+      runWithHint('like', () => togglePostLike(postId, userId), anchor);
     },
     [runWithHint, togglePostLike, userId],
   );
@@ -103,6 +105,8 @@ const Community = () => {
     },
     [runWithHint],
   );
+
+  const moderationCount = reportedPosts.length + blockedUsers.length;
 
   const handleFeedTabChange = (tab: CommunityFeedTab) => {
     setFeedTab(tab);
@@ -115,6 +119,25 @@ const Community = () => {
     <CommunityLayout
       headerScrolled={headerScrolled}
       onWriteClick={() => navigate('/community/write')}
+      headerExtra={
+        <button
+          type="button"
+          onClick={() => navigate('/community/moderation')}
+          className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm active:scale-[0.97]"
+          aria-label={
+            moderationCount > 0
+              ? `숨김 · 차단 관리, ${moderationCount}건`
+              : '숨김 · 차단 관리'
+          }
+        >
+          <Shield className="h-5 w-5" strokeWidth={2} aria-hidden />
+          {moderationCount > 0 ? (
+            <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#FF3AA7] px-1 text-[10px] font-bold text-white">
+              {moderationCount > 9 ? '9+' : moderationCount}
+            </span>
+          ) : null}
+        </button>
+      }
     >
       <CommunityToast message={toast} tone={toastTone} />
       <CommunityCoachMark

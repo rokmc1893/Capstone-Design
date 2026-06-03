@@ -3,9 +3,12 @@
  * Toss 여백감 + Apple Health 계층 구조
  */
 
-/** 페이지 — 좌우 24px, 상단 40px, 하단 탭 여유 128px */
+/** 페이지 — 좌우 24px, 상단 40px (하단 스페이서는 Home.tsx) */
 export const homePage =
-  'premium-scroll premium-scroll--custom-rail relative flex min-h-0 flex-1 flex-col overflow-x-hidden px-6 pt-10 pb-32';
+  'premium-scroll premium-scroll--custom-rail relative flex min-h-0 flex-1 flex-col overflow-x-hidden px-6 pt-10';
+
+/** 하단 탭(≈120px) + CTA 그림자 여유 — Home 맨 아래 스페이서 */
+export const HOME_TAB_SCROLL_SPACER_PX = 168;
 
 /** 주요 섹션 사이 (인사 ↔ 통계 ↔ CTA) */
 export const homeSectionGap = 'mt-8';

@@ -21,7 +21,7 @@ type CommentProps = {
   isCommentAuthor: boolean;
   isPostAuthor: boolean;
   isPinned?: boolean;
-  onToggleLike: () => void;
+  onToggleLike: (anchor: HTMLElement) => void;
   onPin?: () => void;
   onReply: (parentId: string) => void;
   onUpdate: (commentId: string, body: string) => void;

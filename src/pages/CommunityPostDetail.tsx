@@ -11,6 +11,7 @@ import { PostContent } from '../components/community/PostDetail/PostContent';
 import { PremiumScrollArea } from '../components/ui/PremiumScrollArea';
 import { useCommunityFeatureHint } from '../hooks/useCommunityFeatureHint';
 import { useCommunityAuthor } from '../lib/community/useCommunityAuthor';
+import { isPostHiddenFromFeed } from '../lib/community/moderation';
 import { useCommunityStore } from '../store/useCommunityStore';
 import type { CommunityReportReason } from '../types/community';
 import { typeBodySm } from '../lib/typography';
@@ -34,6 +35,8 @@ const CommunityPostDetail = () => {
   const togglePostBookmark = useCommunityStore((s) => s.togglePostBookmark);
   const reportPost = useCommunityStore((s) => s.reportPost);
   const blockUser = useCommunityStore((s) => s.blockUser);
+  const reportedPosts = useCommunityStore((s) => s.reportedPosts);
+  const blockedUsers = useCommunityStore((s) => s.blockedUsers);
   const deletePost = useCommunityStore((s) => s.deletePost);
 
   const [hydrated, setHydrated] = useState(() => useCommunityStore.persist.hasHydrated());
@@ -91,6 +94,16 @@ const CommunityPostDetail = () => {
     );
   }
 
+  const hiddenFromFeed =
+    post &&
+    postId &&
+    isPostHiddenFromFeed(
+      postId,
+      post.authorNickname,
+      new Set(reportedPosts.map((r) => r.postId)),
+      new Set(blockedUsers.map((b) => b.authorNickname)),
+    );
+
   if (!postId || !post) {
     return (
       <CommunityLayout
@@ -116,6 +129,49 @@ const CommunityPostDetail = () => {
             className="mt-4 rounded-full bg-white/20 px-5 py-2.5 text-[14px] font-semibold text-white"
           >
             목록으로
+          </button>
+        </div>
+      </CommunityLayout>
+    );
+  }
+
+  if (hiddenFromFeed) {
+    return (
+      <CommunityLayout
+        title="게시글"
+        showFab={false}
+        subtitle=""
+        headerExtra={
+          <button
+            type="button"
+            onClick={goBack}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white"
+            aria-label="목록으로"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+        }
+      >
+        <div className="mt-10 flex flex-col items-center px-2 text-center">
+          <p className="text-[16px] font-bold text-white/92">숨긴 글이에요</p>
+          <p className="mt-3 text-[13px] leading-[1.65] text-white/55">
+            신고하거나 작성자를 차단한 글은
+            <br />
+            목록에서 보이지 않아요.
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate('/community/moderation')}
+            className="mt-6 rounded-full bg-white px-5 py-2.5 text-[14px] font-semibold text-[#7B6EE8]"
+          >
+            숨김 · 차단 관리
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/community')}
+            className="mt-3 text-[13px] font-medium text-white/60 underline-offset-2 hover:underline"
+          >
+            커뮤니티 목록
           </button>
         </div>
       </CommunityLayout>
@@ -164,6 +220,7 @@ const CommunityPostDetail = () => {
         anchorRect={anchorRect}
         onClose={closeHint}
         onComplete={completeHint}
+        reserveFab={false}
       />
       <ReportBottomSheet
         open={reportOpen}
@@ -181,7 +238,9 @@ const CommunityPostDetail = () => {
           liked={post.likeUserIds.includes(userId)}
           bookmarked={post.bookmarkUserIds.includes(userId)}
           isAuthor={isPostAuthor}
-          onToggleLike={() => runWithHint('like', () => togglePostLike(postId, userId))}
+          onToggleLike={(anchor) =>
+            runWithHint('like', () => togglePostLike(postId, userId), anchor)
+          }
           onToggleBookmark={(anchor) => runWithHint('bookmark', showBookmarkToast, anchor)}
           onEdit={isPostAuthor ? () => navigate(`/community/${postId}/edit`) : undefined}
           onDelete={isPostAuthor ? handleDelete : undefined}

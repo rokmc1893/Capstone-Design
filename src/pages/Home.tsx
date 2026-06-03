@@ -18,7 +18,9 @@ import {
   fetchHomeDashboard,
   fetchUserMe,
   pickDailyRewardCapFromHome,
+  pickSproutFromHome,
 } from '../lib/homeMissionsApi';
+import { HomeSproutProgress } from '../components/home/HomeSproutProgress';
 import { applyUserMeToStores } from '../lib/userProfileSync';
 import { fetchHomeSummaryWithFallback } from '../lib/fetchHomeSummary';
 import { refreshUserProfileFromServer } from '../lib/userProfileApi';
@@ -40,6 +42,7 @@ import {
   homeFactorStack,
   homeHeroStack,
   homePage,
+  HOME_TAB_SCROLL_SPACER_PX,
   homeSectionGap,
   homeStatBody,
   homeStatCardShell,
@@ -118,6 +121,14 @@ const Home = () => {
       }
       if (pickDailyRewardCapFromHome(home)) {
         useBloomMissionsStore.getState().syncDailyRewardCapReached(true);
+      }
+      const sprout = pickSproutFromHome(home);
+      if (sprout) {
+        useBloomMissionsStore.getState().applyHomeSprout({
+          level: sprout.level,
+          exp: sprout.exp,
+          flowerType: sprout.flowerType ?? sprout.currentFlowerType,
+        });
       }
       const summary = await fetchHomeSummaryWithFallback(home);
       setHomeSummary(summary);
@@ -298,6 +309,16 @@ const Home = () => {
       </motion.header>
 
       <motion.section
+        className={homeSectionGap}
+        aria-label="성장 레벨"
+        initial="hidden"
+        animate="visible"
+        variants={variants}
+      >
+        <HomeSproutProgress onPress={() => navigate('/missions')} />
+      </motion.section>
+
+      <motion.section
         className={`${homeSectionGap} ${homeStatsGrid}`}
         aria-label="검사 요약"
         initial="hidden"
@@ -408,6 +429,15 @@ const Home = () => {
           );
         })}
       </motion.section>
+
+      <div
+        aria-hidden
+        className="shrink-0"
+        style={{
+          height: `calc(${HOME_TAB_SCROLL_SPACER_PX}px + env(safe-area-inset-bottom, 0px))`,
+          minHeight: HOME_TAB_SCROLL_SPACER_PX,
+        }}
+      />
     </motion.div>
   );
 };

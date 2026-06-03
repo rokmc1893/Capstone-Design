@@ -33,6 +33,9 @@ export function useCommunityFeatureHint() {
         return;
       }
       anchorRef.current = anchor ?? null;
+      if (anchor) {
+        anchor.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' });
+      }
       setAnchorRect(measureAnchor(anchor ?? null));
       pendingRef.current = action;
       setActiveHint(key);

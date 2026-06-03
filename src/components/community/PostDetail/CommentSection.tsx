@@ -114,7 +114,7 @@ export function CommentSection({
       isCommentAuthor={node.authorNickname === displayName}
       isPostAuthor={isPostAuthor}
       isPinned={pinned}
-      onToggleLike={() => onToggleCommentLike(node.id)}
+      onToggleLike={(_anchor) => onToggleCommentLike(node.id)}
       onPin={onPinComment ? () => onPinComment(node.id) : undefined}
       onReply={(id) => {
         setReplyToId(id);

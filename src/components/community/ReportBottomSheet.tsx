@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { COMMUNITY_REPORT_REASONS } from '../../lib/community/reportReasons';
 import { communityEaseSoft } from '../../lib/community/interactionMotion';
+import { BOTTOM_TAB_RESERVED_PX } from '../../lib/mobileFrame';
 import { glassCommunityBottomSheet } from '../ui/glassStyles';
 import type { CommunityReportReason } from '../../types/community';
 
@@ -46,7 +47,10 @@ export function ReportBottomSheet({ open, onClose, onSubmit }: ReportBottomSheet
             role="dialog"
             aria-modal="true"
             aria-labelledby="report-sheet-title"
-            className="fixed inset-x-0 bottom-0 z-[71] mx-auto max-w-[390px] px-4 pb-[max(20px,env(safe-area-inset-bottom))]"
+            className="fixed inset-x-0 bottom-0 z-[71] mx-auto max-w-[390px] px-4"
+            style={{
+              paddingBottom: `calc(max(20px, env(safe-area-inset-bottom, 0px)) + ${BOTTOM_TAB_RESERVED_PX}px)`,
+            }}
             initial={{ y: '100%', opacity: 0.6 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0.5 }}
@@ -73,7 +77,7 @@ export function ReportBottomSheet({ open, onClose, onSubmit }: ReportBottomSheet
                   <X className="h-4 w-4" />
                 </motion.button>
               </div>
-              <p className="px-5 pt-2 pb-1 text-[13px] leading-relaxed text-white/62">
+              <p className="break-keep px-5 pt-2 pb-1 text-[13px] leading-relaxed text-white/62">
                 신고된 글은 목록에서 숨겨지며, 더 나은 커뮤니티를 위해 검토됩니다.
               </p>
               <ul className="space-y-1 px-3 py-3">
