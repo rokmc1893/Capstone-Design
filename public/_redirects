@@ -6,6 +6,7 @@
 /tests/*  http://3.27.238.246:8080/tests/:splat  200!
 /results/*  http://3.27.238.246:8080/results/:splat  200!
 /missions/sprout/*  http://3.27.238.246:8080/missions/sprout/:splat  200!
+/home  http://3.27.238.246:8080/home  200!
 
 # React Router SPA
 /*  /index.html  200

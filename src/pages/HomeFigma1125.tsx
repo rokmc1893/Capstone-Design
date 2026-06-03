@@ -149,7 +149,7 @@ const HomeFigma1125 = () => {
               <button
                 type="button"
                 className="relative flex h-full flex-col items-center justify-center gap-1"
-                onClick={() => navigate('/home')}
+                onClick={() => navigate('/app')}
               >
                 {selectedTab === 'home' && (
                   <span className="pointer-events-none absolute -top-2 h-1 w-10 rounded-full bg-[#E11D48]" />

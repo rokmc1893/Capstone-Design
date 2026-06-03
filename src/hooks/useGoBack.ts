@@ -17,7 +17,7 @@ export function goBackWithFallback(
   navigate(fallback);
 }
 
-export function useGoBack(fallback = '/home') {
+export function useGoBack(fallback = '/app') {
   const navigate = useNavigate();
   const location = useLocation();
 

@@ -22,7 +22,7 @@ import { typeScreenTitle } from '../lib/typography';
 
 const InspectionReportArchive = () => {
   const navigate = useNavigate();
-  const goBack = useGoBack('/home');
+  const goBack = useGoBack('/app');
   const [searchParams] = useSearchParams();
   const autoOpenedDayRef = useRef<string | null>(null);
   const [archive, setArchive] = useState<InspectionArchiveResponse | null>(null);

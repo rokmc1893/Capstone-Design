@@ -46,7 +46,7 @@ const InspectionReportDetailPage = () => {
 
   const backPath = useMemo(() => {
     if (resultIdParam || roundId) return '/inspection-reports/archive';
-    return '/home';
+    return '/app';
   }, [resultIdParam, roundId]);
 
   const goBack = useGoBack(backPath);

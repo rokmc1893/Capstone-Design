@@ -43,7 +43,7 @@ const MISSION_SURFACE =
 
 const Missions = () => {
   const navigate = useNavigate();
-  const goBack = useGoBack('/home');
+  const goBack = useGoBack('/app');
   const { ref: scrollRef, onScroll, state: scrollState } = usePremiumScrollState();
   const nickname = useUserProfileStore((s) => s.nickname || s.name);
   const hasApiBase = Boolean(import.meta.env.VITE_API_BASE_URL);

@@ -105,26 +105,31 @@ const Home = () => {
       setHomeActions(resolveHomePrimaryActions(null, { hasRecentTest: false }));
       return;
     }
-    const [home, me] = await Promise.all([
-      fetchHomeDashboard(),
-      accessToken ? fetchUserMe().catch(() => null) : Promise.resolve(null),
-    ]);
-    if (me) applyUserMeToStores(me);
+    try {
+      const [home, me] = await Promise.all([
+        fetchHomeDashboard(),
+        accessToken ? fetchUserMe().catch(() => null) : Promise.resolve(null),
+      ]);
+      if (me) applyUserMeToStores(me);
 
-    const nickname = home?.user?.nickname?.trim();
-    if (nickname) {
-      useUserProfileStore.getState().setNickname(nickname);
+      const nickname = home?.user?.nickname?.trim();
+      if (nickname) {
+        useUserProfileStore.getState().setNickname(nickname);
+      }
+      if (pickDailyRewardCapFromHome(home)) {
+        useBloomMissionsStore.getState().syncDailyRewardCapReached(true);
+      }
+      const summary = await fetchHomeSummaryWithFallback(home);
+      setHomeSummary(summary);
+      setHomeActions(
+        resolveHomePrimaryActions(home?.actions, {
+          hasRecentTest: summary != null && summary.resultId != null,
+        }),
+      );
+    } catch {
+      setHomeSummary(null);
+      setHomeActions(resolveHomePrimaryActions(null, { hasRecentTest: false }));
     }
-    if (pickDailyRewardCapFromHome(home)) {
-      useBloomMissionsStore.getState().syncDailyRewardCapReached(true);
-    }
-    const summary = await fetchHomeSummaryWithFallback(home);
-    setHomeSummary(summary);
-    setHomeActions(
-      resolveHomePrimaryActions(home?.actions, {
-        hasRecentTest: summary != null && summary.resultId != null,
-      }),
-    );
   }, [hasApiBase, accessToken]);
 
   useEffect(() => {

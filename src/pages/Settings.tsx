@@ -26,7 +26,7 @@ import { useAuthStore } from '../store/useAuthStore';
 
 const Settings = () => {
   const navigate = useNavigate();
-  const goBack = useGoBack('/home');
+  const goBack = useGoBack('/app');
   const [termsModalOpen, setTermsModalOpen] = useState(false);
   const [usageNoticeModalOpen, setUsageNoticeModalOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);

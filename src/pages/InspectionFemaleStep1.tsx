@@ -25,7 +25,7 @@ function parsePositiveNumber(s: string): number | null {
  */
 const InspectionFemaleStep1 = () => {
   const navigate = useNavigate();
-  const goBack = useGoBack('/home');
+  const goBack = useGoBack('/app');
   const gender = useSimulatorStore((s) => s.gender);
   const applyInspectionStep1 = useSimulatorStore((s) => s.applyInspectionStep1);
   const restoreReady = useRestoreInspectionSession('female');

@@ -30,6 +30,7 @@ const tabs: TabDef[] = [
 
 function getSelectedTab(pathname: string): TabKey {
   if (
+    pathname === '/app' ||
     pathname === '/simulator' ||
     pathname === '/inspection' ||
     pathname.startsWith('/inspection-reports')
@@ -62,7 +63,7 @@ export function BottomTabNav() {
                 }`}
                 aria-current={active ? 'page' : undefined}
                 onClick={() => {
-                  if (t.key === 'home') navigate('/home');
+                  if (t.key === 'home') navigate('/app');
                   if (t.key === 'missions') navigate('/missions');
                   if (t.key === 'community') navigate('/community');
                 }}

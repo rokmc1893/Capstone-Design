@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Navigate, Routes, Route } from 'react-router-dom';
 import { MainTabLayout } from './layouts/MainTabLayout';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -49,7 +49,8 @@ function App() {
         <Route path="/email-auth" element={<EmailAuth />} />
         <Route path="/oauth/kakao/callback" element={<KakaoCallback />} />
         <Route element={<MainTabLayout />}>
-          <Route path="/home" element={<Home />} />
+          <Route path="/app" element={<Home />} />
+          <Route path="/home" element={<Navigate to="/app" replace />} />
           <Route path="/missions" element={<Missions />} />
           <Route path="/community" element={<Community />} />
           <Route path="/community/write" element={<CommunityPostWrite />} />

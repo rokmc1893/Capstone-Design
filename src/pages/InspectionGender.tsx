@@ -35,7 +35,7 @@ const InspectionGender = () => {
     });
   }, []);
 
-  const goBack = useGoBack('/home');
+  const goBack = useGoBack('/app');
 
   const handleSelect = async (g: 'male' | 'female') => {
     if (navigateLock.current) return;

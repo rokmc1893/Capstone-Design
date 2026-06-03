@@ -12,7 +12,7 @@ const Login = () => {
   // 이미 로그인된 경우 홈으로 이동
   const accessToken = useAuthStore((s) => s.accessToken);
   useEffect(() => {
-    if (accessToken) navigate('/home', { replace: true });
+    if (accessToken) navigate('/app', { replace: true });
   }, [accessToken, navigate]);
 
   useEffect(() => {

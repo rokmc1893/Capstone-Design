@@ -54,7 +54,7 @@ const EmailAuth = () => {
       if (mode === 'signup' && nickname.trim()) {
         useUserProfileStore.getState().setNickname(nickname.trim());
       }
-      navigate('/home', { replace: true });
+      navigate('/app', { replace: true });
     } catch (err) {
       if (err instanceof ApiError) {
         setErrorMsg(err.message);

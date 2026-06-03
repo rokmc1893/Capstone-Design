@@ -55,7 +55,7 @@ const KakaoCallback = () => {
         nickname: resolvedNickname,
         profileImageUrl: null,
       });
-      navigate('/home', { replace: true });
+      navigate('/app', { replace: true });
     } else {
       // 토큰이 없으면 로그인 화면으로
       navigate('/login', { replace: true });
